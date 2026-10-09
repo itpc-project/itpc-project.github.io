@@ -144,7 +144,7 @@ export const ActivityService = {
   saveAllActivities(activities) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(activities));
-      CloudSyncService.schedulePush();
+      CloudSyncService.push();
     } catch (e) {
       console.error('Failed to save activities', e);
     }

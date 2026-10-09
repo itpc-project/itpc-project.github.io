@@ -45,18 +45,19 @@ class CloudSyncManager {
   }
 
   loadConfig() {
-    const defaultFirebase = APP_CONFIG.FIREBASE_DATABASE_URL || '';
+    const defaultFirebase = APP_CONFIG.FIREBASE_DATABASE_URL || 'https://satit-cmu-db-default-rtdb.asia-southeast1.firebasedatabase.app';
     try {
       const stored = localStorage.getItem(STORAGE_KEYS.CONFIG);
       if (stored) {
         const parsed = JSON.parse(stored);
+        const resolvedFirebase = (parsed.firebaseUrl && parsed.firebaseUrl.trim()) ? parsed.firebaseUrl.trim() : defaultFirebase;
         return {
           enabled: true,
           endpoint: DEFAULT_REST_URL,
           autoSync: true,
           syncIntervalMs: 12000,
           ...parsed,
-          firebaseUrl: (parsed.firebaseUrl && parsed.firebaseUrl.trim()) || defaultFirebase
+          firebaseUrl: resolvedFirebase
         };
       }
     } catch {}
@@ -81,15 +82,11 @@ class CloudSyncManager {
    * คำนวณ URL ปลายทางสำหรับการดึง/บันทึก JSON
    */
   getTargetUrl() {
-    if (this.config.firebaseUrl && this.config.firebaseUrl.trim()) {
-      let clean = this.config.firebaseUrl.trim().replace(/\/+$/, '');
-      if (!clean.endsWith('.json')) clean += '/satit_cmu.json';
-      return { url: clean, provider: 'firebase' };
-    }
-    return {
-      url: this.config.endpoint || DEFAULT_REST_URL,
-      provider: 'rest'
-    };
+    const defaultFirebase = 'https://satit-cmu-db-default-rtdb.asia-southeast1.firebasedatabase.app';
+    const fbUrl = (this.config.firebaseUrl && this.config.firebaseUrl.trim()) || defaultFirebase;
+    let clean = fbUrl.trim().replace(/\/+$/, '');
+    if (!clean.endsWith('.json')) clean += '/satit_cmu.json';
+    return { url: clean, provider: 'firebase' };
   }
 
   /**
@@ -174,13 +171,13 @@ class CloudSyncManager {
       });
     }
 
-    // 3. Heartbeat ตรวจสอบข้อมูลจาก Cloud เป็นระยะ (ทุก 12 วินาที)
+    // 3. Heartbeat ตรวจสอบข้อมูลจาก Cloud เป็นระยะ (ทุก 10 วินาที)
     if (this.syncIntervalId) clearInterval(this.syncIntervalId);
     this.syncIntervalId = setInterval(() => {
       if (this.config.enabled && this.config.autoSync && !document.hidden) {
         this.pull(false);
       }
-    }, this.config.syncIntervalMs || 12000);
+    }, this.config.syncIntervalMs || 10000);
 
     this.updateStatusBadge();
   }
@@ -216,12 +213,22 @@ class CloudSyncManager {
       const raw = await response.json();
       const remoteData = provider === 'rest' ? (raw.data || raw) : raw;
 
+      // ดึงข้อมูลในเครื่องเพื่อตรวจสอบการผสาน
+      let localProjects = [];
+      let localActivities = [];
+      let localForms = {};
+      try {
+        localProjects = JSON.parse(localStorage.getItem(STORAGE_KEYS.PROJECTS) || '[]');
+      } catch {}
+      try {
+        localActivities = JSON.parse(localStorage.getItem(STORAGE_KEYS.ACTIVITIES) || '[]');
+      } catch {}
+      try {
+        localForms = JSON.parse(localStorage.getItem(STORAGE_KEYS.FORMS) || '{}');
+      } catch {}
+
       if (!remoteData || typeof remoteData !== 'object' || !Array.isArray(remoteData.projects) || remoteData.projects.length === 0) {
-        let localProjects = [];
-        try {
-          localProjects = JSON.parse(localStorage.getItem(STORAGE_KEYS.PROJECTS) || '[]');
-        } catch {}
-        if (localProjects.length > 0) {
+        if (localProjects.length > 0 || localActivities.length > 0) {
           console.log('[CloudSync] Remote DB is empty. Initializing with local data...');
           await this.push();
         }
@@ -229,11 +236,41 @@ class CloudSyncManager {
         return { success: true, data: remoteData };
       }
 
+      const remoteActivities = Array.isArray(remoteData.activities) ? remoteData.activities : [];
+      const remoteForms = (remoteData.activityForms && typeof remoteData.activityForms === 'object') ? remoteData.activityForms : {};
+
+      // ตรวจสอบว่าในเครื่องมีกิจกรรมที่สร้างไว้ แต่บนคลาวด์ยังไม่มีหรือไม่ -> ถ้ามีให้ผสานและส่งขึ้นคลาวด์ทันที
+      let needsPushBack = false;
+      let mergedActivities = [...remoteActivities];
+      if (localActivities.length > 0) {
+        localActivities.forEach((localAct) => {
+          if (!mergedActivities.some((r) => r.id === localAct.id)) {
+            mergedActivities.push(localAct);
+            needsPushBack = true;
+          }
+        });
+      }
+
+      const mergedForms = { ...localForms, ...remoteForms };
+      if (Object.keys(localForms).length > Object.keys(remoteForms).length) {
+        needsPushBack = true;
+      }
+
+      if (needsPushBack) {
+        console.log('[CloudSync] Found local activities/forms not in cloud. Merging and pushing to Firebase...');
+        localStorage.setItem(STORAGE_KEYS.ACTIVITIES, JSON.stringify(mergedActivities));
+        localStorage.setItem(STORAGE_KEYS.FORMS, JSON.stringify(mergedForms));
+        await this.push();
+        this.updateStatusBadge('synced');
+        this.notifySubscribers(this.exportAllDataAsJSON(), 'merge');
+        return { success: true, data: this.exportAllDataAsJSON() };
+      }
+
       const remoteTimestamp = Number(remoteData.updatedAt) || 0;
       const localTimestamp = Number(localStorage.getItem(STORAGE_KEYS.LOCAL_TIMESTAMP)) || 0;
 
-      // ตรวจสอบว่าข้อมูลบน Cloud ใหม่กว่าข้อมูลในเครื่อง หรือถูกบังคับอัปเดต
-      if (force || remoteTimestamp > localTimestamp) {
+      // ตรวจสอบว่าข้อมูลบน Cloud ใหม่กว่าข้อมูลในเครื่อง หรือมีกิจกรรมใหม่ หรือถูกบังคับอัปเดต
+      if (force || remoteTimestamp > localTimestamp || remoteActivities.length !== localActivities.length) {
         let hasUpdated = false;
 
         if (Array.isArray(remoteData.projects) && remoteData.projects.length > 0) {
@@ -241,15 +278,11 @@ class CloudSyncManager {
           hasUpdated = true;
         }
 
-        if (Array.isArray(remoteData.activities)) {
-          localStorage.setItem(STORAGE_KEYS.ACTIVITIES, JSON.stringify(remoteData.activities));
-          hasUpdated = true;
-        }
+        localStorage.setItem(STORAGE_KEYS.ACTIVITIES, JSON.stringify(mergedActivities));
+        hasUpdated = true;
 
-        if (remoteData.activityForms && typeof remoteData.activityForms === 'object') {
-          localStorage.setItem(STORAGE_KEYS.FORMS, JSON.stringify(remoteData.activityForms));
-          hasUpdated = true;
-        }
+        localStorage.setItem(STORAGE_KEYS.FORMS, JSON.stringify(mergedForms));
+        hasUpdated = true;
 
         if (Array.isArray(remoteData.users) && remoteData.users.length > 0) {
           localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(remoteData.users));
