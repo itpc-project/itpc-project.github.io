@@ -1,0 +1,413 @@
+/* ==========================================================================
+   USER MANAGEMENT & PROFILE PAGE STYLES (หน้าจัดการผู้ใช้งานและบัญชีส่วนตัว)
+   โรงเรียนสาธิตมหาวิทยาลัยเชียงใหม่
+   ========================================================================== */
+
+.user-management-page {
+  min-height: 100vh;
+  background-color: var(--bg-page);
+  display: flex;
+  flex-direction: column;
+}
+
+.user-mgmt-main-content {
+  flex: 1;
+  max-width: 1360px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-6) var(--space-12) var(--space-6);
+}
+
+/* Back navigation link */
+.back-nav-row {
+  margin-bottom: var(--space-4);
+}
+
+.back-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.back-link-btn:hover {
+  color: var(--cmu-purple-700);
+}
+
+/* Page Hero Banner */
+.mgmt-hero-banner {
+  background: linear-gradient(135deg, var(--cmu-purple-900) 0%, var(--cmu-purple-800) 45%, #451d5b 100%);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-8);
+  margin-bottom: var(--space-6);
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(111, 44, 145, 0.25);
+}
+
+.mgmt-hero-banner::before {
+  content: "";
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(252, 211, 77, 0.2) 0%, rgba(252, 211, 77, 0) 70%);
+  pointer-events: none;
+}
+
+.mgmt-hero-banner::after {
+  content: "";
+  position: absolute;
+  bottom: -50px;
+  left: 20%;
+  width: 300px;
+  height: 150px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(167, 84, 227, 0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.mgmt-hero-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+}
+
+.mgmt-hero-title-group h2 {
+  font-family: var(--font-family-thai);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.mgmt-hero-title-group p {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 680px;
+  line-height: 1.6;
+}
+
+/* Hero Segmented Tabs */
+.mgmt-tabs-nav {
+  display: inline-flex;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(10px);
+  gap: 4px;
+}
+
+.mgmt-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.6rem 1.25rem;
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+}
+
+.mgmt-tab-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.mgmt-tab-btn.is-active {
+  background: #ffffff;
+  color: var(--cmu-purple-900);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-weight: 700;
+}
+
+[data-theme="dark"] .mgmt-tab-btn.is-active {
+  background: var(--cmu-purple-500);
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   TAB 1: PERSONAL PROFILE STYLES
+   ========================================================================== */
+
+.profile-layout-grid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .profile-layout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Left Card: Summary */
+.profile-summary-card {
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+}
+
+.profile-avatar-circle-wrap {
+  width: 96px;
+  height: 96px;
+  margin: 0 auto var(--space-4) auto;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--cmu-purple-50) 0%, var(--cmu-purple-100) 100%);
+  border: 3px solid var(--cmu-purple-300);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3.25rem;
+  box-shadow: 0 8px 24px rgba(111, 44, 145, 0.15);
+  position: relative;
+}
+
+[data-theme="dark"] .profile-avatar-circle-wrap {
+  background: linear-gradient(135deg, rgba(111, 44, 145, 0.3) 0%, rgba(69, 29, 91, 0.5) 100%);
+  border-color: var(--cmu-purple-500);
+}
+
+.profile-summary-name {
+  font-family: var(--font-family-thai);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: var(--space-1);
+}
+
+.profile-summary-pos {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin-bottom: var(--space-3);
+}
+
+.profile-info-list {
+  text-align: left;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: var(--space-4);
+  margin-top: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.profile-info-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.profile-info-item .info-label {
+  color: var(--text-muted);
+  width: 75px;
+  flex-shrink: 0;
+}
+
+.profile-info-item .info-val {
+  color: var(--text-main);
+  font-weight: 600;
+  word-break: break-all;
+}
+
+/* Access permission box */
+.profile-perm-box {
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  text-align: left;
+}
+
+.profile-perm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.profile-perm-header span {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.profile-perm-desc {
+  font-family: var(--font-family-thai);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* Right Column: Profile Form */
+.profile-form-card {
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-sm);
+}
+
+.form-section-header {
+  margin-bottom: var(--space-5);
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: var(--space-3);
+}
+
+.form-section-title {
+  font-family: var(--font-family-thai);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.form-section-desc {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ==========================================================================
+   TAB 2: ADMIN USER MANAGEMENT STYLES
+   ========================================================================== */
+
+/* Metrics Grid */
+.mgmt-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.mgmt-metric-box {
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  transition: all var(--transition-normal);
+}
+
+.mgmt-metric-box:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--cmu-purple-300);
+}
+
+.metric-icon-bubble {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-xl);
+  background: var(--cmu-purple-50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+[data-theme="dark"] .metric-icon-bubble {
+  background: rgba(111, 44, 145, 0.25);
+}
+
+.metric-data-group .metric-num {
+  font-family: var(--font-family-sans);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+.metric-data-group .metric-txt {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* User Management Content Box */
+.mgmt-content-card {
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Non-Admin Restriction Card */
+.mgmt-restricted-card {
+  background: var(--bg-surface);
+  border: 1.5px dashed var(--border-subtle);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-12) var(--space-6);
+  text-align: center;
+  max-width: 600px;
+  margin: var(--space-8) auto;
+}
+
+.restricted-lock-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto var(--space-4) auto;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mgmt-restricted-card h3 {
+  font-family: var(--font-family-thai);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: var(--space-2);
+}
+
+.mgmt-restricted-card p {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: var(--space-6);
+}

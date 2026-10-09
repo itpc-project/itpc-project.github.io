@@ -1,0 +1,449 @@
+/* ==========================================================================
+   EXCEL SHEET COMPONENT (แบบฟอร์มขออนุมัติบรรจุกิจกรรม สำหรับนักเรียน งบประมาณ 2569)
+   สร้างตามรูปแบบโครงสร้างจริงใน Doc/Excel_example.xlsx
+   ========================================================================== */
+
+.excel-wrapper {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+  margin-bottom: var(--space-8);
+}
+
+/* Excel Ribbon Header */
+.excel-ribbon-bar {
+  background: #107c41;
+  color: #ffffff;
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #0b5c30;
+}
+
+.excel-ribbon-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--font-family-thai);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+}
+
+.excel-icon-svg {
+  width: 1.75rem;
+  height: 1.75rem;
+  background: #ffffff;
+  color: #107c41;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.excel-file-tag {
+  font-size: var(--font-size-xs);
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-md);
+  font-family: monospace;
+}
+
+/* Document Container */
+.excel-document-body {
+  padding: var(--space-8);
+  font-family: var(--font-family-thai);
+}
+
+/* Main Form Title Header */
+.excel-header-block {
+  text-align: center;
+  border-bottom: 2px solid var(--border-subtle);
+  padding-bottom: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+.excel-school-name {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.excel-main-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+}
+
+/* Section Containers */
+.excel-section {
+  margin-bottom: var(--space-6);
+}
+
+.excel-section-heading {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--cmu-purple-800);
+  background: var(--cmu-purple-50);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--cmu-purple-700);
+  margin-bottom: var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+[data-theme="dark"] .excel-section-heading {
+  color: var(--cmu-purple-200);
+  background: rgba(140, 50, 207, 0.15);
+}
+
+/* Key-Value Info Grid */
+.excel-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+.excel-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.excel-field-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.excel-field-label {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.excel-field-input {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-sm);
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  transition: all var(--transition-fast);
+}
+
+.excel-field-input:focus {
+  border-color: var(--cmu-purple-600);
+  background: var(--bg-input-focus);
+  box-shadow: 0 0 0 2px rgba(111, 44, 145, 0.15);
+}
+
+/* Participants Mini Grid */
+.excel-participants-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  background: var(--bg-input);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+}
+
+.participant-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+}
+
+.participant-label {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+.participant-input {
+  width: 100%;
+  max-width: 90px;
+  text-align: center;
+  font-weight: 700;
+  padding: 0.4rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+/* Excel Style Tables */
+.excel-table-container {
+  overflow-x: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  margin-top: var(--space-3);
+}
+
+.excel-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-xs);
+  background: var(--bg-surface);
+}
+
+.excel-table th {
+  background: #f1f5f9;
+  color: var(--text-main);
+  font-weight: 700;
+  text-align: center;
+  padding: 0.65rem 0.5rem;
+  border: 1px solid var(--border-subtle);
+  white-space: nowrap;
+}
+
+[data-theme="dark"] .excel-table th {
+  background: #1e1b2e;
+}
+
+.excel-table td {
+  padding: 0.5rem;
+  border: 1px solid var(--border-subtle);
+  vertical-align: middle;
+}
+
+.excel-table tr:hover {
+  background-color: rgba(111, 44, 145, 0.03);
+}
+
+[data-theme="dark"] .excel-table tr:hover {
+  background-color: rgba(167, 84, 227, 0.05);
+}
+
+/* Category Header Rows (1. ค่าตอบแทน, 2. ค่าใช้สอย, etc.) */
+.category-header-row td {
+  background: #f1f5f9;
+  font-weight: 700;
+  color: var(--cmu-purple-900);
+  padding: 0.65rem 0.85rem;
+  border-top: 2px solid var(--cmu-purple-200);
+  border-bottom: 1.5px solid var(--border-subtle);
+}
+
+[data-theme="dark"] .category-header-row td {
+  background: #1b152d;
+  color: var(--cmu-purple-200);
+  border-top-color: var(--cmu-purple-800);
+}
+
+.category-header-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.category-name-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+.category-actions-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.category-subtotal-badge {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--cmu-purple-800);
+  background: var(--cmu-purple-100);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+}
+
+[data-theme="dark"] .category-subtotal-badge {
+  color: var(--cmu-purple-200);
+  background: rgba(140, 50, 207, 0.25);
+}
+
+.btn-add-subitem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0.25rem 0.65rem;
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  background: #ffffff;
+  border: 1px solid var(--cmu-purple-400);
+  color: var(--cmu-purple-700);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+[data-theme="dark"] .btn-add-subitem {
+  background: var(--bg-surface);
+  border-color: var(--cmu-purple-500);
+  color: var(--cmu-purple-200);
+}
+
+.btn-add-subitem:hover {
+  background: var(--cmu-purple-700);
+  border-color: var(--cmu-purple-700);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* Table Inputs */
+.table-input {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  color: var(--text-main);
+  transition: all var(--transition-fast);
+}
+
+.table-input:hover {
+  border-color: var(--cmu-purple-300);
+  background: var(--bg-surface);
+}
+
+.table-input:focus {
+  border-color: var(--cmu-purple-600);
+  background: #ffffff;
+  box-shadow: 0 0 0 2.5px rgba(111, 44, 145, 0.18);
+}
+
+[data-theme="dark"] .table-input:focus {
+  background: var(--bg-input-focus);
+}
+
+.table-input-number {
+  text-align: right;
+  font-weight: 600;
+}
+
+/* Action Button to Add / Delete Table Rows */
+.table-footer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-3);
+}
+
+.btn-table-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0.45rem 0.95rem;
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  background: var(--cmu-purple-50);
+  border: 1.5px dashed var(--cmu-purple-300);
+  color: var(--cmu-purple-700);
+  transition: all var(--transition-fast);
+}
+
+[data-theme="dark"] .btn-table-action {
+  background: rgba(140, 50, 207, 0.15);
+  border-color: var(--cmu-purple-500);
+  color: var(--cmu-purple-300);
+}
+
+.btn-table-action:hover {
+  background: var(--cmu-purple-600);
+  border-style: solid;
+  border-color: var(--cmu-purple-600);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.btn-del-row {
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-light);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-del-row:hover {
+  color: var(--color-error);
+  background: var(--color-error-bg);
+  border-color: var(--color-error-border);
+}
+
+/* Total & Summary Rows */
+.total-summary-row td {
+  background: var(--cmu-purple-50);
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+  color: var(--cmu-purple-900);
+  border-top: 2px solid var(--cmu-purple-300);
+}
+
+[data-theme="dark"] .total-summary-row td {
+  background: rgba(140, 50, 207, 0.2);
+  color: var(--cmu-purple-200);
+}
+
+.baht-text-banner {
+  background: var(--accent-gold-50);
+  border: 1px solid var(--accent-gold-300);
+  color: var(--accent-gold-700);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-4);
+  font-weight: 600;
+}
+
+[data-theme="dark"] .baht-text-banner {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--accent-gold-300);
+  border-color: rgba(245, 158, 11, 0.25);
+}
+
+@media (max-width: 768px) {
+  .excel-document-body {
+    padding: var(--space-4);
+  }
+
+  .excel-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .excel-participants-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

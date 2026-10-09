@@ -1,0 +1,133 @@
+/* ==========================================================================
+   SEARCH & FILTER COMPONENT
+   ========================================================================== */
+
+.filter-bar-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+}
+
+.filter-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.search-box-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 280px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-light);
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  height: 2.85rem;
+  padding: 0 1rem 0 2.85rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-sm);
+  color: var(--text-main);
+  transition: all var(--transition-normal);
+}
+
+.search-input:focus {
+  background: var(--bg-input-focus);
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(111, 44, 145, 0.15);
+}
+
+/* Filter Controls Group */
+.filter-controls-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.filter-select {
+  height: 2.85rem;
+  padding: 0 2.25rem 0 1rem;
+  background-color: var(--bg-input);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  color: var(--text-main);
+  cursor: pointer;
+  appearance: none;
+  transition: all var(--transition-normal);
+}
+
+.filter-select:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(111, 44, 145, 0.15);
+}
+
+/* Quick Filter Pills Row */
+.filter-chips-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.filter-chip-label {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-right: var(--space-1);
+}
+
+.filter-chip {
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-full);
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.filter-chip:hover {
+  background: var(--cmu-purple-50);
+  color: var(--cmu-purple-700);
+}
+
+[data-theme="dark"] .filter-chip:hover {
+  background: var(--cmu-purple-900);
+  color: var(--cmu-purple-300);
+}
+
+.filter-chip.is-active {
+  background: var(--cmu-purple-700);
+  border-color: var(--cmu-purple-700);
+  color: #ffffff;
+}

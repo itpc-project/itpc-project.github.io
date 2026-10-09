@@ -1,0 +1,19 @@
+{
+  "name": "pre_generator",
+  "version": "1.0.0",
+  "description": "ระบบสร้างเอกสารขออนุมัติโครงการและกิจกรรม โรงเรียนสาธิตมหาวิทยาลัยเชียงใหม่",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.2.0"
+  },
+  "dependencies": {
+    "docxtemplater": "^3.71.0",
+    "file-saver": "^2.0.5",
+    "pizzip": "^3.3.0"
+  }
+}

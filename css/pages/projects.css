@@ -1,0 +1,200 @@
+/* ==========================================================================
+   PROJECTS PAGE LAYOUT STYLES (หน้าที่ 2: กล่องโครงการต่างๆ)
+   ========================================================================== */
+
+.projects-page {
+  min-height: 100vh;
+  background-color: var(--bg-page);
+  display: flex;
+  flex-direction: column;
+}
+
+.projects-main-content {
+  flex: 1;
+  max-width: 1360px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-6) var(--space-12) var(--space-6);
+}
+
+/* Hero Summary Banner */
+.projects-hero-banner {
+  background: var(--hero-gradient);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-8);
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: var(--space-8);
+  box-shadow: var(--shadow-xl);
+}
+
+.projects-hero-banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.hero-banner-inner {
+  position: relative;
+  z-index: var(--z-base);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+}
+
+.hero-welcome-text h2 {
+  font-family: var(--font-family-thai);
+  font-size: clamp(1.5rem, 2.5vw, 2.25rem);
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+  line-height: 1.25;
+}
+
+.hero-welcome-text p {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 600px;
+}
+
+/* Quick Metrics Row inside Banner */
+.hero-metrics-grid {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.hero-metric-box {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-xl);
+  padding: var(--space-3) var(--space-5);
+  min-width: 140px;
+}
+
+.metric-label {
+  font-family: var(--font-family-thai);
+  font-size: 0.6875rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 2px;
+}
+
+.metric-value {
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: #ffffff;
+}
+
+/* Action Header Bar */
+.projects-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.section-heading-group h3 {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+}
+
+.section-heading-group p {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.action-buttons-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+/* Empty State */
+.projects-empty-state {
+  text-align: center;
+  padding: var(--space-12) var(--space-6);
+  background: var(--bg-surface);
+  border: 1.5px dashed var(--border-subtle);
+  border-radius: var(--radius-2xl);
+  margin-top: var(--space-6);
+}
+
+.empty-state-icon {
+  width: 4rem;
+  height: 4rem;
+  margin: 0 auto var(--space-4) auto;
+  border-radius: var(--radius-full);
+  background: var(--cmu-purple-50);
+  color: var(--cmu-purple-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-theme="dark"] .empty-state-icon {
+  background: var(--cmu-purple-900);
+  color: var(--cmu-purple-300);
+}
+
+.empty-state-title {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: var(--space-2);
+}
+
+.empty-state-desc {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  max-width: 420px;
+  margin: 0 auto var(--space-6) auto;
+}
+
+/* Page Footer */
+.projects-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--border-subtle);
+  padding: var(--space-6);
+  text-align: center;
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  background: var(--bg-surface);
+}
+
+@media (max-width: 768px) {
+  .projects-main-content {
+    padding: var(--space-4);
+  }
+
+  .projects-hero-banner {
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .hero-metrics-grid {
+    width: 100%;
+  }
+
+  .hero-metric-box {
+    flex: 1;
+    min-width: 120px;
+  }
+}

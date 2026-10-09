@@ -1,0 +1,473 @@
+/* ==========================================================================
+   USER MANAGEMENT & PERSONAL PROFILE EDIT STYLES
+   ระบบจัดการผู้ใช้งาน สิทธิ์การเข้าถึง และการแก้ไขข้อมูลบัญชีส่วนตัว - สาธิต มช.
+   ========================================================================== */
+
+/* Navbar User Chip Interaction */
+.navbar-user-chip {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  transition: all var(--transition-normal);
+}
+
+.navbar-user-chip:hover {
+  border-color: var(--cmu-purple-400);
+  background: var(--bg-surface);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(111, 44, 145, 0.15);
+}
+
+.user-chip-hint-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  margin-left: 2px;
+  transition: color var(--transition-fast);
+}
+
+.navbar-user-chip:hover .user-chip-hint-icon {
+  color: var(--cmu-purple-700);
+}
+
+/* Navbar Admin Management Button */
+.btn-navbar-admin-mgmt {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.45rem 0.95rem;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, rgba(251, 247, 254, 0.9) 0%, rgba(245, 235, 252, 0.9) 100%);
+  border: 1.5px solid var(--accent-gold-500);
+  color: var(--cmu-purple-900);
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+  transition: all var(--transition-normal);
+}
+
+.btn-navbar-admin-mgmt:hover {
+  background: linear-gradient(135deg, var(--cmu-purple-700) 0%, var(--cmu-purple-900) 100%);
+  color: #ffffff;
+  border-color: var(--cmu-purple-600);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(111, 44, 145, 0.35);
+}
+
+.btn-navbar-admin-mgmt .mgmt-icon {
+  font-size: 1rem;
+}
+
+[data-theme="dark"] .btn-navbar-admin-mgmt {
+  background: linear-gradient(135deg, rgba(45, 20, 65, 0.9) 0%, rgba(30, 10, 45, 0.9) 100%);
+  border-color: var(--accent-gold-400);
+  color: #fcd34d;
+}
+
+[data-theme="dark"] .btn-navbar-admin-mgmt:hover {
+  background: linear-gradient(135deg, var(--cmu-purple-600) 0%, var(--cmu-purple-800) 100%);
+  color: #ffffff;
+}
+
+/* Modal sizing variants */
+.modal-card-md {
+  max-width: 560px;
+  width: 95%;
+}
+
+.modal-card-xl {
+  max-width: 960px;
+  width: 96%;
+}
+
+/* Avatar Picker */
+.avatar-picker-label {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.avatar-picker-grid {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+
+.avatar-pick-item {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-full);
+  background: var(--bg-input);
+  border: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.avatar-pick-item:hover {
+  background: var(--bg-input-hover);
+  transform: scale(1.1);
+}
+
+.avatar-pick-item.is-selected {
+  border-color: var(--cmu-purple-600);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(111, 44, 145, 0.25);
+  transform: scale(1.1);
+}
+
+[data-theme="dark"] .avatar-pick-item.is-selected {
+  background: rgba(60, 25, 90, 0.6);
+  border-color: var(--cmu-purple-400);
+}
+
+/* Form Two Column Row */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+@media (max-width: 600px) {
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Role Info & Current Permission Box */
+.role-info-card {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--cmu-purple-50);
+  border: 1px solid var(--cmu-purple-200);
+  margin-bottom: var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+[data-theme="dark"] .role-info-card {
+  background: rgba(140, 50, 207, 0.15);
+  border-color: rgba(167, 84, 227, 0.3);
+}
+
+.role-info-text-title {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--cmu-purple-900);
+}
+
+[data-theme="dark"] .role-info-text-title {
+  color: var(--cmu-purple-100);
+}
+
+.role-info-text-desc {
+  font-family: var(--font-family-thai);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* Password Change Box (Accordion / Section) */
+.password-change-box {
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-4);
+  background: var(--bg-surface);
+}
+
+.password-change-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+
+.password-change-title {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.password-change-fields {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* ==========================================================================
+   USER MANAGEMENT TABLE & TOOLBAR (ADMIN)
+   ========================================================================== */
+.user-mgmt-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.user-mgmt-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+}
+
+.user-mgmt-search-input {
+  width: 100%;
+  height: 2.5rem;
+  padding-left: 2.25rem;
+  padding-right: 1rem;
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  color: var(--text-main);
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+.user-mgmt-search-input:focus {
+  border-color: var(--cmu-purple-600);
+  box-shadow: 0 0 0 3px rgba(111, 44, 145, 0.15);
+}
+
+.user-mgmt-search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.user-mgmt-filter-chips {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.mgmt-filter-chip {
+  padding: 0.35rem 0.75rem;
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-input);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.mgmt-filter-chip:hover {
+  background: var(--bg-input-hover);
+  color: var(--text-main);
+}
+
+.mgmt-filter-chip.is-active {
+  background: var(--cmu-purple-700);
+  color: #ffffff;
+  border-color: var(--cmu-purple-700);
+  box-shadow: 0 2px 6px rgba(111, 44, 145, 0.25);
+}
+
+/* User Management Table */
+.user-table-wrap {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  max-height: 440px;
+  overflow-y: auto;
+}
+
+.user-mgmt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  text-align: left;
+}
+
+.user-mgmt-table th {
+  background: var(--bg-input);
+  padding: var(--space-3) var(--space-4);
+  font-weight: 700;
+  color: var(--text-main);
+  border-bottom: 1.5px solid var(--border-subtle);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.user-mgmt-table td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  vertical-align: middle;
+}
+
+.user-mgmt-table tbody tr:hover {
+  background: var(--bg-input-hover);
+}
+
+/* User Profile Cell */
+.user-cell-profile {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.user-cell-avatar {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-full);
+  background: var(--cmu-purple-50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+  border: 1px solid var(--border-subtle);
+}
+
+[data-theme="dark"] .user-cell-avatar {
+  background: var(--cmu-purple-900);
+}
+
+.user-cell-name {
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.25;
+}
+
+.user-cell-email {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* Position & Department Cell */
+.user-cell-position {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.user-cell-dept {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* Phone Cell */
+.user-cell-phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-main);
+  font-family: var(--font-family-body);
+}
+
+/* Role Selector Radio Group for Add/Edit Form */
+.role-radio-group {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.role-radio-card {
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  background: var(--bg-surface);
+  text-align: left;
+}
+
+.role-radio-card:hover {
+  border-color: var(--cmu-purple-400);
+  transform: translateY(-1px);
+}
+
+.role-radio-card.is-selected {
+  border-color: var(--cmu-purple-600);
+  background: var(--cmu-purple-50);
+  box-shadow: 0 0 0 2px rgba(111, 44, 145, 0.2);
+}
+
+[data-theme="dark"] .role-radio-card.is-selected {
+  background: rgba(140, 50, 207, 0.2);
+}
+
+.role-radio-title {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 2px;
+}
+
+.role-radio-desc {
+  font-family: var(--font-family-thai);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  line-height: 1.25;
+}
+
+/* Table Action Buttons */
+.table-btn-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.table-btn-action:hover {
+  color: var(--cmu-purple-700);
+  border-color: var(--cmu-purple-400);
+  background: var(--cmu-purple-50);
+}
+
+.table-btn-delete:hover {
+  color: var(--color-error);
+  border-color: var(--color-error-border);
+  background: var(--color-error-bg);
+}
+
+[data-theme="dark"] .table-btn-action:hover {
+  background: var(--cmu-purple-900);
+  color: var(--cmu-purple-200);
+}
+
+[data-theme="dark"] .table-btn-delete:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}

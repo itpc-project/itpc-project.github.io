@@ -1,0 +1,835 @@
+/* ==========================================================================
+   LOGIN PAGE SPECIFIC STYLES
+   ========================================================================== */
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--bg-page);
+}
+
+/* Floating Controls (Top Right: Theme Toggle & Info) */
+.login-top-bar {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  z-index: var(--z-floating);
+}
+
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-full);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+  cursor: pointer;
+}
+
+.theme-toggle-btn:hover {
+  transform: rotate(15deg);
+  border-color: var(--cmu-purple-400);
+  box-shadow: var(--shadow-md);
+}
+
+.theme-icon-dark {
+  display: none;
+}
+
+[data-theme="dark"] .theme-icon-light {
+  display: none;
+}
+
+[data-theme="dark"] .theme-icon-dark {
+  display: block;
+}
+
+/* Split Layout */
+.login-split-container {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Left Brand Showcase Section */
+.login-brand-panel {
+  flex: 1.15;
+  background: var(--hero-gradient);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--space-10) var(--space-12);
+  color: #ffffff;
+  overflow: hidden;
+}
+
+/* Animated Ambient Glows & Grid Pattern */
+.login-brand-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 32px 32px;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.brand-glow-circle-1 {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(167, 84, 227, 0.3) 0%, transparent 70%);
+  top: -100px;
+  right: -100px;
+  filter: blur(60px);
+  pointer-events: none;
+}
+
+.brand-glow-circle-2 {
+  position: absolute;
+  width: 450px;
+  height: 450px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.25) 0%, transparent 70%);
+  bottom: -80px;
+  left: -80px;
+  filter: blur(70px);
+  pointer-events: none;
+}
+
+/* Brand Header */
+.brand-header {
+  position: relative;
+  z-index: var(--z-base);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.school-logo-badge {
+  width: 4rem;
+  height: 4rem;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.brand-text-header h2 {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.brand-text-header p {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 400;
+}
+
+/* Brand Hero Content */
+.brand-body {
+  position: relative;
+  z-index: var(--z-base);
+  margin: var(--space-8) 0;
+}
+
+.brand-badge-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  margin-bottom: var(--space-5);
+  color: var(--accent-gold-100);
+}
+
+.brand-title {
+  font-family: var(--font-family-thai);
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: var(--space-4);
+  letter-spacing: -0.02em;
+}
+
+.brand-title-accent {
+  background: linear-gradient(135deg, #ffffff 30%, var(--accent-gold-300) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand-desc {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-base);
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.6;
+  max-width: 520px;
+  margin-bottom: var(--space-8);
+}
+
+/* Feature Pillars */
+.brand-features-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-xl);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  transition: transform var(--transition-normal), background var(--transition-normal);
+}
+
+.feature-item:hover {
+  transform: translateX(6px);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.feature-icon-wrapper {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--cmu-purple-500) 0%, var(--cmu-purple-700) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.feature-text-title {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 2px;
+}
+
+.feature-text-desc {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* Brand Footer */
+.brand-footer {
+  position: relative;
+  z-index: var(--z-base);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--font-size-xs);
+  color: rgba(255, 255, 255, 0.6);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: var(--space-4);
+}
+
+/* Right Form Section */
+.login-form-panel {
+  flex: 0.95;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8);
+  position: relative;
+}
+
+.login-form-wrapper {
+  width: 100%;
+  max-width: 440px;
+}
+
+.login-header-group {
+  margin-bottom: var(--space-6);
+  text-align: left;
+}
+
+.login-heading {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+  margin-bottom: var(--space-1);
+}
+
+.login-subheading {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+/* Quick Fill Demo Accounts Banner */
+.demo-accounts-card {
+  background: var(--bg-surface-elevated);
+  border: 1px dashed var(--cmu-purple-400);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4);
+  margin-bottom: var(--space-6);
+  transition: all var(--transition-normal);
+}
+
+.demo-accounts-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--cmu-purple-700);
+  margin-bottom: var(--space-2);
+}
+
+[data-theme="dark"] .demo-accounts-title {
+  color: var(--cmu-purple-300);
+}
+
+.demo-chips-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* Form Actions Row */
+.form-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+
+.forgot-password-link {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-sm);
+  color: var(--cmu-purple-700);
+  font-weight: 500;
+  transition: color var(--transition-fast);
+}
+
+[data-theme="dark"] .forgot-password-link {
+  color: var(--cmu-purple-400);
+}
+
+.forgot-password-link:hover {
+  text-decoration: underline;
+  color: var(--cmu-purple-900);
+}
+
+[data-theme="dark"] .forgot-password-link:hover {
+  color: var(--cmu-purple-200);
+}
+
+/* Form Footer Security Notice */
+.login-security-notice {
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  justify-content: center;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* Responsive Media Queries */
+@media (max-width: 1024px) {
+  .login-split-container {
+    flex-direction: column;
+  }
+
+  .login-brand-panel {
+    padding: var(--space-8) var(--space-6);
+  }
+
+  .brand-features-list {
+    display: none;
+  }
+
+  .brand-desc {
+    margin-bottom: var(--space-4);
+  }
+
+  .login-form-panel {
+    padding: var(--space-8) var(--space-6);
+  }
+}
+
+@media (max-width: 640px) {
+  .login-top-bar {
+    top: 1rem;
+    right: 1rem;
+  }
+
+  .login-brand-panel {
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .brand-title {
+    font-size: 1.5rem;
+  }
+
+  .login-form-panel {
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .demo-chips-grid {
+    flex-direction: column;
+  }
+
+  .btn-chip {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .admin-role-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   ADMIN TOOLBAR & ROLE PERMISSIONS PANEL
+   ========================================================================== */
+
+/* Top Floating Admin Badge Button */
+.btn-admin-top-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.45rem 0.95rem;
+  border-radius: var(--radius-full);
+  background: var(--bg-surface);
+  border: 1.5px solid var(--accent-gold-500);
+  color: var(--text-main);
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.btn-admin-top-badge:hover {
+  background: var(--accent-gold-50);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+  border-color: var(--accent-gold-600);
+}
+
+.btn-admin-top-badge .top-crown-icon {
+  font-size: 1rem;
+}
+
+[data-theme="dark"] .btn-admin-top-badge {
+  background: rgba(30, 20, 45, 0.85);
+  border-color: var(--accent-gold-400);
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.15);
+}
+
+[data-theme="dark"] .btn-admin-top-badge:hover {
+  background: rgba(50, 25, 75, 0.95);
+}
+
+/* Admin Toolbar Panel */
+.admin-toolbar-panel {
+  background: linear-gradient(135deg, rgba(251, 247, 254, 0.95) 0%, rgba(245, 235, 252, 0.95) 100%);
+  border: 1.5px solid var(--cmu-purple-200);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4);
+  margin-bottom: var(--space-5);
+  box-shadow: 0 4px 14px rgba(111, 44, 145, 0.08);
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-normal);
+}
+
+.admin-toolbar-panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #f59e0b 0%, #8c32cf 50%, #f59e0b 100%);
+}
+
+[data-theme="dark"] .admin-toolbar-panel {
+  background: linear-gradient(135deg, rgba(35, 15, 55, 0.85) 0%, rgba(25, 10, 40, 0.85) 100%);
+  border-color: rgba(167, 84, 227, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.admin-toolbar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.admin-toolbar-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.admin-toolbar-crown {
+  font-size: 1.5rem;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(245, 158, 11, 0.3));
+}
+
+.admin-toolbar-title {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--cmu-purple-900);
+  line-height: 1.2;
+}
+
+[data-theme="dark"] .admin-toolbar-title {
+  color: var(--cmu-purple-100);
+}
+
+.admin-toolbar-subtitle {
+  font-family: var(--font-family-thai);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+.admin-toolbar-subtitle strong {
+  color: var(--cmu-purple-700);
+}
+
+[data-theme="dark"] .admin-toolbar-subtitle strong {
+  color: var(--accent-gold-300);
+}
+
+.btn-manage-permissions {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0.35rem 0.75rem;
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--cmu-purple-400);
+  background: var(--bg-surface);
+  color: var(--cmu-purple-700);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.btn-manage-permissions:hover {
+  background: var(--cmu-purple-700);
+  color: #ffffff;
+  border-color: var(--cmu-purple-700);
+  transform: translateY(-1px);
+}
+
+[data-theme="dark"] .btn-manage-permissions {
+  background: rgba(140, 50, 207, 0.2);
+  color: var(--cmu-purple-300);
+  border-color: rgba(167, 84, 227, 0.4);
+}
+
+[data-theme="dark"] .btn-manage-permissions:hover {
+  background: var(--cmu-purple-600);
+  color: #ffffff;
+}
+
+/* Role Selector Cards Grid */
+.admin-role-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.admin-role-card {
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.admin-role-card:hover {
+  border-color: var(--cmu-purple-400);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-role-card.is-active {
+  border-color: var(--cmu-purple-600);
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(111, 44, 145, 0.2), 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .admin-role-card.is-active {
+  background: rgba(60, 25, 90, 0.4);
+  border-color: var(--cmu-purple-400);
+  box-shadow: 0 0 0 2px rgba(167, 84, 227, 0.25);
+}
+
+.role-card-top {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 4px;
+}
+
+.role-avatar {
+  font-size: 1rem;
+}
+
+.role-name {
+  font-family: var(--font-family-thai);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.role-status-badge {
+  font-size: 0.65rem;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  background: var(--bg-input);
+  color: var(--text-muted);
+}
+
+.role-status-badge.badge-active {
+  background: var(--cmu-purple-700);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.role-perm-info {
+  margin-top: 2px;
+}
+
+.perm-pill {
+  display: block;
+  font-family: var(--font-family-thai);
+  font-size: 0.68rem;
+  line-height: 1.25;
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+}
+
+.perm-pill.perm-grant {
+  color: #047857;
+  font-weight: 700;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.perm-pill.perm-lock {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+[data-theme="dark"] .perm-pill.perm-grant {
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.18);
+}
+
+/* Instant Admin Login Button */
+.btn-admin-instant-login {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 0.65rem var(--space-4);
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  transition: all var(--transition-normal);
+}
+
+.btn-admin-instant-login:hover {
+  background: linear-gradient(135deg, #d97706 0%, #92400e 100%);
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.45);
+  transform: translateY(-1px);
+}
+
+/* Permissions Matrix Modal & Table */
+.modal-card-lg {
+  max-width: 780px;
+  width: 95%;
+}
+
+.perm-modal-intro {
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--cmu-purple-50);
+  border-left: 4px solid var(--cmu-purple-600);
+  line-height: 1.5;
+}
+
+[data-theme="dark"] .perm-modal-intro {
+  background: rgba(140, 50, 207, 0.15);
+}
+
+.permissions-matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-sm);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.permissions-matrix-table th {
+  background: var(--bg-input);
+  padding: var(--space-3) var(--space-4);
+  font-weight: 700;
+  color: var(--text-main);
+  border-bottom: 1.5px solid var(--border-subtle);
+}
+
+.permissions-matrix-table td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  vertical-align: middle;
+}
+
+.permissions-matrix-table tbody tr:hover {
+  background: var(--bg-input-hover);
+}
+
+.permissions-matrix-table .highlight-perm-row {
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.permissions-matrix-table .highlight-perm-row:hover {
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.perm-badge-grant {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+[data-theme="dark"] .perm-badge-grant {
+  background: rgba(22, 101, 52, 0.4);
+  color: #86efac;
+  border-color: rgba(134, 239, 172, 0.3);
+}
+
+.perm-badge-deny {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+[data-theme="dark"] .perm-badge-deny {
+  background: rgba(127, 29, 29, 0.4);
+  color: #fca5a5;
+  border-color: rgba(252, 165, 165, 0.3);
+}
+
+.perm-badge-info {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+[data-theme="dark"] .perm-badge-info {
+  background: rgba(180, 83, 9, 0.35);
+  color: #fcd34d;
+  border-color: rgba(253, 230, 138, 0.3);
+}
+
+.perm-modal-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  color: #92400e;
+  line-height: 1.4;
+}
+
+[data-theme="dark"] .perm-modal-note {
+  background: rgba(120, 53, 15, 0.25);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #fcd34d;
+}

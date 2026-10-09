@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="แบบฟอร์มขออนุมัติบรรจุกิจกรรม สำหรับนักเรียน งบประมาณ 2569 - โรงเรียนสาธิต มช." />
+  <title>แบบฟอร์มขออนุมัติบรรจุกิจกรรม | สาธิต มช.</title>
+
+  <!-- Google Fonts: Prompt, Sarabun, Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Modular CSS Stylesheets -->
+  <link rel="stylesheet" href="/css/variables.css" />
+  <link rel="stylesheet" href="/css/reset.css" />
+  <link rel="stylesheet" href="/css/components/button.css" />
+  <link rel="stylesheet" href="/css/components/input.css" />
+  <link rel="stylesheet" href="/css/components/card.css" />
+  <link rel="stylesheet" href="/css/components/badge.css" />
+  <link rel="stylesheet" href="/css/components/toast.css" />
+  <link rel="stylesheet" href="/css/components/navbar.css" />
+  <link rel="stylesheet" href="/css/components/user-management.css" />
+  <link rel="stylesheet" href="/css/components/excel-sheet.css" />
+  <link rel="stylesheet" href="/css/pages/activity-form.css" />
+</head>
+<body class="activity-form-page">
+
+  <!-- Top Navigation Bar -->
+  <header class="app-navbar">
+    <div class="navbar-container">
+      <a href="/projects.html" class="navbar-brand">
+        <div class="navbar-logo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fcd34d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            <path d="M12 8v4" stroke="#ffffff"></path>
+            <path d="M12 16h.01" stroke="#ffffff" stroke-width="3"></path>
+          </svg>
+        </div>
+        <div class="navbar-title-group">
+          <h1>โรงเรียนสาธิตมหาวิทยาลัยเชียงใหม่</h1>
+          <p>ระบบสร้างเอกสารขออนุมัติโครงการและกิจกรรม (Pre-Document Generator)</p>
+        </div>
+      </a>
+
+      <div class="navbar-actions">
+        <div class="navbar-user-chip">
+          <div id="navbarUserAvatar" class="user-avatar">👨‍🏫</div>
+          <div class="user-info-text">
+            <span id="navbarUserName" class="user-name">อ.ดร. ศุภชัย วิทยานุกูล</span>
+            <span id="navbarUserRole" class="user-role-badge">อาจารย์ผู้รับผิดชอบ</span>
+          </div>
+        </div>
+
+        <button id="themeToggleBtn" class="theme-toggle-btn" type="button" aria-label="สลับธีม สว่าง/มืด" title="สลับโหมดสี">
+          <svg class="theme-icon-light" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+          </svg>
+          <svg class="theme-icon-dark" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
+        <button id="logoutBtn" class="btn-logout" type="button" title="ออกจากระบบ">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+          </svg>
+          <span>ออกจากระบบ</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="form-main-container">
+
+    <!-- Sticky Toolbar -->
+    <nav class="form-sticky-toolbar" aria-label="เครื่องมือจัดการแบบฟอร์ม">
+      <div class="toolbar-left">
+        <a id="backToActivitiesBtn" href="/project-activities.html" class="btn btn-secondary btn-sm" title="กลับสู่หน้ารายการกิจกรรม">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          <span>กลับสู่หน้ารายการกิจกรรม</span>
+        </a>
+
+        <div style="display: flex; align-items: center; gap: var(--space-2);">
+          <span style="font-size: var(--font-size-xs); color: var(--text-muted); font-weight: 500;">สลับโครงการ:</span>
+          <select id="projectQuickSelect" class="project-quick-select" aria-label="เลือกโครงการ">
+            <!-- Injected via JavaScript -->
+          </select>
+        </div>
+      </div>
+
+      <div class="toolbar-right">
+        <button id="saveFormBtn" type="button" class="btn btn-primary btn-sm">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+            <polyline points="7 3 7 8 15 8"></polyline>
+          </svg>
+          <span>บันทึกแบบฟอร์ม</span>
+        </button>
+
+        <button id="exportWordBtn" type="button" class="btn btn-secondary btn-sm">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmu-purple-700)" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+          <span>สร้างเอกสาร Word (.docx)</span>
+        </button>
+
+        <button id="exportExcelBtn" type="button" class="btn btn-secondary btn-sm">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#107c41" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="3" y1="9" x2="21" y2="9"></line>
+            <line x1="3" y1="15" x2="21" y2="15"></line>
+          </svg>
+          <span>ส่งออก Excel</span>
+        </button>
+
+        <button id="printFormBtn" type="button" class="btn btn-secondary btn-sm" title="พิมพ์แบบฟอร์ม">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          <span>พิมพ์</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Excel Document Sheet Wrapper -->
+    <article class="excel-wrapper" role="document">
+      
+      <!-- Excel Ribbon Header Bar -->
+      <div class="excel-ribbon-bar">
+        <div class="excel-ribbon-title">
+          <div class="excel-icon-svg">X</div>
+          <span>Microsoft Excel Spreadsheet • แม่แบบทางการ</span>
+        </div>
+        <div class="excel-file-tag">Doc/Excel_example.xlsx</div>
+      </div>
+
+      <!-- Main Form Body -->
+      <div class="excel-document-body">
+
+        <!-- Title Block (แถวที่ 1) -->
+        <header class="excel-header-block">
+          <div class="excel-school-name">โรงเรียนสาธิตมหาวิทยาลัยเชียงใหม่ ระดับอนุบาลและประถมศึกษา</div>
+          <h2 class="excel-main-title">แบบฟอร์มขออนุมัติบรรจุกิจกรรม สำหรับนักเรียน งบประมาณ 2569</h2>
+        </header>
+
+        <!-- ส่วนที่ 1: ข้อมูลโครงการและกิจกรรม (แถวที่ 2-13) -->
+        <section class="excel-section" aria-labelledby="sec1Heading">
+          <div id="sec1Heading" class="excel-section-heading">
+            <span>ข้อมูลโครงการและกิจกรรม</span>
+            <span class="badge badge-purple">แถวที่ 2 - 13</span>
+          </div>
+
+          <div class="excel-info-grid">
+            <div class="excel-field-group">
+              <label class="excel-field-label" for="formProjectName">โครงการ</label>
+              <input id="formProjectName" type="text" class="excel-field-input" readonly style="font-weight: 700; color: var(--cmu-purple-800);" />
+            </div>
+
+            <div class="excel-field-group">
+              <label class="excel-field-label" for="formActivityName">กิจกรรม</label>
+              <input id="formActivityName" type="text" class="excel-field-input" />
+            </div>
+
+            <div class="excel-field-group">
+              <label class="excel-field-label" for="formResponsiblePerson">อาจารย์ผู้รับผิดชอบกิจกรรม (1 คน)</label>
+              <input id="formResponsiblePerson" type="text" class="excel-field-input" placeholder="เช่น อ.ดร. ศุภชัย วิทยานุกูล" />
+            </div>
+
+            <div class="excel-field-group">
+              <label class="excel-field-label" for="formResponsiblePhone">เบอร์ติดต่ออาจารย์ผู้รับผิดชอบ</label>
+              <input id="formResponsiblePhone" type="tel" class="excel-field-input" placeholder="เช่น 053-944123 ต่อ 15 หรือ 081-xxx-xxxx" />
+            </div>
+
+            <div class="excel-field-group">
+              <label class="excel-field-label" for="formSemesterYear">ภาคเรียน/ปีการศึกษา</label>
+              <input id="formSemesterYear" type="text" class="excel-field-input" placeholder="เช่น ภาคเรียนที่ 1 ปีการศึกษา 2569" />
+            </div>
+
+            <div class="excel-field-group">
+              <label class="excel-field-label" for="formTargetGrade">เป้าหมายระดับชั้น</label>
+              <input id="formTargetGrade" type="text" class="excel-field-input" placeholder="เช่น ประถมศึกษาตอนต้น (ป.1 - ป.3)" />
+            </div>
+
+            <div class="excel-field-group full-width">
+              <label class="excel-field-label" for="formObjective">วัตถุประสงค์ของกิจกรรม</label>
+              <textarea id="formObjective" class="excel-field-input" rows="2" placeholder="ระบุวัตถุประสงค์ของกิจกรรม..."></textarea>
+            </div>
+
+            <div class="excel-field-group full-width">
+              <label class="excel-field-label" for="formTargetOutcome">เป้าหมายของกิจกรรม</label>
+              <textarea id="formTargetOutcome" class="excel-field-input" rows="2" placeholder="ระบุเป้าหมาย/ผลลัพธ์ของกิจกรรม..."></textarea>
+            </div>
+          </div>
+
+          <!-- ตารางจำนวนผู้เข้าร่วม (แถวที่ 9-13) -->
+          <div style="margin-top: var(--space-4);">
+            <div class="excel-field-label" style="margin-bottom: var(--space-2); font-weight: 700; color: var(--text-main);">
+              จำนวนผู้เข้าร่วมกิจกรรม (คน)
+            </div>
+            <div class="excel-participants-grid">
+              <div class="participant-box">
+                <span class="participant-label">นักเรียน</span>
+                <input id="pStudents" type="number" class="participant-input" min="0" placeholder="0" />
+              </div>
+              <div class="participant-box">
+                <span class="participant-label">อาจารย์</span>
+                <input id="pTeachers" type="number" class="participant-input" min="0" placeholder="0" />
+              </div>
+              <div class="participant-box">
+                <span class="participant-label">ฝ่ายสนับสนุน</span>
+                <input id="pSupport" type="number" class="participant-input" min="0" placeholder="0" />
+              </div>
+              <div class="participant-box">
+                <span class="participant-label">พยาบาล</span>
+                <input id="pNurse" type="number" class="participant-input" min="0" placeholder="0" />
+              </div>
+              <div class="participant-box">
+                <span class="participant-label">ผู้ปกครอง/ภายนอก</span>
+                <input id="pExternal" type="number" class="participant-input" min="0" placeholder="0" />
+              </div>
+            </div>
+            <div style="text-align: right; margin-top: var(--space-2); font-size: var(--font-size-xs); font-weight: 600; color: var(--text-muted);">
+              รวมผู้เข้าร่วมทั้งสิ้น: <span id="pTotalDisplay" style="color: var(--cmu-purple-700); font-size: var(--font-size-sm); font-weight: 700;">0 คน</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ข้อมูลวิทยากร / ผู้บรรยาย (กรณีมีเชิญวิทยากร) -->
+        <section class="excel-section speaker-toggle-section" aria-labelledby="speakerSectionHeading">
+          <div class="speaker-section-header">
+            <div class="speaker-header-left">
+              <div class="speaker-icon-bubble">🎤</div>
+              <div>
+                <h3 id="speakerSectionHeading" class="speaker-section-title">
+                  <span>ข้อมูลวิทยากร / ผู้บรรยาย</span>
+                  <span class="badge badge-gold" style="font-size: 11px;">กรณีมีเชิญวิทยากร</span>
+                </h3>
+                <p class="speaker-section-desc">
+                  เปิดใช้งานหากมีการเชิญวิทยากรบรรยายหรือฝึกอบรม เพื่อนำข้อมูลไปสร้างหนังสือขอเชิญวิทยากรราชการ (.docx) อัตโนมัติ
+                </p>
+              </div>
+            </div>
+
+            <!-- Toggle Switch -->
+            <label class="speaker-toggle-switch" for="toggleHasSpeakers">
+              <input type="checkbox" id="toggleHasSpeakers" />
+              <span class="speaker-slider"></span>
+              <span class="speaker-toggle-label">เชิญวิทยากร</span>
+            </label>
+          </div>
+
+          <!-- Dynamic Speakers Container (Hidden by default) -->
+          <div id="speakersContainer" class="speakers-container" style="display: none;">
+            <div id="speakersList" class="speakers-list">
+              <!-- Rendered via JavaScript -->
+            </div>
+
+            <div class="speaker-add-row">
+              <button type="button" class="btn btn-secondary btn-sm" id="btnAddSpeaker">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>+ เพิ่มวิทยากรอีกท่าน</span>
+              </button>
+              <span style="font-size: var(--font-size-xs); color: var(--text-muted);">
+                💡 สามารถเพิ่มวิทยากรได้หลายท่าน ข้อมูลจะถูกนำไปใช้ในหนังสือขอเชิญวิทยากรราชการ (.docx)
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ส่วนที่ 2: กำหนดการและการเดินทาง (แถวที่ 15-30) -->
+        <section class="excel-section" aria-labelledby="sec2Heading">
+          <div id="sec2Heading" class="excel-section-heading">
+            <span>กำหนดการและการเดินทาง</span>
+            <span class="badge badge-purple">แถวที่ 15 - 30</span>
+          </div>
+
+          <div class="excel-info-grid">
+            <div class="excel-field-group">
+              <label class="excel-field-label" for="schedDate">วัน/เดือน/ปี</label>
+              <input id="schedDate" type="text" class="excel-field-input" placeholder="เช่น 15 - 18 มีนาคม 2569" />
+            </div>
+
+            <div class="excel-field-group">
+              <label class="excel-field-label" for="schedTime">เวลา</label>
+              <input id="schedTime" type="text" class="excel-field-input" placeholder="เช่น 08.00 - 15.00 น." />
+            </div>
+
+            <div class="excel-field-group full-width">
+              <label class="excel-field-label" for="schedLocation">สถานที่จัดกิจกรรม</label>
+              <input id="schedLocation" type="text" class="excel-field-input" placeholder="เช่น ศูนย์ส่งเสริมศิลปวัฒนธรรม มช." />
+            </div>
+
+            <div class="excel-field-group">
+              <label class="excel-field-label" for="schedTravelFormat">รูปแบบขออนุมัติเดินทาง</label>
+              <input id="schedTravelFormat" type="text" class="excel-field-input" placeholder="เช่น ขออนุมัติยานพาหนะเดินทางไปราชการ" />
+            </div>
+
+            <div class="excel-field-group" style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-2);">
+              <div>
+                <label class="excel-field-label" for="schedVehicleType">รถที่ใช้ในการเดินทาง</label>
+                <input id="schedVehicleType" type="text" class="excel-field-input" placeholder="เช่น รถบัสปรับอากาศ" />
+              </div>
+              <div>
+                <label class="excel-field-label" for="schedVehicleCount">จำนวน (คัน)</label>
+                <input id="schedVehicleCount" type="number" class="excel-field-input" min="1" placeholder="จำนวนคัน" />
+              </div>
+            </div>
+          </div>
+
+          <!-- ตารางช่วงเวลากำหนดการ (แถวที่ 21-30) -->
+          <div style="margin-top: var(--space-5);">
+            <div class="excel-field-label" style="margin-bottom: var(--space-2); font-weight: 700; color: var(--text-main);">
+              ตารางกำหนดการตามช่วงเวลา (เวลา / รายละเอียด / หมวดเบิกจ่าย)
+            </div>
+            <div class="excel-table-container">
+              <table class="excel-table">
+                <thead>
+                  <tr>
+                    <th style="width: 140px;">เวลา</th>
+                    <th>รายละเอียดกิจกรรม</th>
+                    <th style="width: 160px;">หมวดเบิกจ่าย</th>
+                    <th style="width: 44px;"></th>
+                  </tr>
+                </thead>
+                <tbody id="scheduleTableBody">
+                  <!-- Injected via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+            <div class="table-footer-actions">
+              <button id="addScheduleRowBtn" type="button" class="btn-table-action">
+                <span>+ เพิ่มช่วงเวลากำหนดการ</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ส่วนที่ 3: ประมาณการค่าใช้จ่าย (แถวที่ 32-54) -->
+        <section class="excel-section" aria-labelledby="sec3Heading">
+          <div id="sec3Heading" class="excel-section-heading">
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <span>ประมาณการค่าใช้จ่าย</span>
+              <span style="font-size: 0.6875rem; font-weight: 500; opacity: 0.85;">
+                1. ค่าตอบแทน — 2. ค่าใช้สอย — 3. ค่าวัสดุ — 4. ค่าสาธารณูปโภค — 5. อื่นๆ
+              </span>
+            </div>
+            <span class="badge badge-purple">แถวที่ 32 - 54</span>
+          </div>
+
+          <div class="excel-table-container">
+            <table class="excel-table">
+              <thead>
+                <tr>
+                  <th style="width: 100px;">ลำดับย่อย</th>
+                  <th>รายการค่าใช้จ่าย</th>
+                  <th style="width: 70px;">จำนวน</th>
+                  <th style="width: 65px;">หน่วย</th>
+                  <th style="width: 70px;">จำนวน</th>
+                  <th style="width: 65px;">หน่วย</th>
+                  <th style="width: 105px;">จำนวนเงิน (บาท)</th>
+                  <th style="width: 120px;">รวมเป็นเงิน (บาท)</th>
+                  <th style="width: 120px;">หมายเหตุ</th>
+                  <th style="width: 44px;"></th>
+                </tr>
+              </thead>
+              <tbody id="budgetTableBody">
+                <!-- Injected via JavaScript -->
+              </tbody>
+              <tfoot>
+                <tr class="total-summary-row">
+                  <td colspan="7" style="text-align: right; padding: 0.75rem 1rem;">
+                    <strong>รวมเป็นเงินทั้งสิ้น</strong>
+                  </td>
+                  <td style="text-align: right; padding: 0.75rem 1rem;">
+                    <span id="budgetGrandTotalDisplay" style="font-size: var(--font-size-base); font-weight: 800; color: var(--cmu-purple-900);">0 บาท</span>
+                  </td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <!-- Thai Baht Text Banner (แถวที่ 54) -->
+          <div class="baht-text-banner">
+            <span>จำนวนเงินตัวอักษร:</span>
+            <span id="bahtTextDisplay" style="font-size: var(--font-size-base); font-weight: 700; letter-spacing: 0.02em;">( ศูนย์บาทถ้วน )</span>
+          </div>
+        </section>
+
+      </div>
+    </article>
+
+  </main>
+
+  <!-- Modal: สร้างเอกสารราชการ Word (.docx) -->
+  <div id="wordExportModal" class="modal-backdrop" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="wordModalTitle">
+    <div class="word-modal-container">
+      <!-- Modal Header -->
+      <div class="word-modal-header">
+        <div class="word-modal-title-group">
+          <div class="word-icon-badge">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </div>
+          <div>
+            <h3 id="wordModalTitle" class="word-modal-title">สร้างเอกสารราชการ Word (.docx)</h3>
+            <p class="word-modal-subtitle">ระบบจะนำข้อมูลที่กรอกในแบบฟอร์มไปแทนที่ในแม่แบบเอกสาร Word อัตโนมัติ</p>
+          </div>
+        </div>
+        <button id="closeWordModalBtn" class="modal-close-btn" type="button" aria-label="ปิดหน้าต่าง">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="word-modal-body">
+        
+        <!-- Step 1: เลือกแม่แบบเอกสาร -->
+        <div class="modal-section">
+          <h4 class="modal-section-title">
+            <span class="step-num">1</span>
+            <span>เลือกแม่แบบเอกสารราชการ (.docx)</span>
+          </h4>
+          
+          <div class="template-options-grid">
+            <label class="template-card is-selected">
+              <input type="radio" name="wordTemplate" value="field_trip" checked />
+              <div class="template-card-content">
+                <div class="template-card-header">
+                  <span class="template-card-icon">📑</span>
+                  <span class="template-card-name">หนังสือขอความอนุเคราะห์นำนักเรียนเข้าทัศนศึกษา</span>
+                  <span class="badge badge-purple" style="font-size: 0.65rem;">ทัศนศึกษา</span>
+                </div>
+                <p class="template-card-desc">ไฟล์ Request_Student_Field_Trip.docx สำหรับขอความอนุเคราะห์เข้าศึกษาแหล่งเรียนรู้ภายนอก</p>
+              </div>
+            </label>
+
+            <label class="template-card">
+              <input type="radio" name="wordTemplate" value="site_visit" />
+              <div class="template-card-content">
+                <div class="template-card-header">
+                  <span class="template-card-icon">🏢</span>
+                  <span class="template-card-name">หนังสือขอความอนุเคราะห์นำนักเรียนเข้าเยี่ยมชม / ศึกษาดูงาน</span>
+                  <span class="badge badge-blue" style="font-size: 0.65rem;">ศึกษาดูงาน</span>
+                </div>
+                <p class="template-card-desc">ไฟล์ Request_Student_Site_Visit.docx หนังสือราชการภายนอกขอเข้าเยี่ยมชมหน่วยงาน</p>
+              </div>
+            </label>
+
+            <label class="template-card">
+              <input type="radio" name="wordTemplate" value="off_campus" />
+              <div class="template-card-content">
+                <div class="template-card-header">
+                  <span class="template-card-icon">📝</span>
+                  <span class="template-card-name">บันทึกข้อความขออนุญาตพานักเรียนออกนอกสถานศึกษาและงบประมาณ</span>
+                  <span class="badge badge-gold" style="font-size: 0.65rem;">บันทึกภายใน</span>
+                </div>
+                <p class="template-card-desc">ไฟล์ Off-Campus_Excursion_Request.docx สำหรับเสนอคณบดีและขออนุมัติเบิกจ่าย</p>
+              </div>
+            </label>
+
+            <label class="template-card">
+              <input type="radio" name="wordTemplate" value="invitation_speaker" />
+              <div class="template-card-content">
+                <div class="template-card-header">
+                  <span class="template-card-icon">🎤</span>
+                  <span class="template-card-name">หนังสือขอความอนุเคราะห์เป็นวิทยากรปฏิบัติการ</span>
+                  <span class="badge badge-teal" style="font-size: 0.65rem;">เชิญวิทยากร</span>
+                </div>
+                <p class="template-card-desc">ไฟล์ Invitation_Workshop_Speaker.docx หนังสือเรียนเชิญวิทยากรผู้ทรงคุณวุฒิภายนอก</p>
+              </div>
+            </label>
+
+            <label class="template-card">
+              <input type="radio" name="wordTemplate" value="consent_parents" />
+              <div class="template-card-content">
+                <div class="template-card-header">
+                  <span class="template-card-icon">👨‍👩‍👧‍👦</span>
+                  <span class="template-card-name">หนังสือขออนุญาตผู้ปกครองให้นักเรียนเข้าร่วมกิจกรรม</span>
+                  <span class="badge badge-purple" style="font-size: 0.65rem;">ผู้ปกครอง (Consent)</span>
+                </div>
+                <p class="template-card-desc">ไฟล์ Activity_Participation_Consent.docx แจ้งรายละเอียดกิจกรรม วัน เวลา และการแต่งกาย</p>
+              </div>
+            </label>
+
+            <label class="template-card">
+              <input type="radio" name="wordTemplate" value="custom" />
+              <div class="template-card-content">
+                <div class="template-card-header">
+                  <span class="template-card-icon">📁</span>
+                  <span class="template-card-name">อัปโหลดไฟล์แม่แบบ .docx ของฉันเอง</span>
+                  <span class="badge" style="font-size: 0.65rem; background: var(--bg-input); border: 1px solid var(--border-subtle);">กำหนดเอง</span>
+                </div>
+                <p class="template-card-desc">เลือกไฟล์ .docx จากคอมพิวเตอร์ของคุณที่มีแท็ก {{...}} ตามรายการ Data Mapping</p>
+              </div>
+            </label>
+          </div>
+
+          <!-- Custom File Upload Row -->
+          <div id="customUploadContainer" class="custom-upload-box" style="display: none;">
+            <label for="customDocxInput" class="upload-dropzone">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--cmu-purple-600)" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <div>
+                <span style="font-weight: 700; color: var(--cmu-purple-700);">คลิกเลือกไฟล์แม่แบบ .docx</span> หรือลากไฟล์มาวางที่นี่
+                <span id="customFileName" style="display: block; font-size: var(--font-size-xs); color: var(--text-muted); margin-top: 4px;">รองรับไฟล์ .docx ที่มีตัวแปร {{...}}</span>
+              </div>
+              <input type="file" id="customDocxInput" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" style="display: none;" />
+            </label>
+          </div>
+        </div>
+
+        <!-- Step 2: ตรวจสอบข้อมูลเชื่อมโยง (Data Mapping Preview) -->
+        <div class="modal-section">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-3); flex-wrap: wrap; gap: var(--space-2);">
+            <h4 class="modal-section-title" style="margin-bottom: 0;">
+              <span class="step-num">2</span>
+              <span>ตรวจสอบข้อมูลที่เชื่อมโยงกับ Word (Data Mapping)</span>
+            </h4>
+            <button id="copyAllTagsBtn" type="button" class="btn btn-secondary btn-sm" title="คัดลอกรายชื่อ Tags ทั้งหมดเพื่อนำไปวางใน Word">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span>คัดลอก Tags ทั้งหมด</span>
+            </button>
+          </div>
+
+          <p style="font-family: var(--font-family-thai); font-size: var(--font-size-xs); color: var(--text-muted); margin-bottom: var(--space-3);">
+            ระบบจะแทนที่ตัวแปรใน Word ด้วยข้อมูลที่คุณกรอกในแบบฟอร์มดังนี้ (สามารถใช้ได้ทั้งแท็กอังกฤษและแท็กไทย):
+          </p>
+
+          <div class="mapping-table-wrapper">
+            <table class="mapping-table">
+              <thead>
+                <tr>
+                  <th style="width: 28%;">Tag ใน Word</th>
+                  <th style="width: 32%;">ข้อมูลที่เชื่อมโยง (จากแบบฟอร์ม)</th>
+                  <th style="width: 25%;">คำอธิบาย</th>
+                  <th style="width: 15%; text-align: center;">สถานะ</th>
+                </tr>
+              </thead>
+              <tbody id="wordMappingTableBody">
+                <!-- Injected via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Step 3: ตั้งชื่อไฟล์ผลลัพธ์ -->
+        <div class="modal-section" style="margin-bottom: 0;">
+          <h4 class="modal-section-title">
+            <span class="step-num">3</span>
+            <span>ชื่อไฟล์เอกสารที่จะดาวน์โหลด</span>
+          </h4>
+          <div style="display: flex; gap: var(--space-2); align-items: center;">
+            <input type="text" id="outputDocxFilename" class="input" style="flex: 1;" value="หนังสือขอความอนุเคราะห์_ทัศนศึกษา.docx" />
+            <span style="font-size: var(--font-size-xs); color: var(--text-muted); white-space: nowrap;">(.docx)</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="word-modal-footer">
+        <button id="cancelWordModalBtn" type="button" class="btn btn-secondary">
+          <span>ยกเลิก</span>
+        </button>
+        <button id="btnConfirmGenerateWord" type="button" class="btn btn-primary btn-generate-word">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span id="btnGenerateWordText">สร้างและดาวน์โหลดเอกสาร Word (.docx)</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="projects-footer">
+    <p>โรงเรียนสาธิตมหาวิทยาลัยเชียงใหม่ ระดับอนุบาลและประถมศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยเชียงใหม่ © 2026</p>
+  </footer>
+
+  <!-- Modular Scripts -->
+  <script type="module" src="/js/pages/activity-form.js"></script>
+</body>
+</html>

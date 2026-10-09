@@ -1,0 +1,66 @@
+/* ==========================================================================
+   CARD & GLASS CONTAINER COMPONENT
+   ========================================================================== */
+
+.card {
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-2xl);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-xl);
+  transition: all var(--transition-normal);
+}
+
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-2xl);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.12),
+              0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+  position: relative;
+  z-index: var(--z-base);
+}
+
+[data-theme="dark"] .glass-card {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
+              0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+.card-header {
+  padding: var(--space-6) var(--space-6) 0 var(--space-6);
+}
+
+.card-body {
+  padding: var(--space-6);
+}
+
+.card-footer {
+  padding: 0 var(--space-6) var(--space-6) var(--space-6);
+}
+
+/* Ambient Ambient Glows */
+.ambient-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: var(--z-background);
+}
+
+.ambient-glow-purple {
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, var(--cmu-purple-600) 0%, transparent 70%);
+}
+
+.ambient-glow-gold {
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, var(--accent-gold-500) 0%, transparent 70%);
+}
+
+[data-theme="dark"] .ambient-glow {
+  opacity: 0.28;
+}
