@@ -44,6 +44,12 @@ document.addEventListener('DOMContentLoaded', () => {
   updateStatistics();
   renderProjectCards();
 
+  // อัปเดตรายการโครงการและสถิติแบบเรียลไทม์เมื่อได้รับข้อมูลใหม่จาก Cloud
+  window.addEventListener('satit-cmu-cloud-synced', () => {
+    updateStatistics();
+    renderProjectCards();
+  });
+
   // Search input handler
   if (searchInput) {
     addEvent(searchInput, 'input', (e) => {

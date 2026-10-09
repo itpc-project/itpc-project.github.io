@@ -3,6 +3,8 @@
  * จัดการข้อมูลโครงการและกิจกรรม 6 ด้านหลักของโรงเรียนสาธิต มช.
  */
 
+import { CloudSyncService } from './cloud-sync-service.js';
+
 const STORAGE_KEY = 'satit_cmu_projects_data';
 const FORMS_STORAGE_KEY = 'satit_cmu_activity_forms';
 
@@ -168,6 +170,7 @@ export const ProjectService = {
   saveProjects(projects) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+      CloudSyncService.schedulePush();
     } catch (e) {
       console.error('Failed to save projects', e);
     }
@@ -378,6 +381,7 @@ export const ProjectService = {
       const allForms = JSON.parse(localStorage.getItem(FORMS_STORAGE_KEY) || '{}');
       allForms[projectId] = formData;
       localStorage.setItem(FORMS_STORAGE_KEY, JSON.stringify(allForms));
+      CloudSyncService.schedulePush();
     } catch (e) {
       console.error('Failed to save activity form data', e);
     }

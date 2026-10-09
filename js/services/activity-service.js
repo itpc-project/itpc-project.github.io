@@ -5,6 +5,7 @@
  */
 
 import { AuthService } from './auth-service.js';
+import { CloudSyncService } from './cloud-sync-service.js';
 
 const STORAGE_KEY = 'satit_cmu_activities_data';
 const FORMS_STORAGE_KEY = 'satit_cmu_activity_forms';
@@ -143,6 +144,7 @@ export const ActivityService = {
   saveAllActivities(activities) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(activities));
+      CloudSyncService.schedulePush();
     } catch (e) {
       console.error('Failed to save activities', e);
     }

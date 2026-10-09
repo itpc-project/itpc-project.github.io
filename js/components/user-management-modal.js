@@ -385,6 +385,13 @@ export function injectUserModals() {
   bindProfileFormEvents();
   bindUserMgmtEvents();
   bindUserEditFormEvents();
+
+  // Listen to realtime cloud sync updates
+  window.addEventListener('satit-cmu-cloud-synced', () => {
+    if ($('#userManagementModal')?.classList.contains('is-active')) {
+      renderUserMgmtTable();
+    }
+  });
 }
 
 /**

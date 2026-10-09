@@ -4,6 +4,7 @@
  */
 
 import { APP_CONFIG, DEMO_ACCOUNTS, ROLES } from '../config.js';
+import { CloudSyncService } from './cloud-sync-service.js';
 
 const USERS_STORAGE_KEY = 'satit_cmu_users_data';
 
@@ -35,6 +36,7 @@ export const UserService = {
   saveAllUsers(users) {
     try {
       localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+      CloudSyncService.schedulePush();
     } catch (e) {
       console.error('Failed to save users to storage', e);
     }

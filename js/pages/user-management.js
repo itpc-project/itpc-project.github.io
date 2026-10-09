@@ -32,6 +32,13 @@ document.addEventListener('DOMContentLoaded', () => {
   initProfileView();
   initAdminUsersView();
   initUserEditModal();
+
+  // อัปเดตตารางผู้ใช้งานแบบเรียลไทม์เมื่อมีการซิงค์ข้อมูลจาก Cloud
+  window.addEventListener('satit-cmu-cloud-synced', () => {
+    if (activeTab === 'users') {
+      initAdminUsersView();
+    }
+  });
 });
 
 /* ==========================================================================

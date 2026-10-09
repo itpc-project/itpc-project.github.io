@@ -10,8 +10,10 @@ import { initPasswordToggle } from '../components/password-toggle.js';
 import { initModal } from '../components/modal.js';
 import { AuthService } from '../services/auth-service.js';
 import { UserService } from '../services/user-service.js';
+import { CloudSyncService } from '../services/cloud-sync-service.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+  CloudSyncService.init();
   // Elements
   const loginForm = $('#loginForm');
   const emailInput = $('#email');
@@ -67,15 +69,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // 4. User Registration Modal Initializer
   initRegisterModal(emailInput, passwordInput, submitBtn);
 
-  // 5. Pre-fill remembered email if saved, or default to admin
+  // 5. Pre-fill remembered email if saved by user
   const rememberedEmail = AuthService.getRememberedEmail();
   if (rememberedEmail && emailInput) {
     emailInput.value = rememberedEmail;
     if (rememberCheckbox) rememberCheckbox.checked = true;
-  } else if (emailInput && !emailInput.value) {
-    // Default to Admin account for convenient testing
-    emailInput.value = 'admin@satit.cmu.ac.th';
-    if (passwordInput) passwordInput.value = 'password123';
   }
 
   // 6. Handle Login Form Submit

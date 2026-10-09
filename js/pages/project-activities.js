@@ -50,6 +50,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // 5. เรนเดอร์กล่องกิจกรรมที่ถูกบันทึกเข้ามาแล้ว
   renderActivitiesList(project);
 
+  // 5.1 อัปเดตรายการกิจกรรมและข้อมูลโครงการแบบเรียลไทม์เมื่อได้รับข้อมูลใหม่จาก Cloud
+  window.addEventListener('satit-cmu-cloud-synced', () => {
+    const updatedProj = ProjectService.getProjectById(project.id);
+    if (updatedProj) {
+      project = updatedProj;
+      renderProjectHeader(project);
+    }
+    renderActivitiesList(project);
+  });
+
   // 6. จัดการปุ่ม [เพิ่มกิจกรรม] (ด้านบน)
   const addActivityBtn = $('#addActivityBtn');
   if (addActivityBtn) {

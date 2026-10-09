@@ -342,6 +342,41 @@
   font-weight: 600;
 }
 
+/* Category 1 Compensation Dropdown Preset */
+.compensation-dropdown-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.input-compensation-preset {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.28rem 0.5rem;
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface-elevated, #ffffff);
+  border: 1.5px solid var(--cmu-purple-200);
+  color: var(--cmu-purple-900);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.input-compensation-preset:hover {
+  border-color: var(--cmu-purple-400);
+}
+
+.input-compensation-preset:focus {
+  border-color: var(--cmu-purple-600);
+  box-shadow: 0 0 0 2px rgba(111, 44, 145, 0.15);
+  outline: none;
+}
+
+[data-theme="dark"] .input-compensation-preset {
+  background: var(--bg-surface);
+  border-color: var(--cmu-purple-700);
+  color: var(--cmu-purple-200);
+}
+
 /* Action Button to Add / Delete Table Rows */
 .table-footer-actions {
   display: flex;

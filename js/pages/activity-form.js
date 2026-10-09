@@ -377,13 +377,48 @@ function createSubItemRowElement(catKey, item = {}) {
   const subtotal = qty1 * qty2 * rate;
   const note = item.note || '';
 
+  const isCompensation = String(catKey) === '1';
+
+  let itemCellContent = '';
+  if (isCompensation) {
+    const isLecturer = itemName.includes('วิทยากรบรรยาย');
+    const isWorkshop = itemName.includes('วิทยากรปฏิบัติการ');
+    const isOvertime = itemName.includes('นอกเวลาราชการ');
+    const isDriver = itemName.includes('ขับรถ');
+
+    let selectedPreset = '';
+    if (isLecturer) selectedPreset = 'ค่าตอบแทนวิทยากรบรรยาย';
+    else if (isWorkshop) selectedPreset = 'ค่าตอบแทนวิทยากรปฏิบัติการ';
+    else if (isOvertime) selectedPreset = 'ค่าตอบแทนปฏิบัติงานนอกเวลาราชการ';
+    else if (isDriver) selectedPreset = 'ค่าตอบแทนในการเดินทางไปปฏิบัติงานของผู้ทำหน้าที่ขับรถ';
+    else if (itemName) selectedPreset = 'custom';
+
+    itemCellContent = `
+      <div class="compensation-dropdown-wrapper" style="display: flex; flex-direction: column; gap: 4px;">
+        <select class="table-input input-compensation-preset" style="font-size: 0.75rem; font-weight: 600; padding: 4px 6px; border-radius: 4px; border: 1.5px solid var(--cmu-purple-200); background: var(--bg-surface-elevated, #fff); color: var(--cmu-purple-900); cursor: pointer;">
+          <option value="">-- เลือกประเภทค่าตอบแทน --</option>
+          <option value="ค่าตอบแทนวิทยากรบรรยาย" ${selectedPreset === 'ค่าตอบแทนวิทยากรบรรยาย' ? 'selected' : ''}>ค่าตอบแทนวิทยากรบรรยาย (600 บาท/คน/ชม.)</option>
+          <option value="ค่าตอบแทนวิทยากรปฏิบัติการ" ${selectedPreset === 'ค่าตอบแทนวิทยากรปฏิบัติการ' ? 'selected' : ''}>ค่าตอบแทนวิทยากรปฏิบัติการ (300 บาท/คน/ชม.)</option>
+          <option value="ค่าตอบแทนปฏิบัติงานนอกเวลาราชการ" ${selectedPreset === 'ค่าตอบแทนปฏิบัติงานนอกเวลาราชการ' ? 'selected' : ''}>ค่าตอบแทนปฏิบัติงานนอกเวลาราชการ (กรอกเอง)</option>
+          <option value="ค่าตอบแทนในการเดินทางไปปฏิบัติงานของผู้ทำหน้าที่ขับรถ" ${selectedPreset === 'ค่าตอบแทนในการเดินทางไปปฏิบัติงานของผู้ทำหน้าที่ขับรถ' ? 'selected' : ''}>ค่าตอบแทนในการเดินทางไปปฏิบัติงานของผู้ทำหน้าที่ขับรถ (กรอกเอง)</option>
+          <option value="custom" ${selectedPreset === 'custom' ? 'selected' : ''}>ระบุเอง / อื่นๆ</option>
+        </select>
+        <input type="text" class="table-input input-item-name" value="${escapeHTML(itemName)}" placeholder="ชื่อรายการค่าตอบแทน..." />
+      </div>
+    `;
+  } else {
+    itemCellContent = `
+      <input type="text" class="table-input input-item-name" value="${escapeHTML(itemName)}" placeholder="ระบุรายการค่าใช้จ่าย..." />
+    `;
+  }
+
   tr.innerHTML = `
     <td style="width: 100px; text-align: center;">
       <input type="text" class="table-input input-item-subcat" style="text-align: center; font-weight: 700; color: var(--cmu-purple-700);" value="${escapeHTML(subCatText)}" placeholder="${catKey}.1" />
       <input type="hidden" class="input-item-cat" value="${escapeHTML(catObj.title)}" />
     </td>
     <td>
-      <input type="text" class="table-input input-item-name" value="${escapeHTML(itemName)}" placeholder="ระบุรายการค่าใช้จ่าย..." />
+      ${itemCellContent}
     </td>
     <td style="width: 70px;">
       <input type="number" class="table-input table-input-number input-qty1" value="${qty1}" min="0" />
@@ -410,6 +445,59 @@ function createSubItemRowElement(catKey, item = {}) {
       <button type="button" class="btn-del-row btn-del-budget" title="ลบรายการนี้">✕</button>
     </td>
   `;
+
+  if (isCompensation) {
+    const presetSelect = tr.querySelector('.input-compensation-preset');
+    const nameInput = tr.querySelector('.input-item-name');
+    const unit1Input = tr.querySelector('.input-unit1');
+    const unit2Input = tr.querySelector('.input-unit2');
+    const rateInput = tr.querySelector('.input-rate');
+
+    presetSelect?.addEventListener('change', (e) => {
+      const val = e.target.value;
+      if (val === 'ค่าตอบแทนวิทยากรบรรยาย') {
+        nameInput.value = 'ค่าตอบแทนวิทยากรบรรยาย';
+        unit1Input.value = 'คน';
+        unit2Input.value = 'ชั่วโมง';
+        rateInput.value = 600;
+        rateInput.dispatchEvent(new Event('input', { bubbles: true }));
+      } else if (val === 'ค่าตอบแทนวิทยากรปฏิบัติการ') {
+        nameInput.value = 'ค่าตอบแทนวิทยากรปฏิบัติการ';
+        unit1Input.value = 'คน';
+        unit2Input.value = 'ชั่วโมง';
+        rateInput.value = 300;
+        rateInput.dispatchEvent(new Event('input', { bubbles: true }));
+      } else if (val === 'ค่าตอบแทนปฏิบัติงานนอกเวลาราชการ') {
+        nameInput.value = 'ค่าตอบแทนปฏิบัติงานนอกเวลาราชการ';
+        unit1Input.value = 'คน';
+        unit2Input.value = 'ชั่วโมง';
+        rateInput.focus();
+        if (typeof rateInput.select === 'function') rateInput.select();
+        rateInput.dispatchEvent(new Event('input', { bubbles: true }));
+      } else if (val === 'ค่าตอบแทนในการเดินทางไปปฏิบัติงานของผู้ทำหน้าที่ขับรถ') {
+        nameInput.value = 'ค่าตอบแทนในการเดินทางไปปฏิบัติงานของผู้ทำหน้าที่ขับรถ';
+        unit1Input.value = 'คน';
+        unit2Input.value = 'วัน';
+        rateInput.focus();
+        if (typeof rateInput.select === 'function') rateInput.select();
+        rateInput.dispatchEvent(new Event('input', { bubbles: true }));
+      } else if (val === 'custom') {
+        nameInput.focus();
+      }
+      recalculateBudgetGrandTotal();
+    });
+
+    nameInput?.addEventListener('input', () => {
+      const curr = nameInput.value.trim();
+      if (['ค่าตอบแทนวิทยากรบรรยาย', 'ค่าตอบแทนวิทยากรปฏิบัติการ', 'ค่าตอบแทนปฏิบัติงานนอกเวลาราชการ', 'ค่าตอบแทนในการเดินทางไปปฏิบัติงานของผู้ทำหน้าที่ขับรถ'].includes(curr)) {
+        presetSelect.value = curr;
+      } else if (curr) {
+        presetSelect.value = 'custom';
+      } else {
+        presetSelect.value = '';
+      }
+    });
+  }
 
   tr.querySelector('.btn-del-budget')?.addEventListener('click', () => {
     tr.remove();
@@ -459,8 +547,12 @@ function addSubItemRow(catKey) {
     }
   }
 
-  // โฟกัสไปที่ช่องชื่อรายการของแถวใหม่
-  newRow.querySelector('.input-item-name')?.focus();
+  // โฟกัสไปที่ช่องชื่อรายการหรือ Dropdown ของแถวใหม่
+  if (String(catKey) === '1') {
+    newRow.querySelector('.input-compensation-preset')?.focus();
+  } else {
+    newRow.querySelector('.input-item-name')?.focus();
+  }
 
   recalculateBudgetGrandTotal();
 }
