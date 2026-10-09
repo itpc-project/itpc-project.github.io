@@ -221,13 +221,13 @@ function openCloudSyncModal() {
           <div style="background: var(--bg-surface-elevated, #f8fafc); border: 1.5px solid var(--border-subtle, #e2e8f0); border-radius: 12px; padding: 14px 16px;">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
               <div style="display: flex; align-items: center; gap: 8px;">
-                <span class="sync-dot" style="width: 10px; height: 10px; border-radius: 50%; background-color: #10b981; display: inline-block;"></span>
-                <span style="font-weight: 700; color: var(--text-main); font-size: 0.9375rem;">สถานะ: ออนไลน์เรียลไทม์ (Active)</span>
+                <span id="cloudModalSyncDot" class="sync-dot" style="width: 10px; height: 10px; border-radius: 50%; background-color: #f59e0b; display: inline-block;"></span>
+                <span id="cloudModalSyncTitle" style="font-weight: 700; color: var(--text-main); font-size: 0.9375rem;">สถานะ: กำลังตรวจสอบ...</span>
               </div>
-              <span id="cloudLastSyncTime" style="font-size: 0.75rem; color: var(--text-muted);">เชื่อมต่อคลาวด์แล้ว</span>
+              <span id="cloudLastSyncTime" style="font-size: 0.75rem; color: var(--text-muted);">-</span>
             </div>
-            <p style="font-size: 0.8125rem; color: var(--text-muted); line-height: 1.5; margin: 0 0 12px 0;">
-              ข้อมูลทั้งหมด (โครงการ, กิจกรรม, แบบฟอร์ม, ผู้ใช้) ถูกจัดเก็บเป็น JSON และซิงค์ตรงกันอัตโนมัติบน GitHub Pages
+            <p id="cloudModalSyncDesc" style="font-size: 0.8125rem; color: var(--text-muted); line-height: 1.5; margin: 0 0 12px 0;">
+              กำลังตรวจสอบการเชื่อมต่อฐานข้อมูลออนไลน์...
             </p>
             <div id="cloudDataStats" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center;">
               <!-- Dynamic stats -->
@@ -247,8 +247,8 @@ function openCloudSyncModal() {
           <!-- File Import Action -->
           <div style="background: var(--bg-surface, #fff); border: 1.5px dashed var(--cmu-purple-300, #d8b4fe); border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
             <div>
-              <div style="font-weight: 700; font-size: 0.84rem; color: var(--text-main);">นำเข้าข้อมูลจากไฟล์ JSON</div>
-              <div style="font-size: 0.75rem; color: var(--text-muted);">ย้ายข้อมูลข้ามเครื่องหรือกู้คืนจากไฟล์ Backup</div>
+              <div style="font-weight: 700; font-size: 0.84rem; color: var(--text-main);">ย้ายข้อมูลข้ามเครื่องด้วยไฟล์ JSON</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">นำเข้าไฟล์ JSON สำรองจากเครื่องอื่น (ทำงานได้ทันทีไม่ต้องต่อ Database)</div>
             </div>
             <input type="file" id="inputImportJsonFile" accept=".json" style="display: none;" />
             <button id="btnTriggerImportJson" type="button" class="btn btn-outline btn-sm" style="flex-shrink: 0;">
@@ -256,16 +256,27 @@ function openCloudSyncModal() {
             </button>
           </div>
 
-          <!-- Advanced Settings (Firebase / Custom URL) -->
-          <details style="font-size: 0.8125rem; color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: 10px;">
-            <summary style="cursor: pointer; font-weight: 600; color: var(--cmu-purple-700); user-select: none;">⚙️ การตั้งค่า Cloud Endpoint หรือ Firebase (ทางเลือก)</summary>
+          <!-- Cloud Database Setup (Firebase Realtime Database) -->
+          <details id="detailsCloudConfig" style="font-size: 0.8125rem; color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: 10px;" open>
+            <summary style="cursor: pointer; font-weight: 700; color: var(--cmu-purple-800); user-select: none;">🌐 เชื่อมต่อ Firebase Realtime Database (ออนไลน์ทุกเครื่อง)</summary>
             <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
-              <label for="inputFirebaseDbUrl" style="font-size: 0.75rem; font-weight: 600; color: var(--text-main);">Firebase Realtime Database URL (ไม่บังคับ):</label>
-              <input type="text" id="inputFirebaseDbUrl" class="table-input" placeholder="เช่น https://satit-cmu-project-default-rtdb.firebaseio.com" style="padding: 7px 10px; font-size: 0.8125rem;" />
-              <p style="font-size: 0.6875rem; color: var(--text-muted); margin: 0;">หากเว้นว่าง ระบบจะใช้ Cloud JSON Sync มาตรฐานอัตโนมัติ</p>
-              <button id="btnSaveCloudConfig" type="button" class="btn btn-sm btn-primary" style="align-self: flex-start; margin-top: 2px;">
-                <span>บันทึกการตั้งค่า</span>
-              </button>
+              <div style="background: rgba(111, 44, 145, 0.05); border: 1px solid var(--cmu-purple-200); border-radius: 8px; padding: 10px 12px; font-size: 0.75rem; line-height: 1.5; color: var(--text-main);">
+                <strong>💡 วิธีทำให้เห็นออนไลน์ตรงกันทุกเครื่อง (ฟรี 100% โดย Google):</strong>
+                <ol style="margin: 4px 0 0 16px; padding: 0;">
+                  <li>เข้า <a href="https://console.firebase.google.com" target="_blank" rel="noopener" style="color: var(--cmu-purple-700); font-weight: 700; text-decoration: underline;">console.firebase.google.com</a> ด้วยบัญชี Google</li>
+                  <li>สร้าง Project แล้วเลือกเมนู <strong>Build &gt; Realtime Database</strong> &gt; กด <strong>Create Database</strong></li>
+                  <li>ที่แท็บ <strong>Rules</strong> เปลี่ยน <code>.read</code> และ <code>.write</code> เป็น <code>true</code> แล้วกด Publish</li>
+                  <li>คัดลอก URL ของ Database (ขึ้นต้นด้วย <code>https://...firebasedatabase.app</code>) มาวางในช่องด้านล่าง</li>
+                </ol>
+              </div>
+
+              <label for="inputFirebaseDbUrl" style="font-size: 0.75rem; font-weight: 700; color: var(--text-main); margin-top: 4px;">Firebase Realtime Database URL:</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="inputFirebaseDbUrl" class="table-input" placeholder="https://your-project-default-rtdb.asia-southeast1.firebasedatabase.app" style="padding: 8px 10px; font-size: 0.8125rem; flex: 1;" />
+                <button id="btnSaveCloudConfig" type="button" class="btn btn-sm btn-primary" style="flex-shrink: 0; padding: 0 16px;">
+                  <span>บันทึกและเชื่อมต่อ</span>
+                </button>
+              </div>
             </div>
           </details>
         </div>
@@ -351,9 +362,13 @@ function openCloudSyncModal() {
         showToast({
           type: 'success',
           title: 'บันทึกการตั้งค่าแล้ว',
-          message: newUrl ? 'เปลี่ยนไปใช้ Firebase Realtime Database เรียบร้อย' : 'ใช้ Cloud Endpoint มาตรฐาน'
+          message: newUrl ? 'เชื่อมต่อ Firebase Realtime Database เรียบร้อย' : 'รีเซ็ตกลับเป็นโหมดเครื่อง'
         });
-        await CloudSyncService.pull(true);
+        const pullRes = await CloudSyncService.pull(true);
+        // หาก Database เพิ่งสร้างใหม่ยังไม่มีข้อมูล ให้ Push ข้อมูลจากเครื่องนี้ขึ้นไปเป็นข้อมูลเริ่มต้นทันที
+        if (!pullRes?.data || !pullRes.data.projects || pullRes.data.projects.length === 0) {
+          await CloudSyncService.push();
+        }
         refreshModalStats(modalEl);
       });
     }
@@ -372,6 +387,25 @@ function refreshModalStats(modalEl) {
   const statsContainer = modalEl.querySelector('#cloudDataStats');
   const inputFirebase = modalEl.querySelector('#inputFirebaseDbUrl');
   const lastSyncEl = modalEl.querySelector('#cloudLastSyncTime');
+  const titleEl = modalEl.querySelector('#cloudModalSyncTitle');
+  const descEl = modalEl.querySelector('#cloudModalSyncDesc');
+  const dotEl = modalEl.querySelector('#cloudModalSyncDot');
+
+  const hasDb = Boolean(CloudSyncService.config.firebaseUrl && CloudSyncService.config.firebaseUrl.trim());
+
+  if (titleEl && descEl && dotEl) {
+    if (hasDb) {
+      dotEl.style.backgroundColor = '#10b981';
+      titleEl.textContent = 'สถานะ: เชื่อมต่อ Firebase ออนไลน์แล้ว';
+      titleEl.style.color = '#10b981';
+      descEl.textContent = 'ข้อมูลโครงการและกิจกรรมจะซิงค์หากันอัตโนมัติแบบเรียลไทม์ระหว่างทุกเครื่อง';
+    } else {
+      dotEl.style.backgroundColor = '#f59e0b';
+      titleEl.textContent = 'สถานะ: ข้อมูลบันทึกเฉพาะในเครื่องนี้ (Local Only)';
+      titleEl.style.color = '#d97706';
+      descEl.innerHTML = 'เนื่องจากเว็บเปิดบน GitHub Pages ข้อมูลจึงถูกจำไว้ในเครื่องนี้เท่านั้น หากต้องการให้เห็นออนไลน์ตรงกันทุกเครื่อง กรุณาสร้าง <strong>Firebase Realtime Database</strong> (ฟรีโดย Google) แล้วนำ URL มาวางในช่องด้านล่าง';
+    }
+  }
 
   if (inputFirebase) {
     inputFirebase.value = CloudSyncService.config.firebaseUrl || '';

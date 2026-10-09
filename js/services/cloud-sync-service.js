@@ -45,23 +45,25 @@ class CloudSyncManager {
   }
 
   loadConfig() {
+    const defaultFirebase = APP_CONFIG.FIREBASE_DATABASE_URL || '';
     try {
       const stored = localStorage.getItem(STORAGE_KEYS.CONFIG);
       if (stored) {
+        const parsed = JSON.parse(stored);
         return {
           enabled: true,
           endpoint: DEFAULT_REST_URL,
-          firebaseUrl: '',
           autoSync: true,
           syncIntervalMs: 12000,
-          ...JSON.parse(stored)
+          ...parsed,
+          firebaseUrl: (parsed.firebaseUrl && parsed.firebaseUrl.trim()) || defaultFirebase
         };
       }
     } catch {}
     return {
       enabled: true,
       endpoint: DEFAULT_REST_URL,
-      firebaseUrl: '',
+      firebaseUrl: defaultFirebase,
       autoSync: true,
       syncIntervalMs: 12000
     };
@@ -214,9 +216,17 @@ class CloudSyncManager {
       const raw = await response.json();
       const remoteData = provider === 'rest' ? (raw.data || raw) : raw;
 
-      if (!remoteData || typeof remoteData !== 'object') {
+      if (!remoteData || typeof remoteData !== 'object' || !Array.isArray(remoteData.projects) || remoteData.projects.length === 0) {
+        let localProjects = [];
+        try {
+          localProjects = JSON.parse(localStorage.getItem(STORAGE_KEYS.PROJECTS) || '[]');
+        } catch {}
+        if (localProjects.length > 0) {
+          console.log('[CloudSync] Remote DB is empty. Initializing with local data...');
+          await this.push();
+        }
         this.updateStatusBadge('synced');
-        return;
+        return { success: true, data: remoteData };
       }
 
       const remoteTimestamp = Number(remoteData.updatedAt) || 0;
@@ -437,34 +447,41 @@ class CloudSyncManager {
   updateStatusBadge(statusOverride) {
     if (typeof document === 'undefined') return;
 
-    const badges = document.querySelectorAll('.cloud-sync-status-indicator, #navbarSyncBadge');
+    const badges = document.querySelectorAll('.cloud-sync-status-indicator, #navbarSyncBadge, #navbarCloudSyncBtn');
     badges.forEach((badge) => {
       const dot = badge.querySelector('.sync-dot') || badge;
       const text = badge.querySelector('.sync-text');
+
+      const hasDb = Boolean(this.config.firebaseUrl && this.config.firebaseUrl.trim());
 
       let status = statusOverride;
       if (!status) {
         if (!navigator.onLine) status = 'offline';
         else if (this.isSyncing) status = 'syncing';
+        else if (!hasDb) status = 'local';
         else status = 'synced';
       }
 
       if (status === 'synced') {
         dot.style.backgroundColor = '#10b981';
-        if (text) text.textContent = 'คลาวด์ JSON ออนไลน์';
-        badge.setAttribute('title', '🟢 เชื่อมต่อฐานข้อมูลออนไลน์ JSON เรียบร้อย (ข้อมูลซิงค์กันทุกเครื่อง)');
+        if (text) text.textContent = 'Firebase ออนไลน์';
+        badge.setAttribute('title', '🟢 เชื่อมต่อฐานข้อมูลออนไลน์ Firebase เรียบร้อย (ข้อมูลซิงค์กันทุกเครื่อง)');
+      } else if (status === 'local') {
+        dot.style.backgroundColor = '#f59e0b';
+        if (text) text.textContent = 'บันทึกในเครื่อง (Local)';
+        badge.setAttribute('title', '🟡 บันทึกในเครื่องนี้เท่านั้น (คลิกเพื่อเชื่อมต่อ Firebase ออนไลน์ให้เห็นทุกเครื่อง)');
       } else if (status === 'syncing') {
         dot.style.backgroundColor = '#3b82f6';
         if (text) text.textContent = 'กำลังซิงค์...';
         badge.setAttribute('title', '⚡ กำลังส่ง/ดึงข้อมูลกับฐานข้อมูลออนไลน์');
       } else if (status === 'offline') {
         dot.style.backgroundColor = '#94a3b8';
-        if (text) text.textContent = 'ออฟไลน์ (ใช้ข้อมูลในเครื่อง)';
-        badge.setAttribute('title', '⚪ ทำงานในโหมดออฟไลน์ (ข้อมูลจะซิงค์เมื่อต่อเน็ต)');
+        if (text) text.textContent = 'ออฟไลน์';
+        badge.setAttribute('title', '⚪ ทำงานในโหมดออฟไลน์');
       } else if (status === 'error') {
-        dot.style.backgroundColor = '#f59e0b';
-        if (text) text.textContent = 'คลาวด์สำรอง';
-        badge.setAttribute('title', '🟡 ใช้ข้อมูลแคชในเครื่องเป็นหลัก');
+        dot.style.backgroundColor = '#ef4444';
+        if (text) text.textContent = 'คลาวด์ขัดข้อง (ใช้ข้อมูลเครื่อง)';
+        badge.setAttribute('title', '🔴 เกิดข้อผิดพลาดในการเชื่อมต่อคลาวด์');
       }
     });
   }

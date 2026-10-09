@@ -12,7 +12,9 @@ export const APP_CONFIG = {
     AUTH_USER: 'satit_cmu_auth_user',
     REMEMBER_EMAIL: 'satit_cmu_remember_email',
     THEME: 'satit_cmu_theme'
-  }
+  },
+  // กำหนด Firebase Realtime Database URL กลางสำหรับทุกคนที่เข้าเว็บ
+  FIREBASE_DATABASE_URL: 'https://satit-cmu-db-default-rtdb.asia-southeast1.firebasedatabase.app'
 };
 
 /**
