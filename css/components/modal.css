@@ -110,13 +110,3 @@
   background: var(--bg-input);
   border-top: 1px solid var(--border-subtle);
 }
-
-@keyframes modalCardShake {
-  0%, 100% { transform: scale(1) translateX(0); }
-  20%, 60% { transform: scale(1.01) translateX(-6px); }
-  40%, 80% { transform: scale(1.01) translateX(6px); }
-}
-
-.modal-card-shake {
-  animation: modalCardShake 0.3s ease-in-out;
-}

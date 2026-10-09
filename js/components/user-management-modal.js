@@ -269,7 +269,7 @@ export function injectUserModals() {
           </button>
         </div>
 
-        <form id="userEditForm">
+        <form id="userEditForm" novalidate onsubmit="return false;" autocomplete="off">
           <div class="modal-body">
             <!-- Avatar Picker -->
             <div class="avatar-picker-label">เลือกรูปสัญลักษณ์ประจำตัว</div>
@@ -368,7 +368,7 @@ export function injectUserModals() {
 
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary btn-sm" data-modal-close>ยกเลิก</button>
-            <button type="submit" class="btn btn-primary btn-sm" id="btnSubmitUserEdit">บันทึกข้อมูลผู้ใช้</button>
+            <button type="button" class="btn btn-primary btn-sm" id="btnSubmitUserEdit">บันทึกข้อมูลผู้ใช้</button>
           </div>
         </form>
       </div>
@@ -774,25 +774,40 @@ function bindUserEditFormEvents() {
 
   // ป้องกันการกด Enter ในช่องกรอกข้อความแล้วฟอร์มเด้ง Submit ก่อนกรอกเสร็จ
   if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    });
+
     const formInputs = form.querySelectorAll('input:not([type="hidden"])');
     formInputs.forEach((input, index) => {
       input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' || e.keyCode === 13) {
           e.preventDefault();
+          e.stopPropagation();
           if (index < formInputs.length - 1) {
             formInputs[index + 1].focus();
-          } else {
-            $('#btnSubmitUserEdit')?.focus();
           }
+          return false;
         }
       });
     });
   }
 
-  // Form submit
-  if (form) {
-    addEvent(form, 'submit', (e) => {
+  // ป้องกันการคลิกหรือลากเมาส์ภายในหน้าต่าง Modal Card หลุดไปโดน Backdrop
+  const modalCard = $('#userEditModal')?.querySelector('.modal-card');
+  if (modalCard) {
+    modalCard.addEventListener('mousedown', (e) => e.stopPropagation());
+    modalCard.addEventListener('click', (e) => e.stopPropagation());
+  }
+
+  // ผูกการบันทึกข้อมูลเฉพาะเมื่อผู้ใช้คลิกปุ่มบันทึกโดยตรง
+  const btnSubmit = $('#btnSubmitUserEdit');
+  if (btnSubmit) {
+    addEvent(btnSubmit, 'click', (e) => {
       e.preventDefault();
+      e.stopPropagation();
 
       const name = $('#userEditName')?.value.trim();
       const position = $('#userEditPosition')?.value.trim() || 'อาจารย์ผู้สอน';

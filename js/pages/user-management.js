@@ -496,20 +496,33 @@ function initUserEditModal() {
 
   // ป้องกันการกดปุ่ม Enter ในช่องกรอกข้อความแล้วฟอร์มเด้ง Submit หรือปิดหน้าต่างก่อนกรอกเสร็จ
   if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    });
+
     const formInputs = form.querySelectorAll('input:not([type="hidden"])');
     formInputs.forEach((input, index) => {
       input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' || e.keyCode === 13) {
           e.preventDefault();
-          // ย้ายเคอร์เซอร์ไปยังช่องถัดไปอย่างราบรื่น
+          e.stopPropagation();
+          // ย้ายเคอร์เซอร์ไปยังช่องถัดไปอย่างราบรื่น (ไม่สั่งบันทึกหรือเด้งปิด)
           if (index < formInputs.length - 1) {
             formInputs[index + 1].focus();
-          } else {
-            $('#btnSubmitModalUser')?.focus();
           }
+          return false;
         }
       });
     });
+  }
+
+  // ป้องกันการคลิกหรือลากเมาส์ภายในหน้าต่าง Modal Card หลุดไปโดน Backdrop
+  const modalCard = modalEl.querySelector('.modal-card');
+  if (modalCard) {
+    modalCard.addEventListener('mousedown', (e) => e.stopPropagation());
+    modalCard.addEventListener('click', (e) => e.stopPropagation());
   }
 
   // Avatar select
@@ -542,10 +555,12 @@ function initUserEditModal() {
     });
   }
 
-  // Submit modal form
-  if (form) {
-    addEvent(form, 'submit', (e) => {
+  // ผูกการบันทึกข้อมูลเฉพาะเมื่อผู้ใช้คลิกปุ่ม "บันทึกข้อมูลผู้ใช้" โดยตรงเท่านั้น
+  const btnSubmit = $('#btnSubmitModalUser');
+  if (btnSubmit) {
+    addEvent(btnSubmit, 'click', (e) => {
       e.preventDefault();
+      e.stopPropagation();
 
       const name = $('#modalUserEditName')?.value.trim();
       const position = $('#modalUserEditPosition')?.value.trim() || 'อาจารย์ผู้สอน';

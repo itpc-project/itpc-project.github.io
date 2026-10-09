@@ -474,7 +474,7 @@
         </button>
       </div>
 
-      <form id="modalUserEditForm">
+      <form id="modalUserEditForm" novalidate onsubmit="return false;" autocomplete="off">
         <div class="modal-body">
           <!-- Avatar Picker -->
           <div class="avatar-picker-label">เลือกรูปสัญลักษณ์ประจำตัว</div>
@@ -573,7 +573,7 @@
 
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary btn-sm" data-modal-close>ยกเลิก</button>
-          <button type="submit" class="btn btn-primary btn-sm" id="btnSubmitModalUser">บันทึกข้อมูลผู้ใช้</button>
+          <button type="button" class="btn btn-primary btn-sm" id="btnSubmitModalUser">บันทึกข้อมูลผู้ใช้</button>
         </div>
       </form>
     </div>

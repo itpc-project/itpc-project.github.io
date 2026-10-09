@@ -26,34 +26,31 @@ export function initModal(modalBackdrop, options = {}) {
   };
 
   closeBtns.forEach((btn) => {
-    btn.addEventListener('click', close);
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      close();
+    });
   });
 
-  // Track mousedown to prevent accidental close on mouse text selection / dragging outside
-  let isMouseDownOnBackdrop = false;
-  modalBackdrop.addEventListener('mousedown', (e) => {
-    isMouseDownOnBackdrop = (e.target === modalBackdrop);
-  });
+  // Protect modal-card from any event bubbling to backdrop
+  const card = modalBackdrop.querySelector('.modal-card');
+  if (card) {
+    card.addEventListener('mousedown', (e) => e.stopPropagation());
+    card.addEventListener('click', (e) => e.stopPropagation());
+  }
 
-  // Close on backdrop click (outside modal card) only if mousedown was also on backdrop
+  // Backdrop click handler: NEVER close when static
   modalBackdrop.addEventListener('click', (e) => {
-    if (e.target === modalBackdrop && isMouseDownOnBackdrop) {
+    if (e.target === modalBackdrop) {
       if (isStatic) {
-        // Static backdrop: do not close! Shake modal card gently to notify user
-        const card = modalBackdrop.querySelector('.modal-card');
-        if (card) {
-          card.classList.remove('modal-card-shake');
-          void card.offsetWidth; // trigger reflow
-          card.classList.add('modal-card-shake');
-        }
+        // Absolutely do not close when static backdrop
         return;
       }
       close();
     }
-    isMouseDownOnBackdrop = false;
   });
 
-  // Close on Escape key
+  // Close on Escape key only when not static
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && modalBackdrop.classList.contains('is-active')) {
       if (!isStatic) {
