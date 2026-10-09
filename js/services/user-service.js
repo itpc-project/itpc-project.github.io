@@ -36,7 +36,7 @@ export const UserService = {
   saveAllUsers(users) {
     try {
       localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
-      CloudSyncService.schedulePush();
+      CloudSyncService.push();
     } catch (e) {
       console.error('Failed to save users to storage', e);
     }

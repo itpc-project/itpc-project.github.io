@@ -46,6 +46,15 @@ export function initNavbar() {
     }
   }
 
+  // Live update user details when synced from cloud
+  window.addEventListener('satit-cmu-cloud-synced', () => {
+    const freshUser = AuthService.getCurrentUser();
+    if (freshUser) {
+      if (userAvatarEl) userAvatarEl.textContent = freshUser.avatar || (AuthService.isAdmin() ? '👑' : '👨‍🏫');
+      if (userNameEl) userNameEl.textContent = freshUser.name || 'ผู้ใช้งานระบบ';
+    }
+  });
+
   // ผูกคลิกที่ชิปโปรไฟล์เพื่อเปิด "แก้ไขข้อมูลบัญชีส่วนตัว"
   if (userChip && !userChip.dataset.hasProfileListener) {
     userChip.dataset.hasProfileListener = 'true';

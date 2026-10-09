@@ -287,6 +287,16 @@ class CloudSyncManager {
         if (Array.isArray(remoteData.users) && remoteData.users.length > 0) {
           localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(remoteData.users));
           hasUpdated = true;
+          try {
+            const rawSession = sessionStorage.getItem(APP_CONFIG.STORAGE_KEYS.AUTH_USER);
+            if (rawSession) {
+              const currentAuth = JSON.parse(rawSession);
+              const matched = remoteData.users.find(u => u.id === currentAuth.id || (u.email && u.email.toLowerCase() === currentAuth.email?.toLowerCase()));
+              if (matched) {
+                sessionStorage.setItem(APP_CONFIG.STORAGE_KEYS.AUTH_USER, JSON.stringify(matched));
+              }
+            }
+          } catch {}
         }
 
         if (hasUpdated) {
