@@ -15,16 +15,16 @@
     rel="stylesheet" />
 
   <!-- Modular CSS Stylesheets -->
-  <script type="module" crossorigin src="./assets/projects-BMDhT5uJ.js"></script>
+  <script type="module" crossorigin src="./assets/projects-EgHUn06Z.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/auth-service-C-dmPdyf.js">
-  <link rel="modulepreload" crossorigin href="./assets/modal-haTqsfJH.js">
   <link rel="modulepreload" crossorigin href="./assets/navbar-C2ItTa6r.js">
-  <link rel="modulepreload" crossorigin href="./assets/activity-service-CsU9X5Ok.js">
+  <link rel="modulepreload" crossorigin href="./assets/modal-DXILHliY.js">
+  <link rel="modulepreload" crossorigin href="./assets/activity-service-DG0vMjhY.js">
   <link rel="stylesheet" crossorigin href="./assets/auth-service-BV4EEhL4.css">
-  <link rel="stylesheet" crossorigin href="./assets/modal-zi4a1Ee7.css">
   <link rel="stylesheet" crossorigin href="./assets/navbar-Cr-t7UZ0.css">
-  <link rel="stylesheet" crossorigin href="./assets/projects-VS-T7jaP.css">
+  <link rel="stylesheet" crossorigin href="./assets/projects-Bh20RJBt.css">
   <link rel="stylesheet" crossorigin href="./assets/input-CJ4tOCkg.css">
+  <link rel="stylesheet" crossorigin href="./assets/modal-zi4a1Ee7.css">
 </head>
 
 <body class="projects-page">
@@ -336,6 +336,110 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary btn-sm" data-modal-close>ยกเลิก</button>
           <button type="submit" class="btn btn-primary btn-sm">บันทึกและสร้างโครงการ</button>
+        </div>
+      </form>
+    </div>
+  </aside>
+
+  <!-- Modal: แก้ไขข้อมูลโครงการ (สำหรับผู้มีสิทธิ์กำหนดสถานะ) -->
+  <aside id="editProjectModal" class="modal-backdrop" aria-hidden="true" data-backdrop="static">
+    <div class="modal-card" style="max-width: 650px;" role="dialog" aria-labelledby="modalEditProjectTitle">
+      <div class="modal-header">
+        <h3 id="modalEditProjectTitle" class="modal-title">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--cmu-purple-600)" stroke-width="2">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
+          <span>แก้ไขข้อมูลโครงการ</span>
+        </h3>
+        <button class="modal-close-btn" type="button" data-modal-close aria-label="ปิดหน้าต่าง">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="editProjectForm" novalidate onsubmit="return false;" autocomplete="off">
+        <input type="hidden" id="editProjectId" value="" />
+        <div class="modal-body">
+          <div class="form-group" style="margin-bottom: var(--space-3);">
+            <label class="input-label" for="editProjectTitle">
+              <span>ชื่อโครงการ <span class="input-label-required">*</span></span>
+            </label>
+            <input id="editProjectTitle" type="text" class="input-control" placeholder="เช่น โครงการ พลเมืองไทยบนวิถีโลก" required />
+          </div>
+
+          <div class="form-group" style="margin-bottom: var(--space-3);">
+            <label class="input-label" for="editProjectActivityName">
+              <span>ชื่อกิจกรรมหลัก / รายละเอียดกิจกรรม</span>
+            </label>
+            <input id="editProjectActivityName" type="text" class="input-control" placeholder="เช่น กิจกรรมพลเมืองรุ่นเยาว์สร้างสรรค์สังคม" />
+          </div>
+
+          <div class="form-group" style="margin-bottom: var(--space-3);">
+            <label class="input-label" for="editProjectResponsiblePerson">
+              <span>อาจารย์ผู้รับผิดชอบโครงการ <span class="input-label-required">*</span></span>
+            </label>
+            <input id="editProjectResponsiblePerson" type="text" class="input-control" placeholder="เช่น อ.ดร. ศุภชัย วิทยานุกูล" required />
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin-bottom: var(--space-3);">
+            <div class="form-group">
+              <label class="input-label" for="editProjectBudget">
+                <span>งบประมาณ (บาท) <span class="input-label-required">*</span></span>
+              </label>
+              <input id="editProjectBudget" type="number" class="input-control" placeholder="เช่น 65000" min="0" required />
+            </div>
+            <div class="form-group">
+              <label class="input-label" for="editProjectGradeLevel">
+                <span>กลุ่มเป้าหมาย / ระดับชั้น <span class="input-label-required">*</span></span>
+              </label>
+              <input id="editProjectGradeLevel" type="text" class="input-control" placeholder="เช่น ประถมศึกษาตอนต้น (ป.1 - ป.3)" required />
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin-bottom: var(--space-3);">
+            <div class="form-group">
+              <label class="input-label" for="editProjectDateRange">
+                <span>กำหนดการจัดโครงการ <span class="input-label-required">*</span></span>
+              </label>
+              <input id="editProjectDateRange" type="text" class="input-control" placeholder="เช่น 15 - 18 มีนาคม 2569" required />
+            </div>
+            <div class="form-group">
+              <label class="input-label" for="editProjectLocation">
+                <span>สถานที่จัดกิจกรรม</span>
+              </label>
+              <input id="editProjectLocation" type="text" class="input-control" placeholder="เช่น โรงเรียนสาธิต มช." />
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin-bottom: var(--space-2);">
+            <div class="form-group">
+              <label class="input-label" for="editProjectDepartment">
+                <span>กลุ่มสาระ / สังกัด</span>
+              </label>
+              <input id="editProjectDepartment" type="text" class="input-control" placeholder="เช่น กลุ่มสาระการเรียนรู้สังคมศึกษาฯ" />
+            </div>
+            <div class="form-group">
+              <label class="input-label" for="editProjectFiscalYear">
+                <span>ปีงบประมาณ</span>
+              </label>
+              <input id="editProjectFiscalYear" type="text" class="input-control" placeholder="2569" />
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-modal-close>ยกเลิก</button>
+          <button type="button" class="btn btn-primary btn-sm" id="btnSaveProjectFromOverview">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            <span>บันทึกการแก้ไข</span>
+          </button>
         </div>
       </form>
     </div>
