@@ -209,11 +209,11 @@ export const WordDocService = {
       fiscalYear: formData.fiscalYear || '2569',
 
       // 2. ผู้รับผิดชอบ & ประสานงาน & บุคคลที่เกี่ยวข้อง
-      teacherName: formData.responsiblePerson || 'อ.ดร. ศุภชัย วิทยานุกูล',
-      responsiblePerson: formData.responsiblePerson || 'อ.ดร. ศุภชัย วิทยานุกูล',
-      teacherPosition: formData.teacherPosition || 'อาจารย์กลุ่มสาระการเรียนรู้',
-      coordinatorPhone: formData.coordinatorPhone || formData.responsiblePhone || '053-944123 ต่อ 15',
-      responsiblePhone: formData.coordinatorPhone || formData.responsiblePhone || '053-944123 ต่อ 15',
+      teacherName: formData.responsiblePerson || '',
+      responsiblePerson: formData.responsiblePerson || '',
+      teacherPosition: formData.teacherPosition || '',
+      coordinatorPhone: formData.coordinatorPhone || formData.responsiblePhone || '',
+      responsiblePhone: formData.coordinatorPhone || formData.responsiblePhone || '',
       recipientName: formData.recipientName || 'ผู้อำนวยการ / หัวหน้าหน่วยงาน',
       speakerName: formData.speakerName || (Array.isArray(formData.speakers) && formData.speakers[0]?.name) || 'วิทยากรผู้ทรงคุณวุฒิ',
       speakerPosition: formData.speakerPosition || (Array.isArray(formData.speakers) && formData.speakers[0]?.position) || '',

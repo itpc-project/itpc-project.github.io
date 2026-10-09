@@ -62,7 +62,7 @@ export function injectUserModals() {
               <label class="input-label" for="profileName">
                 <span>ชื่อ-นามสกุล <span class="input-label-required">*</span></span>
               </label>
-              <input id="profileName" type="text" class="input-control" placeholder="เช่น อ.ดร. ศุภชัย วิทยานุกูล" required />
+              <input id="profileName" type="text" class="input-control" placeholder="กรอกชื่อ-นามสกุล" required />
             </div>
 
             <!-- Position & Department Grid -->
@@ -289,7 +289,7 @@ export function injectUserModals() {
               <label class="input-label" for="userEditName">
                 <span>ชื่อ-นามสกุล <span class="input-label-required">*</span></span>
               </label>
-              <input id="userEditName" type="text" class="input-control" placeholder="เช่น อ.ดร. นิตยา พงษ์ศิริ" required />
+              <input id="userEditName" type="text" class="input-control" placeholder="กรอกชื่อ-นามสกุล" required />
             </div>
 
             <!-- Position & Department Grid -->

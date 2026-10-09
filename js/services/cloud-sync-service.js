@@ -269,33 +269,9 @@ class CloudSyncManager {
         } catch {}
       }
 
-      // 3. ผสานกิจกรรม (Activities) และแบบฟอร์ม (Forms) สองทางเพื่อไม่ให้ข้อมูลสูญหาย
-      let needsPushBack = false;
-      let mergedActivities = [...remoteActivities];
-      if (localActivities.length > 0) {
-        localActivities.forEach((localAct) => {
-          if (!mergedActivities.some((r) => r.id === localAct.id)) {
-            mergedActivities.push(localAct);
-            needsPushBack = true;
-          }
-        });
-      }
-
-      const mergedForms = { ...localForms, ...remoteForms };
-      if (Object.keys(localForms).length > Object.keys(remoteForms).length) {
-        needsPushBack = true;
-      }
-
-      localStorage.setItem(STORAGE_KEYS.ACTIVITIES, JSON.stringify(mergedActivities));
-      localStorage.setItem(STORAGE_KEYS.FORMS, JSON.stringify(mergedForms));
-
-      if (needsPushBack) {
-        console.log('[CloudSync] Found local activities/forms not in cloud. Merging and pushing to Firebase...');
-        await this.push();
-        this.updateStatusBadge('synced');
-        this.notifySubscribers(this.exportAllDataAsJSON(), 'merge');
-        return { success: true, data: this.exportAllDataAsJSON() };
-      }
+      // 3. ซิงค์กิจกรรม (Activities) และแบบฟอร์ม (Forms) จาก Firebase เป็นหลัก
+      localStorage.setItem(STORAGE_KEYS.ACTIVITIES, JSON.stringify(remoteActivities));
+      localStorage.setItem(STORAGE_KEYS.FORMS, JSON.stringify(remoteForms));
 
       const remoteTimestamp = Number(remoteData.updatedAt) || 0;
       localStorage.setItem(STORAGE_KEYS.LOCAL_TIMESTAMP, String(remoteTimestamp || Date.now()));

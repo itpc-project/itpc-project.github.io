@@ -71,51 +71,25 @@ export const DEMO_ACCOUNTS = [
     email: 'admin@satit.cmu.ac.th',
     password: 'password123',
     department: 'ฝ่ายบริหารงานระบบและสารสนเทศ',
-    phone: '053-944123',
+    phone: '0898382807',
     avatar: '👑',
-    canChangeStatus: true
+    canChangeStatus: true,
+    isActive: true
   },
   {
-    id: 'user-teacher',
-    roleId: 'teacher',
-    role: 'อาจารย์ผู้รับผิดชอบ',
-    roleBadge: 'badge-blue',
-    name: 'อ.ดร. ศุภชัย วิทยานุกูล (Teacher)',
-    position: 'อาจารย์ชำนาญการพิเศษ',
-    email: 'teacher@satit.cmu.ac.th',
+    id: 'user-1791557014567',
+    roleId: 'admin',
+    role: 'ผู้ดูแลระบบ / แอดมิน',
+    roleBadge: 'badge-purple',
+    name: 'ชนม์ชนก แก้ววันดี',
+    position: 'ผู้ช่วยผู้อำนวยการ',
+    email: 'chonchanok.k@cmu.ac.th',
     password: 'password123',
-    department: 'กลุ่มสาระการเรียนรู้วิทยาศาสตร์และเทคโนโลยี',
-    phone: '053-944123 ต่อ 15',
+    department: 'ฝ่ายบริการวิชาการและกิจกรรมพิเศษ',
+    phone: '0898382807',
     avatar: '👨‍🏫',
-    canChangeStatus: false
-  },
-  {
-    id: 'user-finance',
-    roleId: 'finance',
-    role: 'เจ้าหน้าที่การเงิน/พัสดุ',
-    roleBadge: 'badge-gold',
-    name: 'คุณกมลวรรณ บุญเจริญ (Finance)',
-    position: 'นักวิชาการเงินและพัสดุชำนาญการ',
-    email: 'finance@satit.cmu.ac.th',
-    password: 'password123',
-    department: 'งานบริหารการเงินและแผนงาน',
-    phone: '053-944123 ต่อ 22',
-    avatar: '💼',
-    canChangeStatus: false
-  },
-  {
-    id: 'user-teacher-2',
-    roleId: 'teacher',
-    role: 'อาจารย์ผู้รับผิดชอบ',
-    roleBadge: 'badge-blue',
-    name: 'อ.พิมลรัตน์ จันทร์เพ็ญ',
-    position: 'อาจารย์ผู้สอนระดับประถมศึกษา',
-    email: 'pimonrat@satit.cmu.ac.th',
-    password: 'password123',
-    department: 'กลุ่มสาระการเรียนรู้ภาษาไทย',
-    phone: '053-944123 ต่อ 18',
-    avatar: '👩‍🏫',
-    canChangeStatus: false
+    canChangeStatus: true,
+    isActive: true
   }
 ];
 

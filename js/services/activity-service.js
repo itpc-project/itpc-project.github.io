@@ -102,8 +102,8 @@ export const ActivityService = {
    */
   getAllActivities() {
     // ล้างข้อมูล Mock เก่าใน LocalStorage อัตโนมัติในครั้งแรก (ตามคำขอของผู้ใช้: ล้างข้อมูลและลบกิจกรรมทั้งหมด)
-    if (!localStorage.getItem('satit_cmu_activities_cleared_user_v2')) {
-      localStorage.setItem('satit_cmu_activities_cleared_user_v2', 'true');
+    if (!localStorage.getItem('satit_cmu_activities_cleared_user_v3')) {
+      localStorage.setItem('satit_cmu_activities_cleared_user_v3', 'true');
       this.clearAllActivities();
       return [];
     }
