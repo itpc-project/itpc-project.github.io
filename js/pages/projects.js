@@ -30,8 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const newProjectBtn = $('#newProjectBtn');
   const newProjectModalEl = $('#newProjectModal');
   const newProjectForm = $('#newProjectForm');
-  const importExcelBtn = $('#importExcelBtn');
-  const importExcelModalEl = $('#importExcelModal');
 
   // Filter state
   const filterState = {
@@ -156,29 +154,6 @@ document.addEventListener('DOMContentLoaded', () => {
       newProjectForm.reset();
       updateStatistics();
       renderProjectCards();
-    });
-  }
-
-  // Import Excel Modal
-  const excelModal = initModal(importExcelModalEl);
-  if (importExcelBtn) {
-    addEvent(importExcelBtn, 'click', () => {
-      excelModal.open();
-    });
-  }
-
-  const uploadExcelBtn = $('#confirmUploadExcelBtn');
-  if (uploadExcelBtn) {
-    addEvent(uploadExcelBtn, 'click', () => {
-      showToast({
-        type: 'success',
-        title: 'นำเข้าข้อมูลจาก Excel สำเร็จ',
-        message: 'นำเข้าข้อมูลโครงการจากไฟล์ Excel_example.xlsx เรียบร้อย'
-      });
-      excelModal.close();
-      setTimeout(() => {
-        window.location.href = '/project-activities.html?id=PRJ-CITIZEN-05';
-      }, 500);
     });
   }
 

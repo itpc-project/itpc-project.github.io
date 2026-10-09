@@ -155,17 +155,6 @@
           <span class="badge badge-purple" style="font-size: 10px; padding: 1px 6px;">Admin</span>
         </button>
 
-        <!-- Import Excel Button -->
-        <button id="importExcelBtn" type="button" class="btn btn-secondary">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
-          <span>นำเข้าจาก Excel</span>
-        </button>
-
         <!-- New Project Button -->
         <button id="newProjectBtn" type="button" class="btn btn-primary">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -445,59 +434,6 @@
           </button>
         </div>
       </form>
-    </div>
-  </aside>
-
-  <!-- Modal: นำเข้าจาก Excel -->
-  <aside id="importExcelModal" class="modal-backdrop" aria-hidden="true">
-    <div class="modal-card" style="max-width: 520px;" role="dialog" aria-labelledby="modalExcelTitle">
-      <div class="modal-header">
-        <h3 id="modalExcelTitle" class="modal-title">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="3" y1="9" x2="21" y2="9"></line>
-            <line x1="3" y1="15" x2="21" y2="15"></line>
-            <line x1="9" y1="3" x2="9" y2="21"></line>
-            <line x1="15" y1="3" x2="15" y2="21"></line>
-          </svg>
-          <span>นำเข้าโครงการจากไฟล์ Excel</span>
-        </h3>
-        <button class="modal-close-btn" type="button" data-modal-close aria-label="ปิดหน้าต่าง">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <p style="font-size: var(--font-size-sm); color: var(--text-muted); margin-bottom: var(--space-4);">
-          รองรับแบบฟอร์มขออนุมัติบรรจุกิจกรรม สำหรับนักเรียน งบประมาณ 2569 (ไฟล์ตัวอย่าง
-          <code>Doc/Excel_example.xlsx</code>)
-        </p>
-
-        <!-- Dropzone Box -->
-        <div
-          style="border: 2px dashed var(--cmu-purple-300); border-radius: var(--radius-xl); padding: var(--space-6); text-align: center; background: var(--cmu-purple-50); cursor: pointer;">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--cmu-purple-700)" stroke-width="2"
-            style="margin: 0 auto var(--space-2) auto;">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="17 8 12 3 7 8"></polyline>
-            <line x1="12" y1="3" x2="12" y2="15"></line>
-          </svg>
-          <div style="font-weight: 600; font-size: var(--font-size-sm); color: var(--cmu-purple-800);">คลิกหรือลากไฟล์
-            Excel (.xlsx) มาวางที่นี่</div>
-          <div style="font-size: var(--font-size-xs); color: var(--text-muted); margin-top: 4px;">ตรวจพบไฟล์ตัวอย่าง:
-            Excel_example.xlsx พร้อมนำเข้าทันที</div>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary btn-sm" data-modal-close>ยกเลิก</button>
-        <button id="confirmUploadExcelBtn" type="button" class="btn btn-primary btn-sm">
-          <span>นำเข้าข้อมูลทันที</span>
-        </button>
-      </div>
     </div>
   </aside>
 

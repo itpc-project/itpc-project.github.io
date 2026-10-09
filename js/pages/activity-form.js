@@ -7,12 +7,14 @@
 import { $, $$, addEvent, escapeHTML } from '../utils/dom.js';
 import { showToast } from '../utils/toast.js';
 import { initNavbar } from '../components/navbar.js';
+import { initModal } from '../components/modal.js';
 import { ProjectService, SIX_MAIN_PROJECTS } from '../services/project-service.js';
-import { ActivityService } from '../services/activity-service.js';
+import { ActivityService, ACTIVITY_STATUS_MAP } from '../services/activity-service.js';
+import { AuthService } from '../services/auth-service.js';
 import { WordDocService } from '../services/word-doc-service.js';
 import { formatBahtText } from '../utils/baht-text.js';
 
-// 5 หมวดงบประมาณหลักตามระเบียบโรงเรียนสาธิต มช. และ Excel_example.xlsx
+// 5 หมวดงบประมาณหลักตามระเบียบโรงเรียนสาธิต มช. และแบบฟอร์มขออนุมัติบรรจุกิจกรรม
 export const BUDGET_CATEGORIES = [
   { key: '1', title: '1. ค่าตอบแทน', icon: '💼', defaultUnit1: 'คน', defaultUnit2: 'ชั่วโมง' },
   { key: '2', title: '2. ค่าใช้สอย', icon: '🚌', defaultUnit1: 'คน', defaultUnit2: 'มื้อ' },
@@ -20,6 +22,72 @@ export const BUDGET_CATEGORIES = [
   { key: '4', title: '4. ค่าสาธารณูปโภค', icon: '⚡', defaultUnit1: 'งาน', defaultUnit2: 'งาน' },
   { key: '5', title: '5. อื่นๆ', icon: '📌', defaultUnit1: 'งาน', defaultUnit2: 'งาน' }
 ];
+
+// รายการตัวเลือก Dropdown สำหรับแต่ละหมวดงบประมาณ
+export const BUDGET_CATEGORY_PRESETS = {
+  '1': {
+    placeholder: '-- เลือกประเภทค่าตอบแทน --',
+    items: [
+      { name: 'ค่าตอบแทนวิทยากรบรรยาย', label: 'ค่าตอบแทนวิทยากรบรรยาย (600 บาท/คน/ชม.)', rate: 600, unit1: 'คน', unit2: 'ชั่วโมง' },
+      { name: 'ค่าตอบแทนวิทยากรปฏิบัติการ', label: 'ค่าตอบแทนวิทยากรปฏิบัติการ (300 บาท/คน/ชม.)', rate: 300, unit1: 'คน', unit2: 'ชั่วโมง' },
+      { name: 'ค่าตอบแทนปฏิบัติงานนอกเวลาราชการ', label: 'ค่าตอบแทนปฏิบัติงานนอกเวลาราชการ (กรอกเอง)', unit1: 'คน', unit2: 'ชั่วโมง' },
+      { name: 'ค่าตอบแทนในการเดินทางไปปฏิบัติงานของผู้ทำหน้าที่ขับรถ', label: 'ค่าตอบแทนในการเดินทางไปปฏิบัติงานของผู้ทำหน้าที่ขับรถ (กรอกเอง)', unit1: 'คน', unit2: 'วัน' }
+    ]
+  },
+  '2': {
+    placeholder: '-- เลือกประเภทค่าใช้สอย --',
+    items: [
+      { name: 'ค่าอาหารว่างและเครื่องดื่ม สำหรับอาจารย์และเจ้าหน้าที่', unit1: 'คน', unit2: 'มื้อ' },
+      { name: 'ค่าอาหารเช้า สำหรับอาจารย์และเจ้าหน้าที่', unit1: 'คน', unit2: 'มื้อ' },
+      { name: 'ค่าอาหารกลางวัน สำหรับอาจารย์และเจ้าหน้าที่', unit1: 'คน', unit2: 'มื้อ' },
+      { name: 'ค่าอาหารเย็น สำหรับอาจารย์และเจ้าหน้าที่', unit1: 'คน', unit2: 'มื้อ' },
+      { name: 'ค่าอาหารว่างและเครื่องดื่ม สำหรับนักเรียน', unit1: 'คน', unit2: 'มื้อ' },
+      { name: 'ค่าอาหารเช้า สำหรับนักเรียน', unit1: 'คน', unit2: 'มื้อ' },
+      { name: 'ค่าอาหารกลางวัน สำหรับนักเรียน', unit1: 'คน', unit2: 'มื้อ' },
+      { name: 'ค่าอาหารเย็น สำหรับนักเรียน', unit1: 'คน', unit2: 'มื้อ' },
+      { name: 'ค่าที่พัก', unit1: 'คน', unit2: 'คืน' },
+      { name: 'ค่าลงทะเบียน', unit1: 'คน', unit2: 'รายการ' },
+      { name: 'ค่าจ้างเหมาบริการ', unit1: 'งาน', unit2: 'รายการ' },
+      { name: 'ค่าจ้างเหมารถตู้พร้อมคนขับและน้ำมันเชื้อเพลิง', unit1: 'คัน', unit2: 'วัน' },
+      { name: 'ค่าจ้างเหมาจัดกิจรรม', unit1: 'งาน', unit2: 'รายการ' },
+      { name: 'ค่าจ้างทำป้ายไวนิล', unit1: 'ผืน', unit2: 'แผ่น' },
+      { name: 'ค่าเข้าชมสถานที่', unit1: 'คน', unit2: 'แห่ง' },
+      { name: 'ค่าเช่าสถานที่', unit1: 'แห่ง', unit2: 'วัน' },
+      { name: 'ค่าเช่าอปุกรณ์', unit1: 'ชุด', unit2: 'วัน' },
+      { name: 'ค่าเดินทาง', unit1: 'คน', unit2: 'เที่ยว' },
+      { name: 'ค่าเบี้ยเลี้ยง', unit1: 'คน', unit2: 'วัน' },
+      { name: 'ค่าของที่ระลึก', unit1: 'ชิ้น', unit2: 'ชุด' },
+      { name: 'ค่าของรางวัล', unit1: 'ชิ้น', unit2: 'รางวัล' },
+      { name: 'ค่าจ้างเหมาทำของที่ระลึก', unit1: 'ชิ้น', unit2: 'งาน' },
+      { name: 'ค่าบำรุงสถานที่', unit1: 'แห่ง', unit2: 'วัน' },
+      { name: 'ค่าจ้างเหมารถราง', unit1: 'คัน', unit2: 'วัน' }
+    ]
+  },
+  '3': {
+    placeholder: '-- เลือกประเภทค่าวัสดุ --',
+    items: [
+      { name: 'ค่าวัสดุ', unit1: 'รายการ', unit2: 'ชุด' },
+      { name: 'ค่าน้ำมันเชื้อเพลิง', unit1: 'คัน', unit2: 'ลิตร' }
+    ]
+  },
+  '4': {
+    placeholder: '-- เลือกประเภทค่าสาธารณูปโภค --',
+    items: [
+      { name: 'ค่าขนส่งพัสดุ', unit1: 'รายการ', unit2: 'ชิ้น' },
+      { name: 'ค่าบริการไปรษณีย์', unit1: 'รายการ', unit2: 'ครั้ง' },
+      { name: 'ค่าไฟฟ้า', unit1: 'เดือน', unit2: 'งวด' },
+      { name: 'ค่าดวงคราไปรษณียากร (แสตมป์)', unit1: 'ดวง', unit2: 'ชุด' },
+      { name: 'ค่าธรรมเนียมธนาคาร', unit1: 'ครั้ง', unit2: 'รายการ' }
+    ]
+  },
+  '5': {
+    placeholder: '-- เลือกประเภทอื่นๆ --',
+    items: [
+      { name: 'เงินเหลือจ่ายสมทบงบประมาณคณะ', unit1: 'โครงการ', unit2: 'งวด' },
+      { name: 'ค่าครุภัณฑ์', unit1: 'ชิ้น', unit2: 'ชุด' }
+    ]
+  }
+};
 
 // ข้อมูลแถวกำหนดการเริ่มต้น: เริ่มต้นเป็นว่างเปล่าเพื่อให้ผู้ใช้เพิ่มเอง
 const DEFAULT_SCHEDULE_SLOTS = [];
@@ -153,15 +221,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 8. Action Buttons Handlers
+  // 8. Action Buttons Handlers: บันทึกแบบร่าง
   const saveBtn = $('#saveFormBtn');
   if (saveBtn) {
     addEvent(saveBtn, 'click', () => {
       saveCurrentFormData(activeProject.id, actIdFromUrl);
       showToast({
         type: 'success',
-        title: 'บันทึกสำเร็จ',
-        message: 'บันทึกข้อมูลเรียบร้อยแล้ว สามารถกดปุ่ม "สร้างเอกสาร Word" เพื่อดาวน์โหลดเอกสารราชการได้ทันที'
+        title: 'บันทึกแบบร่างสำเร็จ',
+        message: 'บันทึกข้อมูลเรียบร้อยแล้ว สามารถกดปุ่ม "สร้างเอกสาร Word" หรือ "ตรวจสอบข้อมูล" เพื่อส่งเอกสาร'
+      });
+    });
+  }
+
+  const bottomSaveDraft = $('#btnBottomSaveDraft');
+  if (bottomSaveDraft) {
+    addEvent(bottomSaveDraft, 'click', () => {
+      saveCurrentFormData(activeProject.id, actIdFromUrl);
+      showToast({
+        type: 'success',
+        title: 'บันทึกแบบร่างสำเร็จ',
+        message: 'บันทึกข้อมูลแบบร่างเรียบร้อยแล้ว'
       });
     });
   }
@@ -189,6 +269,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 10. ระบบจัดการข้อมูลวิทยากร (กรณีมีเชิญวิทยากร)
   initSpeakerSection();
+
+  // 11. ตรวจสอบสิทธิ์และการล็อคแบบฟอร์ม (เฉพาะเจ้าของหรือแอดมิน / ห้ามแก้ไขเมื่อยืนยันแล้วนอกจากแอดมินเปิดสิทธิ์)
+  initFormPermissionsAndLockState(activeProject, actIdFromUrl, isNewMode);
+
+  // 12. ระบบตรวจสอบข้อมูลและเลือกประเภทหนังสือราชการ (Verification Modal & Documents Selection Modal)
+  initVerificationWorkflow(activeProject.id, actIdFromUrl);
 });
 
 /**
@@ -377,33 +463,33 @@ function createSubItemRowElement(catKey, item = {}) {
   const subtotal = qty1 * qty2 * rate;
   const note = item.note || '';
 
-  const isCompensation = String(catKey) === '1';
+  const presetConfig = BUDGET_CATEGORY_PRESETS[String(catKey)];
 
   let itemCellContent = '';
-  if (isCompensation) {
-    const isLecturer = itemName.includes('วิทยากรบรรยาย');
-    const isWorkshop = itemName.includes('วิทยากรปฏิบัติการ');
-    const isOvertime = itemName.includes('นอกเวลาราชการ');
-    const isDriver = itemName.includes('ขับรถ');
-
+  if (presetConfig) {
+    // หา preset ที่ตรงกับ itemName
+    const matchedPreset = presetConfig.items.find((p) => p.name === itemName || (itemName && p.name.includes(itemName.trim())));
     let selectedPreset = '';
-    if (isLecturer) selectedPreset = 'ค่าตอบแทนวิทยากรบรรยาย';
-    else if (isWorkshop) selectedPreset = 'ค่าตอบแทนวิทยากรปฏิบัติการ';
-    else if (isOvertime) selectedPreset = 'ค่าตอบแทนปฏิบัติงานนอกเวลาราชการ';
-    else if (isDriver) selectedPreset = 'ค่าตอบแทนในการเดินทางไปปฏิบัติงานของผู้ทำหน้าที่ขับรถ';
-    else if (itemName) selectedPreset = 'custom';
+    if (matchedPreset) {
+      selectedPreset = matchedPreset.name;
+    } else if (itemName) {
+      selectedPreset = 'custom';
+    }
+
+    const optionsHtml = presetConfig.items.map((p) => {
+      const isSelected = selectedPreset === p.name;
+      const label = p.label || p.name;
+      return `<option value="${escapeHTML(p.name)}" ${isSelected ? 'selected' : ''}>${escapeHTML(label)}</option>`;
+    }).join('');
 
     itemCellContent = `
-      <div class="compensation-dropdown-wrapper" style="display: flex; flex-direction: column; gap: 4px;">
-        <select class="table-input input-compensation-preset" style="font-size: 0.75rem; font-weight: 600; padding: 4px 6px; border-radius: 4px; border: 1.5px solid var(--cmu-purple-200); background: var(--bg-surface-elevated, #fff); color: var(--cmu-purple-900); cursor: pointer;">
-          <option value="">-- เลือกประเภทค่าตอบแทน --</option>
-          <option value="ค่าตอบแทนวิทยากรบรรยาย" ${selectedPreset === 'ค่าตอบแทนวิทยากรบรรยาย' ? 'selected' : ''}>ค่าตอบแทนวิทยากรบรรยาย (600 บาท/คน/ชม.)</option>
-          <option value="ค่าตอบแทนวิทยากรปฏิบัติการ" ${selectedPreset === 'ค่าตอบแทนวิทยากรปฏิบัติการ' ? 'selected' : ''}>ค่าตอบแทนวิทยากรปฏิบัติการ (300 บาท/คน/ชม.)</option>
-          <option value="ค่าตอบแทนปฏิบัติงานนอกเวลาราชการ" ${selectedPreset === 'ค่าตอบแทนปฏิบัติงานนอกเวลาราชการ' ? 'selected' : ''}>ค่าตอบแทนปฏิบัติงานนอกเวลาราชการ (กรอกเอง)</option>
-          <option value="ค่าตอบแทนในการเดินทางไปปฏิบัติงานของผู้ทำหน้าที่ขับรถ" ${selectedPreset === 'ค่าตอบแทนในการเดินทางไปปฏิบัติงานของผู้ทำหน้าที่ขับรถ' ? 'selected' : ''}>ค่าตอบแทนในการเดินทางไปปฏิบัติงานของผู้ทำหน้าที่ขับรถ (กรอกเอง)</option>
+      <div class="preset-dropdown-wrapper" style="display: flex; flex-direction: column; gap: 4px;">
+        <select class="table-input input-budget-preset" style="font-size: 0.75rem; font-weight: 600; padding: 4px 6px; border-radius: 4px; border: 1.5px solid var(--cmu-purple-200); background: var(--bg-surface-elevated, #fff); color: var(--cmu-purple-900); cursor: pointer;">
+          <option value="">${presetConfig.placeholder}</option>
+          ${optionsHtml}
           <option value="custom" ${selectedPreset === 'custom' ? 'selected' : ''}>ระบุเอง / อื่นๆ</option>
         </select>
-        <input type="text" class="table-input input-item-name" value="${escapeHTML(itemName)}" placeholder="ชื่อรายการค่าตอบแทน..." />
+        <input type="text" class="table-input input-item-name" value="${escapeHTML(itemName)}" placeholder="ชื่อรายการ..." />
       </div>
     `;
   } else {
@@ -446,8 +532,8 @@ function createSubItemRowElement(catKey, item = {}) {
     </td>
   `;
 
-  if (isCompensation) {
-    const presetSelect = tr.querySelector('.input-compensation-preset');
+  if (presetConfig) {
+    const presetSelect = tr.querySelector('.input-budget-preset');
     const nameInput = tr.querySelector('.input-item-name');
     const unit1Input = tr.querySelector('.input-unit1');
     const unit2Input = tr.querySelector('.input-unit2');
@@ -455,42 +541,32 @@ function createSubItemRowElement(catKey, item = {}) {
 
     presetSelect?.addEventListener('change', (e) => {
       const val = e.target.value;
-      if (val === 'ค่าตอบแทนวิทยากรบรรยาย') {
-        nameInput.value = 'ค่าตอบแทนวิทยากรบรรยาย';
-        unit1Input.value = 'คน';
-        unit2Input.value = 'ชั่วโมง';
-        rateInput.value = 600;
-        rateInput.dispatchEvent(new Event('input', { bubbles: true }));
-      } else if (val === 'ค่าตอบแทนวิทยากรปฏิบัติการ') {
-        nameInput.value = 'ค่าตอบแทนวิทยากรปฏิบัติการ';
-        unit1Input.value = 'คน';
-        unit2Input.value = 'ชั่วโมง';
-        rateInput.value = 300;
-        rateInput.dispatchEvent(new Event('input', { bubbles: true }));
-      } else if (val === 'ค่าตอบแทนปฏิบัติงานนอกเวลาราชการ') {
-        nameInput.value = 'ค่าตอบแทนปฏิบัติงานนอกเวลาราชการ';
-        unit1Input.value = 'คน';
-        unit2Input.value = 'ชั่วโมง';
-        rateInput.focus();
-        if (typeof rateInput.select === 'function') rateInput.select();
-        rateInput.dispatchEvent(new Event('input', { bubbles: true }));
-      } else if (val === 'ค่าตอบแทนในการเดินทางไปปฏิบัติงานของผู้ทำหน้าที่ขับรถ') {
-        nameInput.value = 'ค่าตอบแทนในการเดินทางไปปฏิบัติงานของผู้ทำหน้าที่ขับรถ';
-        unit1Input.value = 'คน';
-        unit2Input.value = 'วัน';
-        rateInput.focus();
-        if (typeof rateInput.select === 'function') rateInput.select();
-        rateInput.dispatchEvent(new Event('input', { bubbles: true }));
-      } else if (val === 'custom') {
+      if (!val) return;
+      if (val === 'custom') {
         nameInput.focus();
+        return;
       }
-      recalculateBudgetGrandTotal();
+      const matched = presetConfig.items.find((p) => p.name === val);
+      if (matched) {
+        nameInput.value = matched.name;
+        if (matched.unit1) unit1Input.value = matched.unit1;
+        if (matched.unit2) unit2Input.value = matched.unit2;
+        if (matched.rate !== undefined) {
+          rateInput.value = matched.rate;
+        } else {
+          rateInput.focus();
+          if (typeof rateInput.select === 'function') rateInput.select();
+        }
+        rateInput.dispatchEvent(new Event('input', { bubbles: true }));
+        recalculateBudgetGrandTotal();
+      }
     });
 
     nameInput?.addEventListener('input', () => {
       const curr = nameInput.value.trim();
-      if (['ค่าตอบแทนวิทยากรบรรยาย', 'ค่าตอบแทนวิทยากรปฏิบัติการ', 'ค่าตอบแทนปฏิบัติงานนอกเวลาราชการ', 'ค่าตอบแทนในการเดินทางไปปฏิบัติงานของผู้ทำหน้าที่ขับรถ'].includes(curr)) {
-        presetSelect.value = curr;
+      const matched = presetConfig.items.find((p) => p.name === curr);
+      if (matched) {
+        presetSelect.value = matched.name;
       } else if (curr) {
         presetSelect.value = 'custom';
       } else {
@@ -757,18 +833,25 @@ export function collectCurrentFormData(projectId, actId) {
 /**
  * บันทึกข้อมูลกลับสู่ LocalStorage
  */
-function saveCurrentFormData(projectId, actId) {
+export function saveCurrentFormData(projectId, actId, options = {}) {
+  const currentUser = AuthService.getCurrentUser();
   const formData = collectCurrentFormData(projectId, actId);
 
   // บันทึกลงใน ProjectService
   ProjectService.saveActivityFormData(projectId, formData);
 
-  // ดึงสถานะเดิมหากเป็นการแก้ไข หรือตั้งเป็น 'review' (รอตรวจ) สำหรับกิจกรรมใหม่
+  // ดึงข้อมูลเดิมหากมี
   const existingAct = actId ? ActivityService.getActivityById(actId) : null;
-  const activityStatus = existingAct ? existingAct.status : 'review';
+  const isLocked = options.isLocked !== undefined ? Boolean(options.isLocked) : (existingAct ? Boolean(existingAct.isLocked) : false);
+  const activityStatus = options.status !== undefined ? options.status : (existingAct ? existingAct.status : 'review');
+  const selectedDocuments = options.selectedDocuments !== undefined ? options.selectedDocuments : (existingAct?.selectedDocuments || []);
+
+  const creatorId = existingAct?.creatorId || currentUser?.id || currentUser?.email || 'user-1';
+  const creatorEmail = existingAct?.creatorEmail || currentUser?.email || 'user@satit.cmu.ac.th';
+  const creatorName = existingAct?.creatorName || currentUser?.name || formData.responsiblePerson || 'อาจารย์';
 
   // บันทึกลงใน ActivityService ด้วย
-  ActivityService.saveActivity({
+  const activityToSave = {
     id: actId || `ACT-${Date.now()}`,
     projectId,
     title: formData.activityName || 'กิจกรรมใหม่',
@@ -781,16 +864,32 @@ function saveCurrentFormData(projectId, actId) {
     speakerPosition: formData.speakerPosition,
     speakerOrganization: formData.speakerOrganization,
     speakerTopic: formData.speakerTopic,
-    dateRange: formData.schedule.dateRange,
-    timeRange: formData.schedule.timeRange,
-    location: formData.schedule.location,
-    targetGrade: formData.targetGrade,
+    dateRange: formData.schedule?.dateRange || '',
+    timeRange: formData.schedule?.timeRange || '',
+    location: formData.schedule?.location || '',
+    travelFormat: formData.schedule?.travelFormat || '',
+    vehicleType: formData.schedule?.vehicleType || '',
+    vehicleCount: formData.schedule?.vehicleCount || '',
+    objective: formData.objective || '',
+    targetOutcome: formData.targetOutcome || '',
+    semesterYear: formData.semesterYear || '',
+    targetGrade: formData.targetGrade || '',
     participants: formData.participants,
+    timeSlots: formData.schedule?.timeSlots || [],
+    budgetItems: formData.budgetItems || [],
     budget: formData.budget || 0,
-    status: activityStatus
-  });
+    status: activityStatus,
+    isLocked,
+    selectedDocuments,
+    creatorId,
+    creatorEmail,
+    creatorName,
+    submittedAt: options.isLocked ? (existingAct?.submittedAt || new Date().toISOString()) : (existingAct?.submittedAt || null)
+  };
 
-  return formData;
+  ActivityService.saveActivity(activityToSave);
+
+  return activityToSave;
 }
 
 /**
@@ -1260,5 +1359,332 @@ function renderSpeakersList() {
       renderSpeakersList();
     });
   });
+}
+
+/**
+ * ตรวจสอบสิทธิ์การเข้าถึงและการล็อคแบบฟอร์ม
+ * กฎ: เมื่อกด "ยืนยัน" แล้วจะไม่สามารถแก้ไขกิจกรรมได้
+ * หากต้องการแก้ไข ต้องให้ แอดมิน หรือผู้มีสิทธิ์เปิดสิทธิ์แก้ไขให้เท่านั้น (สถานะ = 'edit')
+ * และจะสามารถแก้ไขได้เฉพาะกิจกรรมของตนเองที่กรอกเข้าไปเท่านั้น ไม่สามารถให้คนอื่นแก้ไขให้ได้ นอกจากแอดมิน
+ */
+function initFormPermissionsAndLockState(activeProject, actId, isNewMode) {
+  const currentUser = AuthService.getCurrentUser();
+  const isAdmin = AuthService.isAdmin();
+  const existingAct = actId ? ActivityService.getActivityById(actId) : null;
+
+  if (isNewMode || !existingAct) {
+    return; // กิจกรรมใหม่สามารถกรอกได้เสมอ
+  }
+
+  const isLocked = Boolean(existingAct.isLocked);
+  const isOwner = Boolean(
+    currentUser && (
+      existingAct.creatorId === currentUser.id ||
+      existingAct.creatorEmail?.toLowerCase() === currentUser.email?.toLowerCase() ||
+      (currentUser.name && (existingAct.creatorName === currentUser.name || existingAct.responsiblePerson === currentUser.name))
+    )
+  );
+  const isStatusEdit = existingAct.status === 'edit';
+  const canEdit = isAdmin || (!isLocked && isOwner) || (isLocked && isOwner && isStatusEdit);
+
+  const bannerContainer = $('#lockedBannerContainer');
+  if (!canEdit) {
+    const statusCfg = ACTIVITY_STATUS_MAP[existingAct.status] || { label: 'รอตรวจ' };
+    const reasonMsg = (!isOwner && !isAdmin)
+      ? `กิจกรรมนี้สร้างโดย <strong>${escapeHTML(existingAct.creatorName || existingAct.responsiblePerson || 'อาจารย์ท่านอื่น')}</strong> ท่านไม่สามารถแก้ไขกิจกรรมของผู้อื่นได้ (สิทธิ์แก้ไขเฉพาะเจ้าของกิจกรรมหรือผู้ดูแลระบบ)`
+      : `กิจกรรมนี้ได้รับการยืนยันและล็อคเรียบร้อยแล้ว (สถานะปัจจุบัน: <strong>${statusCfg.label}</strong>) หากต้องการแก้ไข กรุณาติดต่อผู้ดูแลระบบ (Admin) เพื่อเปิดสิทธิ์แก้ไข (ปรับสถานะเป็น "แก้ไข")`;
+
+    if (bannerContainer) {
+      bannerContainer.innerHTML = `
+        <div class="form-locked-alert-banner">
+          <div style="display: flex; align-items: center; gap: var(--space-3);">
+            <span style="font-size: 1.5rem;">🔒</span>
+            <div>
+              <div class="form-locked-badge">
+                <span>โหมดดูอย่างเดียว (Locked / Read-Only)</span>
+              </div>
+              <div style="font-size: var(--font-size-sm); margin-top: 2px;">
+                ${reasonMsg}
+              </div>
+            </div>
+          </div>
+          ${isAdmin ? `<span class="badge badge-purple" style="font-size: var(--font-size-xs);">สิทธิ์แอดมิน: สามารถเปลี่ยนสถานะได้จากหน้ารายการ</span>` : ''}
+        </div>
+      `;
+    }
+
+    makeFormReadOnly();
+  } else if (isLocked && isOwner && isStatusEdit) {
+    if (bannerContainer) {
+      bannerContainer.innerHTML = `
+        <div class="form-locked-alert-banner" style="background: rgba(249, 115, 22, 0.1); border-color: rgba(249, 115, 22, 0.5);">
+          <div style="display: flex; align-items: center; gap: var(--space-3);">
+            <span style="font-size: 1.5rem;">✏️</span>
+            <div>
+              <div class="form-locked-badge" style="color: #ea580c;">
+                <span>เปิดสิทธิ์แก้ไขโดยผู้ดูแลระบบ (สถานะ: แก้ไข)</span>
+              </div>
+              <div style="font-size: var(--font-size-sm); margin-top: 2px;">
+                ท่านสามารถปรับปรุงรายละเอียดแบบฟอร์มได้ เมื่อแก้ไขเสร็จสิ้นแล้วกรุณากด <strong>"ตรวจสอบข้อมูลกิจกรรม"</strong> และ <strong>"ยืนยัน"</strong> อีกครั้งเพื่อส่งตรวจ
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  }
+}
+
+/**
+ * ล็อคแบบฟอร์มให้อยู่ในโหมด Read-Only ทั้งหมด
+ */
+function makeFormReadOnly() {
+  $$('.excel-document-body input, .excel-document-body select, .excel-document-body textarea').forEach((el) => {
+    el.disabled = true;
+    el.style.cursor = 'not-allowed';
+    el.style.opacity = '0.85';
+  });
+
+  $$('.btn-del-budget, .btn-del-row, .btn-add-subitem, #addScheduleRowBtn, #addCustomSpeakerBtn').forEach((el) => {
+    el.disabled = true;
+    el.style.display = 'none';
+  });
+
+  ['#saveFormBtn', '#btnBottomSaveDraft', '#btnVerifyForm', '#toolbarVerifyBtn'].forEach((id) => {
+    const el = $(id);
+    if (el) {
+      el.disabled = true;
+      el.style.display = 'none';
+    }
+  });
+}
+
+/**
+ * ระบบ Workflow ตรวจสอบข้อมูลกิจกรรม และเลือกประเภทหนังสือราชการ
+ */
+function initVerificationWorkflow(projectId, actId) {
+  const verifyModalEl = $('#verifyActivityModal');
+  const docsModalEl = $('#selectDocsModal');
+  if (!verifyModalEl || !docsModalEl) return;
+
+  const verifyModal = initModal(verifyModalEl, { staticBackdrop: true });
+  const docsModal = initModal(docsModalEl, { staticBackdrop: true });
+
+  const triggerVerification = () => {
+    const actName = $('#formActivityName')?.value.trim();
+    if (!actName) {
+      showToast({
+        type: 'warning',
+        title: 'ข้อมูลยังไม่ครบถ้วน',
+        message: 'กรุณากรอกชื่อกิจกรรมก่อนทำการตรวจสอบข้อมูล'
+      });
+      $('#formActivityName')?.focus();
+      return;
+    }
+
+    const formData = collectCurrentFormData(projectId, actId);
+    renderVerifyModalSummary(formData);
+    verifyModal.open();
+  };
+
+  // ผูกปุ่มตรวจสอบ
+  $('#btnVerifyForm')?.addEventListener('click', triggerVerification);
+  $('#toolbarVerifyBtn')?.addEventListener('click', triggerVerification);
+
+  // ปุ่มใน Modal 1 (ตรวจสอบ)
+  $('#btnVerifyBack')?.addEventListener('click', () => {
+    verifyModal.close();
+  });
+
+  $('#btnVerifyEdit')?.addEventListener('click', () => {
+    verifyModal.close();
+    showToast({
+      type: 'info',
+      title: 'กลับสู่การแก้ไขข้อมูล',
+      message: 'สามารถปรับปรุงข้อมูลกิจกรรมในแบบฟอร์มได้ทันที'
+    });
+    const firstInput = $('#formActivityName');
+    if (firstInput) {
+      firstInput.focus();
+      firstInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+
+  $('#btnVerifyConfirm')?.addEventListener('click', () => {
+    verifyModal.close();
+    // เติมข้อมูลหนังสือที่เคยเลือกไว้เดิม (ถ้ามี)
+    const existingAct = actId ? ActivityService.getActivityById(actId) : null;
+    if (existingAct && Array.isArray(existingAct.selectedDocuments)) {
+      const docs = existingAct.selectedDocuments;
+      const chk1 = $('#docReq1');
+      const chk2 = $('#docReq2');
+      const chk3 = $('#docReq3');
+      const chk4 = $('#docReq4');
+      const chk5 = $('#docReq5');
+
+      if (chk1) chk1.checked = docs.some((d) => d.includes('ขออนุญาติผู้ปกครอง'));
+      if (chk2) chk2.checked = docs.some((d) => d.includes('นำนักเรียนเข้าสถานที่'));
+      if (chk3) chk3.checked = docs.some((d) => d.includes('เป็นวิทยากร'));
+
+      const others = docs.filter((d) => d.startsWith('อื่น ๆ:') || d.startsWith('อื่นๆ:'));
+      if (others[0] && chk4) {
+        chk4.checked = true;
+        const inp4 = $('#docReqOther1');
+        if (inp4) inp4.value = others[0].replace(/^(อื่น ๆ:|อื่นๆ:)\s*/, '');
+      }
+      if (others[1] && chk5) {
+        chk5.checked = true;
+        const inp5 = $('#docReqOther2');
+        if (inp5) inp5.value = others[1].replace(/^(อื่น ๆ:|อื่นๆ:)\s*/, '');
+      }
+    }
+    docsModal.open();
+  });
+
+  // ปุ่มใน Modal 2 (เลือกหนังสือ)
+  $('#btnDocsBack')?.addEventListener('click', () => {
+    docsModal.close();
+    verifyModal.open();
+  });
+
+  $('#btnDocsConfirm')?.addEventListener('click', () => {
+    const selectedDocs = [];
+    if ($('#docReq1')?.checked) selectedDocs.push($('#docReq1').value);
+    if ($('#docReq2')?.checked) selectedDocs.push($('#docReq2').value);
+    if ($('#docReq3')?.checked) selectedDocs.push($('#docReq3').value);
+
+    if ($('#docReq4')?.checked) {
+      const text = $('#docReqOther1')?.value.trim();
+      selectedDocs.push(text ? `อื่น ๆ: ${text}` : 'อื่น ๆ (ระบุตามแบบฟอร์ม)');
+    }
+    if ($('#docReq5')?.checked) {
+      const text = $('#docReqOther2')?.value.trim();
+      selectedDocs.push(text ? `อื่น ๆ: ${text}` : 'อื่น ๆ (ระบุตามแบบฟอร์ม)');
+    }
+
+    // บันทึกและล็อคกิจกรรม
+    saveCurrentFormData(projectId, actId, {
+      isLocked: true,
+      status: 'review',
+      selectedDocuments: selectedDocs
+    });
+
+    docsModal.close();
+
+    showToast({
+      type: 'success',
+      title: 'บันทึกและยืนยันสำเร็จ 🔒',
+      message: 'ระบบได้ทำการล็อคกิจกรรมและส่งเพื่อรอการตรวจสอบแล้ว กำลังกลับสู่หน้ารายการกิจกรรม...'
+    });
+
+    setTimeout(() => {
+      window.location.href = `/project-activities.html?id=${encodeURIComponent(projectId)}`;
+    }, 1200);
+  });
+}
+
+/**
+ * เรนเดอร์ข้อมูลสรุปใน Modal ตรวจสอบข้อมูลกิจกรรม
+ */
+function renderVerifyModalSummary(formData) {
+  const verifyBody = $('#verifyModalBody');
+  if (!verifyBody) return;
+
+  const catSums = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 };
+  (formData.budgetItems || []).forEach((item) => {
+    const catNum = item.category ? item.category.charAt(0) : '2';
+    if (catSums[catNum] !== undefined) {
+      catSums[catNum] += item.total || 0;
+    }
+  });
+
+  const timeSlotsCount = formData.schedule?.timeSlots?.length || 0;
+  const grandTotal = formData.budget || 0;
+
+  verifyBody.innerHTML = `
+    <div style="display: flex; flex-direction: column; gap: var(--space-4); font-family: var(--font-family-thai);">
+      
+      <!-- Card 1: ข้อมูลกิจกรรมทั่วไป -->
+      <div style="background: var(--bg-surface-elevated, #fff); border: 1.5px solid var(--border-subtle, #e2e8f0); border-radius: var(--radius-xl); padding: var(--space-4) var(--space-5); box-shadow: var(--shadow-sm);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-3); border-bottom: 1px solid var(--border-subtle); padding-bottom: var(--space-2);">
+          <span style="font-weight: 700; color: var(--cmu-purple-900); font-size: 1rem;">📌 ข้อมูลโครงการและกิจกรรม</span>
+          <span class="badge badge-purple">${escapeHTML(formData.projectName)}</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); font-size: var(--font-size-sm);">
+          <div>
+            <div style="color: var(--text-muted); font-size: var(--font-size-xs);">ชื่อกิจกรรม:</div>
+            <div style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">${escapeHTML(formData.activityName || '-')}</div>
+          </div>
+          <div>
+            <div style="color: var(--text-muted); font-size: var(--font-size-xs);">อาจารย์ผู้รับผิดชอบ / ติดต่อ:</div>
+            <div style="font-weight: 600;">${escapeHTML(formData.responsiblePerson || '-')} ${formData.coordinatorPhone ? `(โทร ${escapeHTML(formData.coordinatorPhone)})` : ''}</div>
+          </div>
+          <div>
+            <div style="color: var(--text-muted); font-size: var(--font-size-xs);">วัน-เวลา ที่จัด:</div>
+            <div style="font-weight: 600;">📅 ${escapeHTML(formData.schedule?.dateRange || '-')} ${formData.schedule?.timeRange ? `(${escapeHTML(formData.schedule.timeRange)})` : ''}</div>
+          </div>
+          <div>
+            <div style="color: var(--text-muted); font-size: var(--font-size-xs);">สถานที่จัดกิจกรรม:</div>
+            <div style="font-weight: 600;">📍 ${escapeHTML(formData.schedule?.location || '-')}</div>
+          </div>
+          <div>
+            <div style="color: var(--text-muted); font-size: var(--font-size-xs);">กลุ่มเป้าหมาย / ผู้เข้าร่วม:</div>
+            <div style="font-weight: 600;">👥 นักเรียน ${formData.participants?.students || 0} คน (รวมทั้งหมด ${formData.participants?.total || 0} คน)</div>
+          </div>
+          <div>
+            <div style="color: var(--text-muted); font-size: var(--font-size-xs);">กำหนดการ:</div>
+            <div style="font-weight: 600;">🕒 บรรจุช่วงเวลาทั้งหมด ${timeSlotsCount} ช่วง</div>
+          </div>
+        </div>
+        ${formData.hasSpeakers && formData.speakerName ? `
+          <div style="margin-top: var(--space-3); padding-top: var(--space-2); border-top: 1px dashed var(--border-subtle); font-size: var(--font-size-xs);">
+            <span style="color: var(--text-muted);">วิทยากร: </span>
+            <strong>${escapeHTML(formData.speakerName)}</strong> ${formData.speakerOrganization ? `(${escapeHTML(formData.speakerOrganization)})` : ''}
+          </div>
+        ` : ''}
+      </div>
+
+      <!-- Card 2: สรุปงบประมาณ -->
+      <div style="background: linear-gradient(135deg, rgba(111, 44, 145, 0.04) 0%, rgba(107, 33, 168, 0.08) 100%); border: 1.5px solid var(--cmu-purple-200); border-radius: var(--radius-xl); padding: var(--space-4) var(--space-5);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-3);">
+          <span style="font-weight: 700; color: var(--cmu-purple-900); font-size: 1rem;">💰 ประมาณการค่าใช้จ่าย</span>
+          <span style="font-size: 1.25rem; font-weight: 800; color: var(--cmu-purple-900);">${grandTotal.toLocaleString()} บาท</span>
+        </div>
+        <div style="font-size: var(--font-size-xs); color: var(--cmu-purple-700); font-weight: 600; margin-bottom: var(--space-3); text-align: right;">
+          ( ${formatBahtText(grandTotal)} )
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 6px; font-size: var(--font-size-xs); background: var(--bg-surface-elevated, #fff); padding: 10px 14px; border-radius: var(--radius-lg); border: 1px solid var(--border-subtle);">
+          <div style="display: flex; justify-content: space-between;">
+            <span>1. หมวดค่าตอบแทน:</span>
+            <strong>${catSums['1'].toLocaleString()} บาท</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span>2. หมวดค่าใช้สอย:</span>
+            <strong>${catSums['2'].toLocaleString()} บาท</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span>3. หมวดค่าวัสดุ:</span>
+            <strong>${catSums['3'].toLocaleString()} บาท</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span>4. หมวดค่าสาธารณูปโภค:</span>
+            <strong>${catSums['4'].toLocaleString()} บาท</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span>5. หมวดอื่นๆ:</span>
+            <strong>${catSums['5'].toLocaleString()} บาท</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Prompt -->
+      <div style="padding: 10px 14px; border-radius: var(--radius-lg); background: rgba(5, 150, 105, 0.08); border: 1px solid rgba(5, 150, 105, 0.3); font-size: var(--font-size-xs); color: #065f46; display: flex; align-items: center; gap: 8px;">
+        <span>✅</span>
+        <span>หากข้อมูลถูกต้องครบถ้วนแล้ว ให้กดปุ่ม <strong>"ยืนยัน"</strong> เพื่อเลือกประเภทหนังสือราชการที่ต้องการ</span>
+      </div>
+
+    </div>
+  `;
 }
 

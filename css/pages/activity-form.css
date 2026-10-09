@@ -702,3 +702,99 @@
   gap: var(--space-3);
   flex-wrap: wrap;
 }
+
+/* Bottom Action Bar */
+.form-bottom-actions-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-6) var(--space-8);
+  margin-top: var(--space-6);
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-md);
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+/* Locked Form Alert Banner */
+.form-locked-alert-banner {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(245, 158, 11, 0.08) 100%);
+  border: 1.5px solid rgba(245, 158, 11, 0.5);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4) var(--space-6);
+  margin-bottom: var(--space-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-family: var(--font-family-thai);
+  color: var(--text-main);
+  box-shadow: var(--shadow-sm);
+  flex-wrap: wrap;
+}
+
+.form-locked-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #dc2626;
+}
+
+[data-theme="dark"] .form-locked-alert-banner {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+/* Checklist items for official document selection */
+.doc-selection-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: var(--space-3) 0;
+}
+
+.doc-selection-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--bg-surface-elevated, #ffffff);
+  border: 1.5px solid var(--border-subtle, #e2e8f0);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.doc-selection-item:hover {
+  border-color: var(--cmu-purple-400);
+  background: var(--bg-surface);
+}
+
+.doc-selection-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--cmu-purple-700);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.doc-selection-text {
+  flex: 1;
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-sm);
+  color: var(--text-main);
+  line-height: 1.4;
+}
+
+.doc-selection-custom-input {
+  margin-top: 6px;
+  width: 100%;
+}
+
