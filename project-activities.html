@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="หน้ารายการกิจกรรมของโครงการ - โรงเรียนสาธิต มช." />
+  <title>รายการกิจกรรมของโครงการ | สาธิต มช.</title>
+
+  <!-- Google Fonts: Prompt, Sarabun, Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Modular CSS Stylesheets -->
+  <script type="module" crossorigin src="./assets/projectActivities-BQlDZpnZ.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/auth-service-CTnetkcV.js">
+  <link rel="modulepreload" crossorigin href="./assets/navbar-yfZPHOgh.js">
+  <link rel="modulepreload" crossorigin href="./assets/activity-service-CIrWOL9n.js">
+  <link rel="stylesheet" crossorigin href="./assets/auth-service-vdnWKq7i.css">
+  <link rel="stylesheet" crossorigin href="./assets/navbar-TkR8UJxd.css">
+  <link rel="stylesheet" crossorigin href="./assets/projectActivities-aVYl-mar.css">
+</head>
+<body class="activities-page">
+
+  <!-- Top Navigation Bar -->
+  <header class="app-navbar">
+    <div class="navbar-container">
+      <a href="/projects.html" class="navbar-brand">
+        <div class="navbar-logo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fcd34d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            <path d="M12 8v4" stroke="#ffffff"></path>
+            <path d="M12 16h.01" stroke="#ffffff" stroke-width="3"></path>
+          </svg>
+        </div>
+        <div class="navbar-title-group">
+          <h1>โรงเรียนสาธิตมหาวิทยาลัยเชียงใหม่</h1>
+          <p>ระดับอนุบาลและประถมศึกษา • ระบบสร้างเอกสารขออนุมัติโครงการ</p>
+        </div>
+      </a>
+
+      <div class="navbar-actions">
+        <div class="navbar-user-chip">
+          <div id="navbarUserAvatar" class="user-avatar">👨‍🏫</div>
+          <div class="user-info-text">
+            <span id="navbarUserName" class="user-name">อ.ดร. ศุภชัย วิทยานุกูล</span>
+            <span id="navbarUserRole" class="user-role-badge">อาจารย์ผู้รับผิดชอบ</span>
+          </div>
+        </div>
+
+        <button id="themeToggleBtn" class="theme-toggle-btn" type="button" aria-label="สลับธีม สว่าง/มืด" title="สลับโหมดสี">
+          <svg class="theme-icon-light" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+          </svg>
+          <svg class="theme-icon-dark" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
+        <button id="logoutBtn" class="btn-logout" type="button" title="ออกจากระบบ">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+          </svg>
+          <span>ออกจากระบบ</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="activities-main-content">
+
+    <!-- Back Navigation Link -->
+    <div class="back-nav-row">
+      <a href="/projects.html" class="back-link-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        <span>กลับสู่หน้ารวมโครงการ</span>
+      </a>
+    </div>
+
+    <!-- Project Header Card -->
+    <section id="projectHeaderCard" class="project-header-card" aria-label="ข้อมูลโครงการ">
+      <div class="project-header-left">
+        <div id="projectHeaderIcon" class="project-header-icon">📁</div>
+        <div>
+          <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: 2px;">
+            <span id="projectHeaderCode" class="badge badge-purple">PRJ-05</span>
+            <span id="projectHeaderYear" class="badge badge-gold">ปีงบประมาณ 2569</span>
+          </div>
+          <h2 id="projectHeaderTitle" class="project-header-title">โครงการ พลเมืองไทยบนวิถีโลก</h2>
+          <div class="project-header-meta">
+            <span id="projectHeaderGrade" style="font-size: var(--font-size-xs); color: var(--text-muted);">ประถมศึกษาตอนต้น</span>
+            <span style="font-size: var(--font-size-xs); color: var(--text-light);">•</span>
+            <span id="projectHeaderPerson" style="font-size: var(--font-size-xs); color: var(--text-muted);">อ.ดร. ศุภชัย วิทยานุกูล</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Admin & Role Status Indicator Banner (แถบแสดงสิทธิ์และการควบคุมแอดมิน) -->
+    <section id="rolePermissionBanner" class="role-permission-banner" aria-label="แถบข้อมูลสิทธิ์การกำหนดสถานะ">
+      <!-- Injected via JavaScript based on AuthService.isAdmin() -->
+    </section>
+
+    <!-- TOP SECTION: [เพิ่มกิจกรรม] Action Bar -->
+    <section class="activities-top-action-bar" aria-label="แถบเพิ่มกิจกรรม">
+      <div class="action-bar-title-group">
+        <h3>
+          <span>กิจกรรมภายใต้โครงการ</span>
+          <span id="activitiesCountBadge" class="badge badge-purple">กำลังโหลด...</span>
+        </h3>
+        <p>จัดการกิจกรรมและสร้างแบบฟอร์มขออนุมัติบรรจุกิจกรรมตามแบบฟอร์ม Excel</p>
+      </div>
+
+      <!-- Prominent [เพิ่มกิจกรรม] Button -->
+      <button id="addActivityBtn" type="button" class="btn-add-activity" title="คลิกเพื่อเปิดหน้ากรอกแบบฟอร์ม Excel">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span>เพิ่มกิจกรรม</span>
+      </button>
+    </section>
+
+    <!-- BOTTOM SECTION: กล่องกิจกรรมที่ถูกบันทึกเข้ามาแล้ว -->
+    <section aria-label="รายการกล่องกิจกรรมที่บันทึกแล้ว">
+      <div class="activities-section-header">
+        <h4 class="activities-section-title">
+          <span>กล่องกิจกรรมที่ถูกบันทึกเข้ามาแล้ว</span>
+        </h4>
+        <span class="activities-section-hint">
+          💡 สามารถกดเปลี่ยนสถานะ (รอตรวจ / ดำเนินการ / แก้ไข / เสร็จสิ้น / ยกเลิก) ได้โดยตรงที่แต่ละกล่องกิจกรรม
+        </span>
+      </div>
+
+      <!-- Filter Chips สำหรับ 5 สถานะ -->
+      <div class="activity-status-filters" id="statusFilterBar" role="tablist" aria-label="กรองกิจกรรมตามสถานะ">
+        <button type="button" class="status-filter-chip is-active" data-filter="all">
+          <span>ทั้งหมด</span>
+          <span class="filter-count" id="countAll">0</span>
+        </button>
+        <button type="button" class="status-filter-chip chip-review" data-filter="review" title="กรองเฉพาะ รอตรวจ">
+          <span class="chip-dot"></span>
+          <span>รอตรวจ</span>
+          <span class="filter-count" id="countReview">0</span>
+        </button>
+        <button type="button" class="status-filter-chip chip-progress" data-filter="in-progress" title="กรองเฉพาะ ดำเนินการ">
+          <span class="chip-dot"></span>
+          <span>ดำเนินการ</span>
+          <span class="filter-count" id="countProgress">0</span>
+        </button>
+        <button type="button" class="status-filter-chip chip-edit" data-filter="edit" title="กรองเฉพาะ แก้ไข">
+          <span class="chip-dot"></span>
+          <span>แก้ไข</span>
+          <span class="filter-count" id="countEdit">0</span>
+        </button>
+        <button type="button" class="status-filter-chip chip-completed" data-filter="completed" title="กรองเฉพาะ เสร็จสิ้น">
+          <span class="chip-dot"></span>
+          <span>เสร็จสิ้น</span>
+          <span class="filter-count" id="countCompleted">0</span>
+        </button>
+        <button type="button" class="status-filter-chip chip-cancelled" data-filter="cancelled" title="กรองเฉพาะ ยกเลิก">
+          <span class="chip-dot"></span>
+          <span>ยกเลิก</span>
+          <span class="filter-count" id="countCancelled">0</span>
+        </button>
+      </div>
+
+      <div id="activitiesGrid" class="activities-grid">
+        <!-- Injected dynamically via js/pages/project-activities.js -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="projects-footer">
+    <p>โรงเรียนสาธิตมหาวิทยาลัยเชียงใหม่ ระดับอนุบาลและประถมศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยเชียงใหม่ © 2026</p>
+  </footer>
+
+  <!-- Modular Scripts -->
+</body>
+</html>
