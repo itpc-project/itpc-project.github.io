@@ -33,10 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
   initAdminUsersView();
   initUserEditModal();
 
-  // อัปเดตตารางผู้ใช้งานแบบเรียลไทม์เมื่อมีการซิงค์ข้อมูลจาก Cloud
+  // อัปเดตตารางผู้ใช้งานและข้อมูลส่วนตัวแบบเรียลไทม์เมื่อมีการซิงค์ข้อมูลจาก Cloud
   window.addEventListener('satit-cmu-cloud-synced', () => {
+    renderProfileSummaryAndForm();
     if (activeTab === 'users') {
-      initAdminUsersView();
+      renderAdminUsersTab();
     }
   });
 });
@@ -577,7 +578,7 @@ function initUserEditModal() {
       const password = $('#modalUserEditPassword')?.value.trim();
       const roleId = roleInput?.value || 'teacher';
       const avatar = avatarInput?.value || '👨‍🏫';
-      const canChangeStatus = statusToggle ? statusToggle.checked : roleId === 'admin';
+      const canChangeStatus = (roleId === 'admin') || Boolean(statusToggle && statusToggle.checked);
 
       if (!name) {
         showToast({

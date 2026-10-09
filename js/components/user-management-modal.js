@@ -388,6 +388,7 @@ export function injectUserModals() {
 
   // Listen to realtime cloud sync updates
   window.addEventListener('satit-cmu-cloud-synced', () => {
+    updateNavbarDisplay();
     if ($('#userManagementModal')?.classList.contains('is-active')) {
       renderUserMgmtTable();
     }
@@ -824,7 +825,7 @@ function bindUserEditFormEvents() {
       const password = $('#userEditPassword')?.value.trim();
       const roleId = roleInput?.value || 'teacher';
       const avatar = avatarInput?.value || '👨‍🏫';
-      const canChangeStatus = statusToggle ? statusToggle.checked : (roleId === 'admin');
+      const canChangeStatus = (roleId === 'admin') || Boolean(statusToggle && statusToggle.checked);
 
       if (!name) {
         showToast({

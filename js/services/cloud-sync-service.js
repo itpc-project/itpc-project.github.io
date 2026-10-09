@@ -55,7 +55,7 @@ class CloudSyncManager {
           enabled: true,
           endpoint: DEFAULT_REST_URL,
           autoSync: true,
-          syncIntervalMs: 12000,
+          syncIntervalMs: 25000,
           ...parsed,
           firebaseUrl: resolvedFirebase
         };
@@ -66,7 +66,7 @@ class CloudSyncManager {
       endpoint: DEFAULT_REST_URL,
       firebaseUrl: defaultFirebase,
       autoSync: true,
-      syncIntervalMs: 12000
+      syncIntervalMs: 25000
     };
   }
 
@@ -171,13 +171,13 @@ class CloudSyncManager {
       });
     }
 
-    // 3. Heartbeat ตรวจสอบข้อมูลจาก Cloud เป็นระยะ (ทุก 10 วินาที)
+    // 3. Heartbeat ตรวจสอบข้อมูลจาก Cloud เป็นระยะ (ทุก 25 วินาที เพื่อไม่ให้หน่วงเครื่องและเน็ต)
     if (this.syncIntervalId) clearInterval(this.syncIntervalId);
     this.syncIntervalId = setInterval(() => {
       if (this.config.enabled && this.config.autoSync && !document.hidden) {
         this.pull(false);
       }
-    }, this.config.syncIntervalMs || 10000);
+    }, this.config.syncIntervalMs || 25000);
 
     this.updateStatusBadge();
   }
@@ -194,17 +194,24 @@ class CloudSyncManager {
     }
 
     this.isSyncing = true;
-    this.updateStatusBadge('syncing');
+    if (force) {
+      this.updateStatusBadge('syncing');
+    }
 
     try {
       const { url, provider } = this.getTargetUrl();
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000); // 6s timeout ป้องกันเน็ตช้าค้าง
+
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
         },
-        cache: 'no-store'
+        cache: 'no-store',
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`HTTP Error: ${response.status}`);
@@ -239,7 +246,30 @@ class CloudSyncManager {
       const remoteActivities = Array.isArray(remoteData.activities) ? remoteData.activities : [];
       const remoteForms = (remoteData.activityForms && typeof remoteData.activityForms === 'object') ? remoteData.activityForms : {};
 
-      // ตรวจสอบว่าในเครื่องมีกิจกรรมที่สร้างไว้ แต่บนคลาวด์ยังไม่มีหรือไม่ -> ถ้ามีให้ผสานและส่งขึ้นคลาวด์ทันที
+      // 1. ซิงค์ข้อมูลโครงการ (Projects) จาก Remote เสมอ
+      if (Array.isArray(remoteData.projects) && remoteData.projects.length > 0) {
+        localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(remoteData.projects));
+      }
+
+      // 2. ซิงค์รายชื่อผู้ใช้และสิทธิ์ (Users) จาก Remote เสมอ เพื่อให้สิทธิ์แอดมินที่ได้รับมีผลทันทีข้ามเครื่อง
+      if (Array.isArray(remoteData.users) && remoteData.users.length > 0) {
+        localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(remoteData.users));
+        try {
+          const rawSession = sessionStorage.getItem(APP_CONFIG.STORAGE_KEYS.AUTH_USER);
+          if (rawSession) {
+            const currentAuth = JSON.parse(rawSession);
+            const matched = remoteData.users.find(
+              (u) => (currentAuth.id && u.id === currentAuth.id) || 
+                     (currentAuth.email && u.email && u.email.toLowerCase() === currentAuth.email.toLowerCase())
+            );
+            if (matched) {
+              sessionStorage.setItem(APP_CONFIG.STORAGE_KEYS.AUTH_USER, JSON.stringify(matched));
+            }
+          }
+        } catch {}
+      }
+
+      // 3. ผสานกิจกรรม (Activities) และแบบฟอร์ม (Forms) สองทางเพื่อไม่ให้ข้อมูลสูญหาย
       let needsPushBack = false;
       let mergedActivities = [...remoteActivities];
       if (localActivities.length > 0) {
@@ -256,10 +286,11 @@ class CloudSyncManager {
         needsPushBack = true;
       }
 
+      localStorage.setItem(STORAGE_KEYS.ACTIVITIES, JSON.stringify(mergedActivities));
+      localStorage.setItem(STORAGE_KEYS.FORMS, JSON.stringify(mergedForms));
+
       if (needsPushBack) {
         console.log('[CloudSync] Found local activities/forms not in cloud. Merging and pushing to Firebase...');
-        localStorage.setItem(STORAGE_KEYS.ACTIVITIES, JSON.stringify(mergedActivities));
-        localStorage.setItem(STORAGE_KEYS.FORMS, JSON.stringify(mergedForms));
         await this.push();
         this.updateStatusBadge('synced');
         this.notifySubscribers(this.exportAllDataAsJSON(), 'merge');
@@ -267,44 +298,8 @@ class CloudSyncManager {
       }
 
       const remoteTimestamp = Number(remoteData.updatedAt) || 0;
-      const localTimestamp = Number(localStorage.getItem(STORAGE_KEYS.LOCAL_TIMESTAMP)) || 0;
-
-      // ตรวจสอบว่าข้อมูลบน Cloud ใหม่กว่าข้อมูลในเครื่อง หรือมีกิจกรรมใหม่ หรือถูกบังคับอัปเดต
-      if (force || remoteTimestamp > localTimestamp || remoteActivities.length !== localActivities.length) {
-        let hasUpdated = false;
-
-        if (Array.isArray(remoteData.projects) && remoteData.projects.length > 0) {
-          localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(remoteData.projects));
-          hasUpdated = true;
-        }
-
-        localStorage.setItem(STORAGE_KEYS.ACTIVITIES, JSON.stringify(mergedActivities));
-        hasUpdated = true;
-
-        localStorage.setItem(STORAGE_KEYS.FORMS, JSON.stringify(mergedForms));
-        hasUpdated = true;
-
-        if (Array.isArray(remoteData.users) && remoteData.users.length > 0) {
-          localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(remoteData.users));
-          hasUpdated = true;
-          try {
-            const rawSession = sessionStorage.getItem(APP_CONFIG.STORAGE_KEYS.AUTH_USER);
-            if (rawSession) {
-              const currentAuth = JSON.parse(rawSession);
-              const matched = remoteData.users.find(u => u.id === currentAuth.id || (u.email && u.email.toLowerCase() === currentAuth.email?.toLowerCase()));
-              if (matched) {
-                sessionStorage.setItem(APP_CONFIG.STORAGE_KEYS.AUTH_USER, JSON.stringify(matched));
-              }
-            }
-          } catch {}
-        }
-
-        if (hasUpdated) {
-          localStorage.setItem(STORAGE_KEYS.LOCAL_TIMESTAMP, String(remoteTimestamp || Date.now()));
-          this.notifySubscribers(remoteData, 'cloud');
-        }
-      }
-
+      localStorage.setItem(STORAGE_KEYS.LOCAL_TIMESTAMP, String(remoteTimestamp || Date.now()));
+      this.notifySubscribers(remoteData, 'cloud');
       this.updateStatusBadge('synced');
       return { success: true, data: remoteData };
     } catch (err) {

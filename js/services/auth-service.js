@@ -5,6 +5,7 @@
 
 import { APP_CONFIG, DEMO_ACCOUNTS, ROLES } from '../config.js';
 import { UserService } from './user-service.js';
+import { CloudSyncService } from './cloud-sync-service.js';
 
 export const AuthService = {
   /**
@@ -41,8 +42,10 @@ export const AuthService = {
    * @returns {Promise<{ success: boolean, user?: object, message?: string }>}
    */
   async login(email, password, rememberMe = false) {
-    // จำลอง Network Delay 500ms เพื่อความสมจริงและแสดง Loading animation
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    // ดึงข้อมูลผู้ใช้ล่าสุดจากคลาวด์ก่อนตรวจสอบ เพื่อให้สิทธิ์ที่ได้รับมอบหมายใหม่มีผลทันที
+    try {
+      await CloudSyncService.pull(true);
+    } catch {}
 
     const cleanEmail = email.trim().toLowerCase();
     const allUsers = UserService.getUsers();
@@ -90,28 +93,47 @@ export const AuthService = {
 
   /**
    * ดึงข้อมูลผู้ใช้ปัจจุบันที่ล็อกอินอยู่
+   * ตรวจสอบและดึงสิทธิ์ล่าสุดจาก UserService เสมอ เพื่อให้การปรับสิทธิ์เป็นแอดมินมีผลทันทีข้ามเครื่อง
    */
   getCurrentUser() {
     try {
       const data = sessionStorage.getItem(APP_CONFIG.STORAGE_KEYS.AUTH_USER);
-      if (data) return JSON.parse(data);
+      if (data) {
+        const parsed = JSON.parse(data);
+        const allUsers = UserService.getUsers();
+        const latest = allUsers.find(
+          (u) => (parsed.id && u.id === parsed.id) || (parsed.email && u.email && u.email.toLowerCase() === parsed.email.toLowerCase())
+        );
+        if (latest) {
+          // หากข้อมูลผู้ใช้ในระบบมีสิทธิ์ บทบาท หรือชื่อใหม่ ให้ซิงค์ลง sessionStorage ทันที
+          if (latest.roleId !== parsed.roleId || latest.canChangeStatus !== parsed.canChangeStatus || latest.name !== parsed.name) {
+            sessionStorage.setItem(APP_CONFIG.STORAGE_KEYS.AUTH_USER, JSON.stringify(latest));
+          }
+          return latest;
+        }
+        return parsed;
+      }
       const allUsers = UserService.getUsers();
-      return allUsers[1] || DEMO_ACCOUNTS[1];
+      return allUsers[0] || DEMO_ACCOUNTS[0];
     } catch {
-      return DEMO_ACCOUNTS[1];
+      return DEMO_ACCOUNTS[0];
     }
   },
 
   /**
    * ตรวจสอบว่าผู้ใช้ปัจจุบันมีสิทธิ์เป็น แอดมิน (Admin) หรือไม่
-   * กฎ: เฉพาะแอดมินเท่านั้นที่สามารถกำหนด/เปลี่ยนสถานะกิจกรรมได้
+   * กฎ: แอดมินทุกคนมีสิทธิ์เท่าเทียมกันทุกประการ (เปลี่ยนสถานะกิจกรรม, แก้ไขโครงการ, จัดการกิจกรรม)
    */
   isAdmin() {
     const user = this.getCurrentUser();
     if (!user) return false;
-    if (user.canChangeStatus === true) return true;
-    if (user.roleId === 'admin') return true;
-    if (user.role && (user.role.includes('แอดมิน') || user.role.includes('ผู้บริหาร') || user.role.toLowerCase().includes('admin'))) return true;
+    if (user.canChangeStatus === true || user.canChangeStatus === 'true') return true;
+    if (user.roleId && user.roleId.toLowerCase() === 'admin') return true;
+    if (user.role && (
+      user.role.includes('แอดมิน') || 
+      user.role.includes('ผู้บริหาร') || 
+      user.role.toLowerCase().includes('admin')
+    )) return true;
     if (user.email && user.email.toLowerCase().startsWith('admin')) return true;
     return false;
   },

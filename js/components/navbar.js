@@ -50,8 +50,30 @@ export function initNavbar() {
   window.addEventListener('satit-cmu-cloud-synced', () => {
     const freshUser = AuthService.getCurrentUser();
     if (freshUser) {
-      if (userAvatarEl) userAvatarEl.textContent = freshUser.avatar || (AuthService.isAdmin() ? '👑' : '👨‍🏫');
+      const isFreshAdmin = AuthService.isAdmin();
+      if (userAvatarEl) userAvatarEl.textContent = freshUser.avatar || (isFreshAdmin ? '👑' : '👨‍🏫');
       if (userNameEl) userNameEl.textContent = freshUser.name || 'ผู้ใช้งานระบบ';
+      
+      if (userRoleEl) {
+        if (isFreshAdmin) {
+          userRoleEl.textContent = '👑 แอดมิน (กำหนดสถานะได้)';
+          userRoleEl.style.background = 'linear-gradient(135deg, var(--cmu-purple-700) 0%, #451d5b 100%)';
+          userRoleEl.style.color = '#fcd34d';
+          userRoleEl.style.border = '1px solid rgba(252, 211, 77, 0.4)';
+        } else {
+          userRoleEl.textContent = `${freshUser.role || 'อาจารย์'} (ดูสถานะเท่านั้น 🔒)`;
+          userRoleEl.style.background = '';
+          userRoleEl.style.color = '';
+          userRoleEl.style.border = '';
+        }
+      }
+
+      if (userMgmtBtn) {
+        userMgmtBtn.style.display = isFreshAdmin ? 'inline-flex' : 'none';
+      }
+      if (extAdminMgmtBtn) {
+        extAdminMgmtBtn.style.display = isFreshAdmin ? 'inline-flex' : 'none';
+      }
     }
   });
 
