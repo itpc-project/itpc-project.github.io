@@ -131,6 +131,70 @@ export const WordDocService = {
       }
     }
 
+    // 7. จัดการข้อมูลรายการงบประมาณ (สำหรับวนลูปใน Word และแบบข้อความบล็อกเดียว)
+    const formattedBudgetItems = budgetItems.map((b, idx) => {
+      const itemNo = idx + 1;
+      const itemName = (b.item || b.name || '').trim();
+      const qty1 = Number(b.qty1 || 0);
+      const qty2 = Number(b.qty2 || 1);
+      const rateNum = Number(b.rate || 0);
+      const totalNum = Number(b.total) || (qty1 * qty2 * rateNum);
+      const totalFormatted = totalNum.toLocaleString('th-TH');
+      const totalDecFormatted = totalNum.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      // สร้างข้อความสูตรการคำนวณ เช่น (11 คน x 1 มื้อ x 40 บาท)
+      let calcStr = '';
+      if (qty1 > 0 && rateNum > 0) {
+        const parts = [];
+        parts.push(`${qty1} ${b.unit1 || 'คน'}`);
+        if (qty2 > 1 || (b.unit2 && b.unit2 !== b.unit1 && b.unit2 !== '-')) {
+          parts.push(`${qty2} ${b.unit2 || 'มื้อ'}`);
+        }
+        parts.push(`${rateNum.toLocaleString('th-TH')} บาท`);
+        calcStr = `(${parts.join(' x ')})`;
+      } else if (b.note) {
+        calcStr = `(${b.note})`;
+      } else if (totalNum > 0) {
+        calcStr = `(${totalFormatted} บาท)`;
+      }
+
+      return {
+        itemNo: itemNo,
+        ลำดับ: itemNo,
+        category: b.category || '',
+        หมวด: b.category || '',
+        subCategory: b.subCategory || '',
+        item: itemName,
+        itemName: itemName,
+        รายการ: itemName,
+        qty1: String(qty1),
+        unit1: b.unit1 || '',
+        qty2: String(qty2),
+        unit2: b.unit2 || '',
+        rate: rateNum.toLocaleString('th-TH'),
+        rateInt: rateNum.toLocaleString('th-TH'),
+        อัตรา: rateNum.toLocaleString('th-TH'),
+        total: totalDecFormatted,
+        itemTotal: totalFormatted,
+        itemTotalInt: totalFormatted,
+        itemTotalDec: totalDecFormatted,
+        จำนวนเงิน: totalFormatted,
+        ยอดเงิน: totalFormatted,
+        itemCalc: calcStr,
+        สูตรคำนวณ: calcStr,
+        การคำนวณ: calcStr,
+        note: b.note || '',
+        หมายเหตุ: b.note || ''
+      };
+    });
+
+    // สรุปรายการงบประมาณเป็นข้อความบล็อกเดียว (พร้อมเลขข้อ แท็บ และการคำนวณ)
+    const budgetItemsList = formattedBudgetItems.map((it) => {
+      const line1 = `   ${it.itemNo}. ${it.itemName}\t${it.itemTotal} บาท`;
+      const line2 = it.itemCalc ? `      ${it.itemCalc}` : '';
+      return line2 ? `${line1}\n${line2}` : line1;
+    }).join('\n');
+
     // ข้อมูลพื้นฐานหลัก (Core Placeholders สำหรับทั้ง 5 แม่แบบ)
     const baseMapping = {
       // 1. โครงการ & กิจกรรม
@@ -196,26 +260,20 @@ export const WordDocService = {
       docMonth: dates.month,
       docYear: dates.year,
 
-      // 7. รายการย่อยสำหรับตาราง (Looping Sections)
+      // 7. รายการย่อยสำหรับตารางและลูป (Looping Sections)
       timeSlots: timeSlots.map((s, idx) => ({
         slotNo: idx + 1,
+        ลำดับ: idx + 1,
         time: s.time || '',
+        เวลา: s.time || '',
         detail: s.detail || '',
-        expenseCategory: s.expenseCategory || '-'
+        รายละเอียด: s.detail || '',
+        expenseCategory: s.expenseCategory || '-',
+        หมวดเบิกจ่าย: s.expenseCategory || '-'
       })),
-      budgetItems: budgetItems.map((b, idx) => ({
-        itemNo: idx + 1,
-        category: b.category || '',
-        subCategory: b.subCategory || '',
-        item: b.item || '',
-        qty1: String(b.qty1 || 0),
-        unit1: b.unit1 || '',
-        qty2: String(b.qty2 || 1),
-        unit2: b.unit2 || '',
-        rate: Number(b.rate || 0).toLocaleString('th-TH'),
-        total: Number(b.total || 0).toLocaleString('th-TH', { minimumFractionDigits: 2 }),
-        note: b.note || ''
-      }))
+      budgetItems: formattedBudgetItems,
+      budgetItemsList: budgetItemsList,
+      budgetItemsText: budgetItemsList
     };
 
     // เพิ่ม Aliases ภาษาไทยและตัวแปรเสริมเพื่อความเข้ากันได้ 100%
@@ -282,6 +340,9 @@ export const WordDocService = {
       'งบประมาณ': baseMapping.budgetTotal,
       'งบประมาณรวม': baseMapping.budgetTotal,
       'งบประมาณตัวอักษร': baseMapping.budgetBahtText,
+      'รายการงบประมาณ': baseMapping.budgetItemsList,
+      'งบประมาณรายการ': baseMapping.budgetItemsList,
+      'งบประมาณย่อย': baseMapping.budgetItems,
       'วันที่เอกสาร': baseMapping.docDate,
       'วันที่เลขไทย': baseMapping.docDateThai,
       'วัน': baseMapping.docDay,
@@ -480,11 +541,67 @@ export const WordDocService = {
       },
       {
         category: 'งบประมาณ',
+        tag: '{{budgetTotalInt}}',
+        thaiTag: '{{งบประมาณจำนวนเต็ม}}',
+        label: 'งบประมาณรวม (จำนวนเต็ม)',
+        currentValue: `${data.budgetTotalInt} บาท`,
+        desc: 'ยอดงบประมาณรวมแบบจำนวนเต็ม เช่น 20,240'
+      },
+      {
+        category: 'งบประมาณ',
         tag: '{{budgetBahtText}}',
         thaiTag: '{{งบประมาณตัวอักษร}}',
         label: 'งบประมาณตัวอักษร',
         currentValue: data.budgetBahtText,
         desc: 'ตัวอักษรภาษาไทย เช่น หกหมื่นห้าพันบาทถ้วน'
+      },
+      {
+        category: 'งบประมาณ',
+        tag: '{{budgetItemsList}}',
+        thaiTag: '{{รายการงบประมาณ}}',
+        label: 'รายการงบประมาณทั้งหมด (ข้อความรวม)',
+        currentValue: data.budgetItemsList,
+        desc: 'รวมรายการค่าใช้จ่ายทุกข้อ พร้อมเลขข้อ แท็บระยะ และสูตรคำนวณวงเล็บ วาง Tag เดียวจบ'
+      },
+      {
+        category: 'งบประมาณ (วนลูปใน Word)',
+        tag: '{{#budgetItems}}...{{/budgetItems}}',
+        thaiTag: '{{#งบประมาณ}}...{{/งบประมาณ}}',
+        label: 'การวนลูปรายการงบประมาณ',
+        currentValue: `${data.budgetItems.length} รายการ`,
+        desc: 'ใช้ครอบแถวใน Word: {{#budgetItems}} {{itemNo}}. {{itemName}} {{itemTotal}} บาท (เคาะแท็บ) {{itemCalc}} {{/budgetItems}}'
+      },
+      {
+        category: 'งบประมาณ (วนลูปใน Word)',
+        tag: '{{itemNo}}',
+        thaiTag: '{{ลำดับ}}',
+        label: 'ลำดับรายการงบประมาณ',
+        currentValue: '1, 2, ...',
+        desc: 'ลำดับที่ของรายการค่าใช้จ่าย (ใช้ภายในลูป budgetItems)'
+      },
+      {
+        category: 'งบประมาณ (วนลูปใน Word)',
+        tag: '{{itemName}}',
+        thaiTag: '{{รายการ}}',
+        label: 'ชื่อรายการค่าใช้จ่าย',
+        currentValue: data.budgetItems[0]?.itemName || 'ค่าอาหารว่าง...',
+        desc: 'ชื่อรายการค่าใช้จ่าย (ใช้ภายในลูป budgetItems)'
+      },
+      {
+        category: 'งบประมาณ (วนลูปใน Word)',
+        tag: '{{itemTotal}}',
+        thaiTag: '{{จำนวนเงิน}}',
+        label: 'ยอดเงินของรายการ',
+        currentValue: data.budgetItems[0]?.itemTotal || '440',
+        desc: 'จำนวนเงินรวมของรายการนั้นๆ มีคอมม่า (ใช้ภายในลูป budgetItems)'
+      },
+      {
+        category: 'งบประมาณ (วนลูปใน Word)',
+        tag: '{{itemCalc}}',
+        thaiTag: '{{สูตรคำนวณ}}',
+        label: 'สูตรการคำนวณในวงเล็บ',
+        currentValue: data.budgetItems[0]?.itemCalc || '(11 คน x 1 มื้อ x 40 บาท)',
+        desc: 'ข้อความสูตรคำนวณ เช่น (11 คน x 1 มื้อ x 40 บาท) (ใช้ภายในลูป budgetItems)'
       },
       {
         category: 'วันที่เอกสารราชการ',
@@ -523,6 +640,50 @@ export const WordDocService = {
   async generateWordDocument(templateSource, formData) {
     const arrayBuffer = await this.loadTemplateArrayBuffer(templateSource);
     const zip = new PizZip(arrayBuffer);
+
+    // ปรับปรุง XML ให้รองรับทั้งแท็กเดี่ยว {#tag} และแท็กคู่ {{#tag}} รวมถึงตารางที่ถูกตัด runs ใน Word
+    try {
+      const docXml = zip.file('word/document.xml');
+      if (docXml) {
+        let content = docXml.asText();
+        
+        // 1. จัดการช่องตาราง (Table Cells: <w:tc>) ที่มีแท็กวงเล็บเดี่ยว เช่น {#timeSlots}{slotNo}, {time}, {detail}, {expenseCategory}{/timeSlots}
+        content = content.replace(/<w:tc\b[\s\S]*?<\/w:tc>/g, (tcXml) => {
+          if (tcXml.includes('{') && !tcXml.includes('{{')) {
+            let allText = '';
+            const tRegex = /<w:t\b[^>]*>([\s\S]*?)<\/w:t>/g;
+            let m;
+            while ((m = tRegex.exec(tcXml)) !== null) {
+              allText += m[1];
+            }
+            const converted = allText
+              .replace(/\{#([a-zA-Z0-9_\u0E00-\u0E7F]+)\}/g, '{{#$1}}')
+              .replace(/\{\/([a-zA-Z0-9_\u0E00-\u0E7F]+)\}/g, '{{/$1}}')
+              .replace(/\{([a-zA-Z0-9_\u0E00-\u0E7F]+)\}/g, '{{$1}}');
+            
+            let first = true;
+            return tcXml.replace(/<w:t\b[^>]*>([\s\S]*?)<\/w:t>/g, () => {
+              if (first) {
+                first = false;
+                return `<w:t xml:space="preserve">${converted}</w:t>`;
+              }
+              return '<w:t></w:t>';
+            });
+          }
+          return tcXml;
+        });
+
+        // 2. แปลง loop tags ทั่วไปที่เขียน {#tag} ให้เป็น {{#tag}} และ {/tag} ให้เป็น {{/tag}}
+        content = content
+          .replace(/(?<!\{)\{#([a-zA-Z0-9_\u0E00-\u0E7F]+)\}(?!\})/g, '{{#$1}}')
+          .replace(/(?<!\{)\{\/([a-zA-Z0-9_\u0E00-\u0E7F]+)\}(?!\})/g, '{{/$1}}')
+          .replace(/(?<!\{)\{(itemNo|itemName|itemTotal|itemTotalInt|itemCalc|slotNo|time|detail|expenseCategory|ลำดับ|รายการ|จำนวนเงิน|สูตรคำนวณ)\}(?!\})/g, '{{$1}}');
+
+        zip.file('word/document.xml', content);
+      }
+    } catch (e) {
+      console.warn('Word XML tag normalization skipped:', e);
+    }
 
     // สร้าง Docxtemplater โดยกำหนด Delimiters ให้ตรงกับ {{ และ }}
     const doc = new Docxtemplater(zip, {
