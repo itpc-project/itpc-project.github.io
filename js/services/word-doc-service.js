@@ -619,7 +619,27 @@ export const WordDocService = {
    */
   async loadTemplateArrayBuffer(templateSource) {
     if (typeof templateSource === 'string') {
-      const response = await fetch(templateSource);
+      let response = await fetch(templateSource);
+      if (!response.ok) {
+        // Fallback: หากขึ้นต้นด้วย / ให้ลองเอา / ออก หรือเติม ./
+        const alternatives = [];
+        if (templateSource.startsWith('/')) {
+          alternatives.push('.' + templateSource);
+          alternatives.push(templateSource.slice(1));
+        } else {
+          alternatives.push('/' + templateSource);
+          alternatives.push('./' + templateSource);
+        }
+        for (const alt of alternatives) {
+          try {
+            const altRes = await fetch(alt);
+            if (altRes.ok) {
+              response = altRes;
+              break;
+            }
+          } catch {}
+        }
+      }
       if (!response.ok) {
         throw new Error(`ไม่สามารถโหลดไฟล์แม่แบบจาก "${templateSource}" ได้ (HTTP ${response.status})`);
       }
