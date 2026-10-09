@@ -29,10 +29,21 @@
   border: 1px solid var(--border-subtle);
   width: 100%;
   max-width: 480px;
+  max-height: calc(100vh - 2.5rem);
+  display: flex;
+  flex-direction: column;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   transform: scale(0.95) translateY(10px);
   opacity: 0;
   transition: all var(--transition-smooth);
+  overflow: hidden;
+}
+
+.modal-card form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -42,6 +53,7 @@
 }
 
 .modal-header {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -82,9 +94,14 @@
 
 .modal-body {
   padding: var(--space-6);
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
 }
 
 .modal-footer {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -92,4 +109,14 @@
   padding: var(--space-4) var(--space-6);
   background: var(--bg-input);
   border-top: 1px solid var(--border-subtle);
+}
+
+@keyframes modalCardShake {
+  0%, 100% { transform: scale(1) translateX(0); }
+  20%, 60% { transform: scale(1.01) translateX(-6px); }
+  40%, 80% { transform: scale(1.01) translateX(6px); }
+}
+
+.modal-card-shake {
+  animation: modalCardShake 0.3s ease-in-out;
 }

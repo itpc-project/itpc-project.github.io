@@ -376,10 +376,10 @@ export function injectUserModals() {
     document.body.appendChild(userEditModalEl);
   }
 
-  // Initialize Modal instances
-  profileModalInstance = initModal($('#profileModal'));
-  userMgmtModalInstance = initModal($('#userManagementModal'));
-  userEditModalInstance = initModal($('#userEditModal'));
+  // Initialize Modal instances with static backdrop
+  profileModalInstance = initModal($('#profileModal'), { staticBackdrop: true });
+  userMgmtModalInstance = initModal($('#userManagementModal'), { staticBackdrop: true });
+  userEditModalInstance = initModal($('#userEditModal'), { staticBackdrop: true });
 
   // Bind Form Events
   bindProfileFormEvents();
@@ -772,14 +772,31 @@ function bindUserEditFormEvents() {
     });
   }
 
+  // ป้องกันการกด Enter ในช่องกรอกข้อความแล้วฟอร์มเด้ง Submit ก่อนกรอกเสร็จ
+  if (form) {
+    const formInputs = form.querySelectorAll('input:not([type="hidden"])');
+    formInputs.forEach((input, index) => {
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (index < formInputs.length - 1) {
+            formInputs[index + 1].focus();
+          } else {
+            $('#btnSubmitUserEdit')?.focus();
+          }
+        }
+      });
+    });
+  }
+
   // Form submit
   if (form) {
     addEvent(form, 'submit', (e) => {
       e.preventDefault();
 
       const name = $('#userEditName')?.value.trim();
-      const position = $('#userEditPosition')?.value.trim();
-      const department = $('#userEditDept')?.value.trim();
+      const position = $('#userEditPosition')?.value.trim() || 'อาจารย์ผู้สอน';
+      const department = $('#userEditDept')?.value.trim() || 'โรงเรียนสาธิตมหาวิทยาลัยเชียงใหม่';
       const phone = $('#userEditPhone')?.value.trim();
       const email = $('#userEditEmail')?.value.trim();
       const password = $('#userEditPassword')?.value.trim();
@@ -787,12 +804,34 @@ function bindUserEditFormEvents() {
       const avatar = avatarInput?.value || '👨‍🏫';
       const canChangeStatus = statusToggle ? statusToggle.checked : (roleId === 'admin');
 
-      if (!name || !email || !password) {
+      if (!name) {
         showToast({
           type: 'error',
           title: 'ข้อมูลไม่ครบถ้วน',
-          message: 'กรุณากรอกชื่อ-นามสกุล, อีเมล และรหัสผ่าน'
+          message: 'กรุณากรอกชื่อ-นามสกุลของผู้ใช้งาน'
         });
+        $('#userEditName')?.focus();
+        return;
+      }
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showToast({
+          type: 'error',
+          title: 'อีเมลไม่ถูกต้อง',
+          message: 'กรุณากรอกอีเมลให้ถูกต้อง (เช่น name@satit.cmu.ac.th)'
+        });
+        $('#userEditEmail')?.focus();
+        return;
+      }
+
+      const finalPassword = password || 'password123';
+      if (finalPassword.length < 6) {
+        showToast({
+          type: 'error',
+          title: 'รหัสผ่านสั้นเกินไป',
+          message: 'รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร'
+        });
+        $('#userEditPassword')?.focus();
         return;
       }
 
@@ -803,7 +842,7 @@ function bindUserEditFormEvents() {
         department,
         phone,
         email,
-        password,
+        password: finalPassword,
         roleId,
         avatar,
         canChangeStatus

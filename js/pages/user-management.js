@@ -484,7 +484,8 @@ function initUserEditModal() {
   const modalEl = $('#pageUserEditModal');
   if (!modalEl) return;
 
-  userEditModalInstance = initModal(modalEl);
+  // เปิดใช้งาน Static Backdrop: คลิกพื้นที่มืดด้านนอกจะไม่ปิดหน้าต่าง ป้องกันข้อมูลที่กำลังกรอกหาย
+  userEditModalInstance = initModal(modalEl, { staticBackdrop: true });
 
   const form = $('#modalUserEditForm');
   const avatarPicker = $('#modalUserEditAvatarPicker');
@@ -493,10 +494,29 @@ function initUserEditModal() {
   const roleInput = $('#modalUserEditSelectedRole');
   const statusToggle = $('#modalUserEditCanChangeStatus');
 
+  // ป้องกันการกดปุ่ม Enter ในช่องกรอกข้อความแล้วฟอร์มเด้ง Submit หรือปิดหน้าต่างก่อนกรอกเสร็จ
+  if (form) {
+    const formInputs = form.querySelectorAll('input:not([type="hidden"])');
+    formInputs.forEach((input, index) => {
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          // ย้ายเคอร์เซอร์ไปยังช่องถัดไปอย่างราบรื่น
+          if (index < formInputs.length - 1) {
+            formInputs[index + 1].focus();
+          } else {
+            $('#btnSubmitModalUser')?.focus();
+          }
+        }
+      });
+    });
+  }
+
   // Avatar select
   if (avatarPicker && avatarInput) {
     avatarPicker.querySelectorAll('.avatar-pick-item').forEach((btn) => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
         avatarPicker.querySelectorAll('.avatar-pick-item').forEach((b) => b.classList.remove('is-selected'));
         btn.classList.add('is-selected');
         avatarInput.value = btn.getAttribute('data-avatar');
@@ -507,7 +527,8 @@ function initUserEditModal() {
   // Role radio cards select
   if (roleGroup && roleInput) {
     roleGroup.querySelectorAll('.role-radio-card').forEach((card) => {
-      card.addEventListener('click', () => {
+      card.addEventListener('click', (e) => {
+        e.preventDefault();
         roleGroup.querySelectorAll('.role-radio-card').forEach((c) => c.classList.remove('is-selected'));
         card.classList.add('is-selected');
         const role = card.getAttribute('data-role');
@@ -527,8 +548,8 @@ function initUserEditModal() {
       e.preventDefault();
 
       const name = $('#modalUserEditName')?.value.trim();
-      const position = $('#modalUserEditPosition')?.value.trim();
-      const department = $('#modalUserEditDept')?.value.trim();
+      const position = $('#modalUserEditPosition')?.value.trim() || 'อาจารย์ผู้สอน';
+      const department = $('#modalUserEditDept')?.value.trim() || 'โรงเรียนสาธิตมหาวิทยาลัยเชียงใหม่';
       const phone = $('#modalUserEditPhone')?.value.trim();
       const email = $('#modalUserEditEmail')?.value.trim();
       const password = $('#modalUserEditPassword')?.value.trim();
@@ -536,12 +557,34 @@ function initUserEditModal() {
       const avatar = avatarInput?.value || '👨‍🏫';
       const canChangeStatus = statusToggle ? statusToggle.checked : roleId === 'admin';
 
-      if (!name || !email || !password) {
+      if (!name) {
         showToast({
           type: 'error',
           title: 'ข้อมูลไม่ครบถ้วน',
-          message: 'กรุณากรอกชื่อ-นามสกุล, อีเมล และรหัสผ่าน'
+          message: 'กรุณากรอกชื่อ-นามสกุลของผู้ใช้งาน'
         });
+        $('#modalUserEditName')?.focus();
+        return;
+      }
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showToast({
+          type: 'error',
+          title: 'อีเมลไม่ถูกต้อง',
+          message: 'กรุณากรอกอีเมลให้ถูกต้อง (เช่น name@satit.cmu.ac.th)'
+        });
+        $('#modalUserEditEmail')?.focus();
+        return;
+      }
+
+      const finalPassword = password || 'password123';
+      if (finalPassword.length < 6) {
+        showToast({
+          type: 'error',
+          title: 'รหัสผ่านสั้นเกินไป',
+          message: 'รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร'
+        });
+        $('#modalUserEditPassword')?.focus();
         return;
       }
 
@@ -552,7 +595,7 @@ function initUserEditModal() {
         department,
         phone,
         email,
-        password,
+        password: finalPassword,
         roleId,
         avatar,
         canChangeStatus
@@ -605,7 +648,10 @@ function openPageUserEditModal(user = null) {
       emailInput.value = user.email || '';
       emailInput.readOnly = user.id === 'user-admin';
     }
-    if (pwdInput) pwdInput.value = user.password || 'password123';
+    if (pwdInput) {
+      pwdInput.value = user.password || 'password123';
+      pwdInput.placeholder = 'อย่างน้อย 6 ตัวอักษร';
+    }
     if (roleInput) roleInput.value = user.roleId || 'teacher';
     if (avatarInput) avatarInput.value = user.avatar || '👨‍🏫';
     if (statusToggle) statusToggle.checked = Boolean(user.canChangeStatus);
@@ -619,7 +665,10 @@ function openPageUserEditModal(user = null) {
       emailInput.value = '';
       emailInput.readOnly = false;
     }
-    if (pwdInput) pwdInput.value = 'password123';
+    if (pwdInput) {
+      pwdInput.value = '';
+      pwdInput.placeholder = 'เว้นว่างไว้เพื่อใช้ค่าเริ่มต้น: password123';
+    }
     if (roleInput) roleInput.value = 'teacher';
     if (avatarInput) avatarInput.value = '👨‍🏫';
     if (statusToggle) statusToggle.checked = false;
@@ -638,4 +687,9 @@ function openPageUserEditModal(user = null) {
   });
 
   userEditModalInstance.open();
+
+  // Auto focus first input after open
+  setTimeout(() => {
+    nameInput?.focus();
+  }, 100);
 }
