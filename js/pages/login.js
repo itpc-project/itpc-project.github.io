@@ -9,6 +9,7 @@ import { showToast } from '../utils/toast.js';
 import { initPasswordToggle } from '../components/password-toggle.js';
 import { initModal } from '../components/modal.js';
 import { AuthService } from '../services/auth-service.js';
+import { UserService } from '../services/user-service.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Elements
@@ -63,30 +64,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 4. Role Permissions Matrix Modal Initializer
-  const permModalEl = $('#permissionsModal');
-  const permModal = permModalEl ? initModal(permModalEl) : null;
-  const btnOpenPermModal = $('#btnOpenPermissionsModal');
-  const adminToolbarTopBtn = $('#adminToolbarTopBtn');
+  // 4. User Registration Modal Initializer
+  initRegisterModal(emailInput, passwordInput, submitBtn);
 
-  if (btnOpenPermModal && permModal) {
-    addEvent(btnOpenPermModal, 'click', (e) => {
-      e.preventDefault();
-      permModal.open();
-    });
-  }
-
-  if (adminToolbarTopBtn && permModal) {
-    addEvent(adminToolbarTopBtn, 'click', (e) => {
-      e.preventDefault();
-      permModal.open();
-    });
-  }
-
-  // 5. Admin Toolbar Role Selector Cards Handler
-  initAdminRoleToolbar(emailInput, passwordInput, submitBtn);
-
-  // 6. Pre-fill remembered email if saved, or default to admin
+  // 5. Pre-fill remembered email if saved, or default to admin
   const rememberedEmail = AuthService.getRememberedEmail();
   if (rememberedEmail && emailInput) {
     emailInput.value = rememberedEmail;
@@ -167,88 +148,146 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Admin Toolbar & Role Selection Controller
+ * User Registration Modal Controller
  */
-function initAdminRoleToolbar(emailInput, passwordInput, submitBtn) {
-  const cards = $$('.admin-role-card');
-  const instantLoginBtn = $('#btnInstantAdminLogin');
+function initRegisterModal(emailInput, passwordInput, submitBtn) {
+  const registerModalEl = $('#registerModal');
+  if (!registerModalEl) return;
 
-  cards.forEach((card) => {
-    card.addEventListener('click', () => {
-      cards.forEach((c) => {
-        c.classList.remove('is-active');
-        const badge = c.querySelector('.role-status-badge');
-        if (badge) {
-          badge.classList.remove('badge-active');
-          badge.textContent = 'คลิกเพื่อเลือก';
+  const regModal = initModal(registerModalEl, { staticBackdrop: true });
+  const btnTopRegister = $('#btnTopRegister');
+  const btnOpenRegisterModal = $('#btnOpenRegisterModal');
+  const regForm = $('#registerForm');
+  const btnSubmitRegister = $('#btnSubmitRegister');
+
+  const openModal = (e) => {
+    if (e) e.preventDefault();
+    regModal.open();
+    const firstInput = $('#regName');
+    if (firstInput) setTimeout(() => firstInput.focus(), 100);
+  };
+
+  if (btnTopRegister) addEvent(btnTopRegister, 'click', openModal);
+  if (btnOpenRegisterModal) addEvent(btnOpenRegisterModal, 'click', openModal);
+
+  // Avatar picker selection
+  const avatarPicker = $('#regAvatarPicker');
+  const avatarHiddenInput = $('#regAvatar');
+  if (avatarPicker) {
+    const avatarButtons = avatarPicker.querySelectorAll('.avatar-pick-item');
+    avatarButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        avatarButtons.forEach((b) => b.classList.remove('is-selected'));
+        btn.classList.add('is-selected');
+        if (avatarHiddenInput) {
+          avatarHiddenInput.value = btn.dataset.avatar || '👨‍🏫';
         }
       });
-
-      card.classList.add('is-active');
-      const badge = card.querySelector('.role-status-badge');
-      if (badge) {
-        badge.classList.add('badge-active');
-        badge.textContent = 'เลือกอยู่';
-      }
-
-      const email = card.getAttribute('data-email');
-      const pwd = card.getAttribute('data-pwd');
-      const roleId = card.getAttribute('data-role-id');
-
-      if (emailInput && passwordInput) {
-        emailInput.value = email;
-        passwordInput.value = pwd;
-        clearErrors();
-
-        if (roleId === 'admin') {
-          showToast({
-            type: 'success',
-            title: 'เลือกสิทธิ์ผู้ดูแลระบบ (Admin) 👑',
-            message: 'คุณมีสิทธิ์กำหนดและเปลี่ยนสถานะกิจกรรมได้ทุกสถานะ'
-          });
-        } else {
-          showToast({
-            type: 'info',
-            title: `เลือกบทบาท: ${roleId === 'teacher' ? 'อาจารย์ผู้รับผิดชอบ' : 'เจ้าหน้าที่การเงิน'}`,
-            message: 'สถานะกิจกรรมจะถูกล็อค (เฉพาะแอดมินเท่านั้นที่เปลี่ยนสถานะได้)'
-          });
-        }
-      }
     });
-  });
+  }
 
-  // ปุ่มเข้าสู่ระบบด่วนด้วยสิทธิ์แอดมิน
-  if (instantLoginBtn) {
-    instantLoginBtn.addEventListener('click', async () => {
-      if (emailInput && passwordInput) {
-        emailInput.value = 'admin@satit.cmu.ac.th';
-        passwordInput.value = 'password123';
-        clearErrors();
+  // Submit registration
+  if (btnSubmitRegister) {
+    addEvent(btnSubmitRegister, 'click', () => {
+      const name = $('#regName')?.value.trim();
+      const position = $('#regPosition')?.value.trim();
+      const department = $('#regDepartment')?.value.trim();
+      const phone = $('#regPhone')?.value.trim();
+      const email = $('#regEmail')?.value.trim();
+      const password = $('#regPassword')?.value;
+      const confirmPassword = $('#regConfirmPassword')?.value;
+      const avatar = avatarHiddenInput?.value || '👨‍🏫';
+
+      // Validation
+      if (!name) {
+        showToast({ type: 'warning', title: 'กรุณากรอกชื่อ-นามสกุล', message: 'กรุณาระบุชื่อ-นามสกุลพร้อมคำนำหน้า' });
+        $('#regName')?.focus();
+        return;
+      }
+      if (!position) {
+        showToast({ type: 'warning', title: 'กรุณากรอกตำแหน่ง', message: 'กรุณาระบุตำแหน่ง เช่น อาจารย์ผู้สอน หรือ รองผู้อำนวยการ' });
+        $('#regPosition')?.focus();
+        return;
+      }
+      if (!department) {
+        showToast({ type: 'warning', title: 'กรุณากรอกกลุ่มสาระ/สังกัด', message: 'กรุณาระบุกลุ่มสาระหรือฝ่ายงานที่สังกัด' });
+        $('#regDepartment')?.focus();
+        return;
+      }
+      if (!phone) {
+        showToast({ type: 'warning', title: 'กรุณากรอกเบอร์โทรติดต่อ', message: 'กรุณาระบุเบอร์โทรศัพท์สำหรับติดต่อประสานงาน' });
+        $('#regPhone')?.focus();
+        return;
+      }
+      if (!email) {
+        showToast({ type: 'warning', title: 'กรุณากรอกอีเมล', message: 'กรุณาระบุอีเมล CMU Mail' });
+        $('#regEmail')?.focus();
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showToast({ type: 'error', title: 'รูปแบบอีเมลไม่ถูกต้อง', message: 'ตัวอย่าง: teacher@satit.cmu.ac.th' });
+        $('#regEmail')?.focus();
+        return;
+      }
+      if (!password || password.length < 6) {
+        showToast({ type: 'warning', title: 'รหัสผ่านสั้นเกินไป', message: 'รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร' });
+        $('#regPassword')?.focus();
+        return;
+      }
+      if (password !== confirmPassword) {
+        showToast({ type: 'error', title: 'รหัสผ่านไม่ตรงกัน', message: 'กรุณาตรวจสอบการยืนยันรหัสผ่านอีกครั้ง' });
+        $('#regConfirmPassword')?.focus();
+        return;
       }
 
-      setButtonLoading(instantLoginBtn, true);
-      showToast({
-        type: 'info',
-        title: 'กำลังเข้าสู่ระบบในฐานะแอดมิน...',
-        message: 'กำลังตรวจสอบสิทธิ์ผู้ดูแลระบบและจัดเตรียมพื้นที่ทำงาน'
+      // Check existing user
+      const existingUser = UserService.getUserByEmail(email);
+      if (existingUser) {
+        showToast({
+          type: 'warning',
+          title: 'อีเมลนี้มีในระบบแล้ว',
+          message: `อีเมล ${email} ถูกลงทะเบียนไว้แล้ว สามารถเข้าสู่ระบบได้ทันที`
+        });
+        if (emailInput) emailInput.value = email;
+        if (passwordInput) passwordInput.value = '';
+        regModal.close();
+        if (passwordInput) passwordInput.focus();
+        return;
+      }
+
+      // Save new user
+      const newUser = UserService.saveUser({
+        name,
+        position,
+        department,
+        phone,
+        email,
+        password,
+        avatar,
+        roleId: 'teacher'
       });
 
-      try {
-        const result = await AuthService.login('admin@satit.cmu.ac.th', 'password123', true);
-        if (result.success) {
-          showToast({
-            type: 'success',
-            title: 'เข้าสู่ระบบสำเร็จ (Admin) 👑',
-            message: 'ยินดีต้อนรับผู้ดูแลระบบ! คุณสามารถกำหนดสถานะของกิจกรรมได้ทุกโครงการ'
-          });
-          setTimeout(() => {
-            window.location.href = '/projects.html';
-          }, 600);
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setButtonLoading(instantLoginBtn, false);
+      showToast({
+        type: 'success',
+        title: 'สมัครสมาชิกสำเร็จ! 🎉',
+        message: `ยินดีต้อนรับ ${newUser.name}! บัญชีของคุณพร้อมใช้งานแล้ว`
+      });
+
+      // Pre-fill login inputs
+      if (emailInput) emailInput.value = email;
+      if (passwordInput) passwordInput.value = password;
+
+      // Reset form
+      if (regForm) regForm.reset();
+      if (avatarPicker) {
+        const items = avatarPicker.querySelectorAll('.avatar-pick-item');
+        items.forEach((item, idx) => item.classList.toggle('is-selected', idx === 0));
+        if (avatarHiddenInput) avatarHiddenInput.value = '👨‍🏫';
+      }
+
+      regModal.close();
+      if (submitBtn) {
+        submitBtn.focus();
       }
     });
   }
