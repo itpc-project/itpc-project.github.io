@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html lang="th" data-theme="light">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="ระบบสร้างเอกสารขออนุมัติโครงการและกิจกรรม โรงเรียนสาธิตมหาวิทยาลัยเชียงใหม่ ระดับอนุบาลและประถมศึกษา" />
+  <meta name="description"
+    content="ระบบสร้างเอกสารขออนุมัติโครงการและกิจกรรม โรงเรียนสาธิตมหาวิทยาลัยเชียงใหม่ ระดับอนุบาลและประถมศึกษา" />
   <title>เข้าสู่ระบบ | ระบบสร้างเอกสารโครงการและกิจกรรม - สาธิต มช.</title>
 
   <!-- Google Fonts: Prompt, Sarabun, Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
 
   <!-- Modular CSS Stylesheets -->
   <link rel="stylesheet" href="/css/variables.css" />
@@ -23,6 +27,7 @@
   <link rel="stylesheet" href="/css/components/user-management.css" />
   <link rel="stylesheet" href="/css/pages/login.css" />
 </head>
+
 <body>
 
   <!-- Top Floating Controls -->
@@ -44,9 +49,11 @@
     </div>
 
     <!-- Theme Toggle Button -->
-    <button id="themeToggleBtn" class="theme-toggle-btn" type="button" aria-label="สลับธีม สว่าง/มืด" title="สลับโหมดสี">
+    <button id="themeToggleBtn" class="theme-toggle-btn" type="button" aria-label="สลับธีม สว่าง/มืด"
+      title="สลับโหมดสี">
       <!-- Sun Icon (for light mode) -->
-      <svg class="theme-icon-light" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg class="theme-icon-light" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="5"></circle>
         <line x1="12" y1="1" x2="12" y2="3"></line>
         <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -58,7 +65,8 @@
         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
       </svg>
       <!-- Moon Icon (for dark mode) -->
-      <svg class="theme-icon-dark" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg class="theme-icon-dark" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
       </svg>
     </button>
@@ -77,7 +85,8 @@
         <header class="brand-header">
           <div class="school-logo-badge" aria-label="ตราสัญลักษณ์โรงเรียนสาธิต มช.">
             <!-- Elegant Satit CMU Shield Icon SVG -->
-            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fcd34d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fcd34d" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
               <path d="M12 8v4" stroke="#ffffff"></path>
               <path d="M12 16h.01" stroke="#ffffff" stroke-width="3"></path>
@@ -102,66 +111,15 @@
           </h1>
 
           <p class="brand-desc">
-            ยกระดับการจัดทำบันทึกข้อความราชการ ขออนุมัติทัศนศึกษา เชิญวิทยากร และหนังสือยินยอมผู้ปกครอง
-            ลดขั้นตอนที่ซ้ำซ้อนด้วยระบบแปลงข้อมูลจาก Excel สู่แม่แบบเอกสาร Word อัตโนมัติ
+            จัดทำบันทึกข้อความ ขออนุมัติทัศนศึกษา เชิญวิทยากร และหนังสือยินยอมผู้ปกครอง
+            ที่เกี่ยวกับงาน ฝ่ายยุทธศาสตร์ บริการวิชาการ และกิจกรรมพิเศษ
           </p>
 
-          <!-- Feature Highlights List -->
-          <div class="brand-features-list">
-            <!-- Feature 1 -->
-            <div class="feature-item">
-              <div class="feature-icon-wrapper">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline>
-                  <line x1="16" y1="13" x2="8" y2="13"></line>
-                  <line x1="16" y1="17" x2="8" y2="17"></line>
-                  <polyline points="10 9 9 9 8 9"></polyline>
-                </svg>
-              </div>
-              <div class="feature-text">
-                <div class="feature-text-title">สร้างเอกสารมาตรฐาน Word (.docx) แม่นยำ</div>
-                <div class="feature-text-desc">แม่แบบตรงตามระเบียบสารบรรณของสาธิต มช. และมหาวิทยาลัยเชียงใหม่</div>
-              </div>
-            </div>
-
-            <!-- Feature 2 -->
-            <div class="feature-item">
-              <div class="feature-icon-wrapper" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                  <line x1="3" y1="9" x2="21" y2="9"></line>
-                  <line x1="3" y1="15" x2="21" y2="15"></line>
-                  <line x1="9" y1="3" x2="9" y2="21"></line>
-                  <line x1="15" y1="3" x2="15" y2="21"></line>
-                </svg>
-              </div>
-              <div class="feature-text">
-                <div class="feature-text-title">ดึงข้อมูลอัตโนมัติจากไฟล์ Excel</div>
-                <div class="feature-text-desc">รองรับไฟล์แบบฟอร์มงบประมาณ กำหนดการ และกลุ่มเป้าหมายนักเรียน</div>
-              </div>
-            </div>
-
-            <!-- Feature 3 -->
-            <div class="feature-item">
-              <div class="feature-icon-wrapper" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                </svg>
-              </div>
-              <div class="feature-text">
-                <div class="feature-text-title">เสร็จสิ้นใน 3 นาที</div>
-                <div class="feature-text-desc">ลดระยะเวลาและข้อผิดพลาดในการพิมพ์เอกสารซ้ำซ้อนได้อย่างสมบูรณ์</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Brand Footer -->
-        <footer class="brand-footer">
-          <span>ฝ่ายเทคโนโลยีและนวัตกรรมการศึกษา</span>
-          <span>© 2026 Chiang Mai University Demonstration School</span>
-        </footer>
+          <!-- Brand Footer -->
+          <footer class="brand-footer">
+            <span>ฝ่ายยุทธศาสตร์ บริการวิชาการ และกิจกรรมพิเศษ</span>
+            <span>© 2026 Chiang Mai University Demonstration School</span>
+          </footer>
       </section>
 
       <!-- RIGHT: Interactive Login Form Container -->
@@ -186,24 +144,19 @@
                 <div class="form-group">
                   <label class="input-label" for="email">
                     <span>อีเมล / บัญชีผู้ใช้ <span class="input-label-required">*</span></span>
-                    <span style="font-size: var(--font-size-xs); color: var(--text-muted); font-weight: 400;">CMU Mail</span>
+                    <span style="font-size: var(--font-size-xs); color: var(--text-muted); font-weight: 400;">CMU
+                      Mail</span>
                   </label>
                   <div class="input-wrapper input-has-icon-left">
                     <span class="input-icon-left" aria-hidden="true">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                         <polyline points="22,6 12,13 2,6"></polyline>
                       </svg>
                     </span>
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      class="input-control"
-                      placeholder="เช่น teacher@satit.cmu.ac.th"
-                      autocomplete="email"
-                      required
-                    />
+                    <input id="email" name="email" type="email" class="input-control"
+                      placeholder="เช่น teacher@satit.cmu.ac.th" autocomplete="email" required />
                   </div>
                 </div>
 
@@ -214,27 +167,16 @@
                   </label>
                   <div class="input-wrapper input-has-icon-left input-has-icon-right">
                     <span class="input-icon-left" aria-hidden="true">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                         <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                       </svg>
                     </span>
-                    <input
-                      id="password"
-                      name="password"
-                      type="password"
-                      class="input-control"
-                      placeholder="กรอกรหัสผ่านของคุณ"
-                      autocomplete="current-password"
-                      required
-                    />
-                    <button
-                      id="togglePassword"
-                      type="button"
-                      class="input-icon-right input-toggle-btn"
-                      aria-label="แสดงรหัสผ่าน"
-                      title="สลับแสดง/ซ่อนรหัสผ่าน"
-                    >
+                    <input id="password" name="password" type="password" class="input-control"
+                      placeholder="กรอกรหัสผ่านของคุณ" autocomplete="current-password" required />
+                    <button id="togglePassword" type="button" class="input-icon-right input-toggle-btn"
+                      aria-label="แสดงรหัสผ่าน" title="สลับแสดง/ซ่อนรหัสผ่าน">
                       <!-- Injected via password-toggle.js -->
                     </button>
                   </div>
@@ -260,7 +202,8 @@
                 <!-- Submit Button -->
                 <button id="submitBtn" type="submit" class="btn btn-primary btn-full btn-lg">
                   <span>เข้าสู่ระบบ</span>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                     <polyline points="12 5 19 12 12 19"></polyline>
                   </svg>
@@ -274,7 +217,8 @@
                       <span class="register-desc">ลงทะเบียนบัญชีบุคลากรใหม่เพื่อเริ่มสร้างโครงการ</span>
                     </div>
                     <button type="button" class="btn-register-open" id="btnOpenRegisterModal">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5">
                         <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                         <circle cx="8.5" cy="7" r="4"></circle>
                         <line x1="20" y1="8" x2="20" y2="14"></line>
@@ -288,7 +232,8 @@
 
               <!-- Security Notice -->
               <div class="login-security-notice">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                 </svg>
                 <span>ระบบรักษาความปลอดภัยเครือข่าย มหาวิทยาลัยเชียงใหม่</span>
@@ -339,13 +284,8 @@
                   <polyline points="22,6 12,13 2,6"></polyline>
                 </svg>
               </span>
-              <input
-                id="resetEmail"
-                type="email"
-                class="input-control"
-                placeholder="เช่น yourname@cmu.ac.th"
-                required
-              />
+              <input id="resetEmail" type="email" class="input-control" placeholder="เช่น yourname@cmu.ac.th"
+                required />
             </div>
           </div>
         </div>
@@ -402,7 +342,8 @@
           <div class="form-group" style="margin-bottom: var(--space-3);">
             <label class="input-label" for="regName">
               <span>ชื่อ-นามสกุล <span class="input-label-required">*</span></span>
-              <span style="font-size: var(--font-size-xs); color: var(--text-muted); font-weight: 400;">(พร้อมคำนำหน้าชื่อ)</span>
+              <span
+                style="font-size: var(--font-size-xs); color: var(--text-muted); font-weight: 400;">(พร้อมคำนำหน้าชื่อ)</span>
             </label>
             <input id="regName" type="text" class="input-control" placeholder="เช่น อ.ดร. นิตยา พงษ์ศิริ" required />
           </div>
@@ -413,13 +354,15 @@
               <label class="input-label" for="regPosition">
                 <span>ตำแหน่ง <span class="input-label-required">*</span></span>
               </label>
-              <input id="regPosition" type="text" class="input-control" placeholder="เช่น อาจารย์ผู้สอน, รองผู้อำนวยการ" required />
+              <input id="regPosition" type="text" class="input-control" placeholder="เช่น อาจารย์ผู้สอน, รองผู้อำนวยการ"
+                required />
             </div>
             <div class="form-group">
               <label class="input-label" for="regDepartment">
                 <span>กลุ่มสาระ / สังกัด <span class="input-label-required">*</span></span>
               </label>
-              <input id="regDepartment" type="text" class="input-control" placeholder="เช่น ฝ่ายวิชาการ, กลุ่มสาระวิทยาศาสตร์" required />
+              <input id="regDepartment" type="text" class="input-control"
+                placeholder="เช่น ฝ่ายวิชาการ, กลุ่มสาระวิทยาศาสตร์" required />
             </div>
           </div>
 
@@ -429,13 +372,15 @@
               <label class="input-label" for="regPhone">
                 <span>เบอร์โทรศัพท์ติดต่อ <span class="input-label-required">*</span></span>
               </label>
-              <input id="regPhone" type="tel" class="input-control" placeholder="เช่น 053-944123 หรือ 081-234-5678" required />
+              <input id="regPhone" type="tel" class="input-control" placeholder="เช่น 053-944123 หรือ 081-234-5678"
+                required />
             </div>
             <div class="form-group">
               <label class="input-label" for="regEmail">
                 <span>อีเมล CMU Mail <span class="input-label-required">*</span></span>
               </label>
-              <input id="regEmail" type="email" class="input-control" placeholder="เช่น user@satit.cmu.ac.th" required />
+              <input id="regEmail" type="email" class="input-control" placeholder="เช่น user@satit.cmu.ac.th"
+                required />
             </div>
           </div>
 
@@ -445,18 +390,21 @@
               <label class="input-label" for="regPassword">
                 <span>รหัสผ่านเข้าใช้งาน <span class="input-label-required">*</span></span>
               </label>
-              <input id="regPassword" type="password" class="input-control" placeholder="อย่างน้อย 6 ตัวอักษร" required />
+              <input id="regPassword" type="password" class="input-control" placeholder="อย่างน้อย 6 ตัวอักษร"
+                required />
             </div>
             <div class="form-group">
               <label class="input-label" for="regConfirmPassword">
                 <span>ยืนยันรหัสผ่าน <span class="input-label-required">*</span></span>
               </label>
-              <input id="regConfirmPassword" type="password" class="input-control" placeholder="พิมพ์รหัสผ่านอีกครั้ง" required />
+              <input id="regConfirmPassword" type="password" class="input-control" placeholder="พิมพ์รหัสผ่านอีกครั้ง"
+                required />
             </div>
           </div>
 
           <p style="font-size: var(--font-size-xs); color: var(--text-muted); margin-top: var(--space-2);">
-            💡 <strong>หมายเหตุ:</strong> บัญชีที่สมัครใหม่จะมีบทบาทเป็น <em>อาจารย์ผู้รับผิดชอบกิจกรรม</em> ซึ่งสามารถสร้างโครงการและจัดทำเอกสารได้ทันที
+            💡 <strong>หมายเหตุ:</strong> บัญชีที่สมัครใหม่จะมีบทบาทเป็น <em>อาจารย์ผู้รับผิดชอบกิจกรรม</em>
+            ซึ่งสามารถสร้างโครงการและจัดทำเอกสารได้ทันที
           </p>
         </div>
 
@@ -478,4 +426,5 @@
   <!-- Modular Scripts -->
   <script type="module" src="/js/pages/login.js"></script>
 </body>
+
 </html>

@@ -176,10 +176,70 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Edit Project Modal
+  const editProjectModalEl = $('#editProjectModal');
+  const editProjectModal = editProjectModalEl ? initModal(editProjectModalEl, { staticBackdrop: true }) : null;
+  const btnSaveProjectFromOverview = $('#btnSaveProjectFromOverview');
+
+  if (btnSaveProjectFromOverview) {
+    addEvent(btnSaveProjectFromOverview, 'click', () => {
+      const projectId = $('#editProjectId')?.value;
+      const title = $('#editProjectTitle')?.value.trim();
+      const activityName = $('#editProjectActivityName')?.value.trim();
+      const responsiblePerson = $('#editProjectResponsiblePerson')?.value.trim();
+      const budget = $('#editProjectBudget')?.value;
+      const gradeLevel = $('#editProjectGradeLevel')?.value.trim();
+      const dateRange = $('#editProjectDateRange')?.value.trim();
+      const location = $('#editProjectLocation')?.value.trim();
+      const department = $('#editProjectDepartment')?.value.trim();
+      const fiscalYear = $('#editProjectFiscalYear')?.value.trim();
+
+      if (!title) {
+        showToast({ type: 'warning', title: 'กรุณากรอกชื่อโครงการ', message: 'ชื่อโครงการต้องไม่เป็นค่าว่าง' });
+        $('#editProjectTitle')?.focus();
+        return;
+      }
+      if (!responsiblePerson) {
+        showToast({ type: 'warning', title: 'กรุณากรอกผู้รับผิดชอบ', message: 'กรุณาระบุชื่ออาจารย์ผู้รับผิดชอบโครงการ' });
+        $('#editProjectResponsiblePerson')?.focus();
+        return;
+      }
+      if (budget === '' || isNaN(Number(budget))) {
+        showToast({ type: 'warning', title: 'งบประมาณไม่ถูกต้อง', message: 'กรุณากรอกจำนวนงบประมาณเป็นตัวเลข' });
+        $('#editProjectBudget')?.focus();
+        return;
+      }
+
+      const updated = ProjectService.updateProject(projectId, {
+        title,
+        activityName,
+        responsiblePerson,
+        budget: Number(budget),
+        gradeLevel,
+        dateRange,
+        location,
+        department,
+        fiscalYear: fiscalYear || '2569'
+      });
+
+      if (updated) {
+        showToast({
+          type: 'success',
+          title: 'บันทึกโครงการสำเร็จ! ✨',
+          message: `อัปเดตข้อมูลโครงการ "${updated.title}" เรียบร้อยแล้ว`
+        });
+        if (editProjectModal) editProjectModal.close();
+        updateStatistics();
+        renderProjectCards();
+      }
+    });
+  }
+
   // เรนเดอร์การ์ด 6 กล่องโครงการ (คลิกเข้าได้เลยโดยตรง)
   function renderProjectCards() {
     if (!projectsGrid) return;
 
+    const isAdmin = AuthService.isAdmin();
     const filtered = ProjectService.filterProjects(filterState);
     const countEl = $('#projectsCountBadge');
     if (countEl) {
@@ -246,6 +306,11 @@ document.addEventListener('DOMContentLoaded', () => {
                   <span class="badge-dot"></span>
                   <span>${escapeHTML(project.statusLabel)}</span>
                 </span>
+                ${isAdmin ? `
+                  <button type="button" class="btn-card-edit-project" data-id="${project.id}" title="แก้ไขข้อมูลโครงการ (สำหรับผู้มีสิทธิ์กำหนดสถานะ)">
+                    <span>✏️ แก้ไข</span>
+                  </button>
+                ` : ''}
               </div>
             </div>
 
@@ -303,6 +368,41 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
       })
       .join('');
+
+    // จัดการปุ่มแก้ไขโครงการบนการ์ด
+    projectsGrid.querySelectorAll('.btn-card-edit-project').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute('data-id');
+        const p = ProjectService.getProjectById(id);
+        if (p && editProjectModal) {
+          const editIdEl = $('#editProjectId');
+          const editTitleEl = $('#editProjectTitle');
+          const editActEl = $('#editProjectActivityName');
+          const editRespEl = $('#editProjectResponsiblePerson');
+          const editBudEl = $('#editProjectBudget');
+          const editGradeEl = $('#editProjectGradeLevel');
+          const editDateEl = $('#editProjectDateRange');
+          const editLocEl = $('#editProjectLocation');
+          const editDeptEl = $('#editProjectDepartment');
+          const editYearEl = $('#editProjectFiscalYear');
+
+          if (editIdEl) editIdEl.value = p.id;
+          if (editTitleEl) editTitleEl.value = p.title || '';
+          if (editActEl) editActEl.value = p.activityName || '';
+          if (editRespEl) editRespEl.value = p.responsiblePerson || '';
+          if (editBudEl) editBudEl.value = p.budget || 0;
+          if (editGradeEl) editGradeEl.value = p.gradeLevel || '';
+          if (editDateEl) editDateEl.value = p.dateRange || '';
+          if (editLocEl) editLocEl.value = p.location || '';
+          if (editDeptEl) editDeptEl.value = p.department || '';
+          if (editYearEl) editYearEl.value = p.fiscalYear || '2569';
+
+          editProjectModal.open();
+          if (editTitleEl) setTimeout(() => editTitleEl.focus(), 100);
+        }
+      });
+    });
 
     // คลิกเข้าที่กล่องโครงการได้เลยโดยตรง
     projectsGrid.querySelectorAll('.project-card').forEach((card) => {

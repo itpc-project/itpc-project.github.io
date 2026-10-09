@@ -178,7 +178,107 @@ export const ProjectService = {
    */
   getProjectById(id) {
     const list = this.getProjects();
-    return list.find((p) => p.id === id || p.title === id || p.slug === id) || list[4]; // default to พลเมืองไทยบนวิถีโลก
+    return list.find((p) => p.id === id || p.title === id || p.slug === id || p.code === id) || list[4]; // default to พลเมืองไทยบนวิถีโลก
+  },
+
+  /**
+   * อัปเดตข้อมูลโครงการ (เช่น ชื่อผู้รับผิดชอบ งบประมาณ เป้าหมาย กำหนดการ สำหรับผู้กำหนดสถานะได้)
+   */
+  updateProject(id, updatedData) {
+    const list = this.getProjects();
+    const index = list.findIndex(
+      (p) => p.id === id || p.code === id || p.title === id || p.slug === id
+    );
+
+    if (index === -1) {
+      console.warn(`Project with id "${id}" not found.`);
+      return null;
+    }
+
+    const current = list[index];
+
+    // จัดการแปลงค่าตัวเลขงบประมาณ
+    let parsedBudget = current.budget;
+    if (updatedData.budget !== undefined) {
+      const bStr = String(updatedData.budget).replace(/,/g, '').trim();
+      parsedBudget = Number(bStr) || 0;
+    }
+
+    const updated = {
+      ...current,
+      ...updatedData,
+      id: current.id,
+      code: current.code,
+      title: updatedData.title !== undefined ? updatedData.title.trim() : current.title,
+      activityName: updatedData.activityName !== undefined ? updatedData.activityName.trim() : current.activityName,
+      responsiblePerson: updatedData.responsiblePerson !== undefined ? updatedData.responsiblePerson.trim() : current.responsiblePerson,
+      budget: parsedBudget,
+      gradeLevel: updatedData.gradeLevel !== undefined ? updatedData.gradeLevel.trim() : current.gradeLevel,
+      dateRange: updatedData.dateRange !== undefined ? updatedData.dateRange.trim() : current.dateRange,
+      location: updatedData.location !== undefined ? updatedData.location.trim() : current.location,
+      department: updatedData.department !== undefined ? updatedData.department.trim() : current.department,
+      fiscalYear: updatedData.fiscalYear !== undefined ? updatedData.fiscalYear.trim() : current.fiscalYear
+    };
+
+    list[index] = updated;
+    this.saveProjects(list);
+
+    // ซิงค์ข้อมูลโครงการปัจจุบันใน sessionStorage
+    try {
+      const activeStored = sessionStorage.getItem('satit_cmu_active_project');
+      if (activeStored) {
+        const activeObj = JSON.parse(activeStored);
+        if (activeObj.id === updated.id) {
+          sessionStorage.setItem('satit_cmu_active_project', JSON.stringify(updated));
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to sync active project in session', e);
+    }
+
+    return updated;
+  },
+
+  /**
+   * สร้างโครงการใหม่
+   */
+  createProject(data) {
+    const list = this.getProjects();
+    const nextCodeNum = list.length + 1;
+    const code = `PRJ-${String(nextCodeNum).padStart(2, '0')}`;
+    const newId = `PRJ-${Date.now()}`;
+
+    const newProject = {
+      id: newId,
+      code: code,
+      title: data.title?.trim() || 'โครงการใหม่',
+      slug: data.title ? data.title.toLowerCase().replace(/\s+/g, '-') : `project-${nextCodeNum}`,
+      themeColor: data.themeColor || '#6F2C91',
+      accentColor: data.accentColor || '#9048B8',
+      icon: data.icon || '📁',
+      activityName: data.activityName?.trim() || data.title?.trim() || 'กิจกรรมในโครงการ',
+      fiscalYear: data.fiscalYear || '2569',
+      gradeLevel: data.gradeLevel || 'ทุกระดับชั้น',
+      department: data.department || 'โรงเรียนสาธิต มช.',
+      responsiblePerson: data.responsiblePerson?.trim() || 'อ.ดร. ศุภชัย วิทยานุกูล',
+      dateRange: data.dateRange?.trim() || 'ตลอดปีการศึกษา',
+      location: data.location?.trim() || 'โรงเรียนสาธิต มช.',
+      participants: {
+        students: Number(data.students) || 100,
+        teachers: Number(data.teachers) || 10,
+        supportStaff: 4,
+        total: (Number(data.students) || 100) + (Number(data.teachers) || 10) + 4
+      },
+      budget: Number(String(data.budget || 50000).replace(/,/g, '')) || 50000,
+      status: 'active',
+      statusLabel: 'กำลังดำเนินการ',
+      documentsReady: 0,
+      documentsTotal: 4
+    };
+
+    list.push(newProject);
+    this.saveProjects(list);
+    return newProject;
   },
 
   /**

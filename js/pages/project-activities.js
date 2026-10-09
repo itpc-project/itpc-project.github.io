@@ -7,6 +7,7 @@
 import { $, $$, addEvent, escapeHTML } from '../utils/dom.js';
 import { showToast } from '../utils/toast.js';
 import { initNavbar } from '../components/navbar.js';
+import { initModal } from '../components/modal.js';
 import { ProjectService, SIX_MAIN_PROJECTS } from '../services/project-service.js';
 import { ActivityService, ACTIVITY_STATUS_MAP } from '../services/activity-service.js';
 import { AuthService } from '../services/auth-service.js';
@@ -40,8 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // 2. แสดงข้อมูลใน Project Header
   renderProjectHeader(project);
 
-  // 3. แสดงแถบสิทธิ์ผู้ดูแลระบบ (Admin Role Banner)
-  renderRolePermissionBanner(project);
+  // 3. เริ่มต้นระบบแก้ไขข้อมูลโครงการ (สำหรับผู้มีสิทธิ์กำหนดสถานะ)
+  initEditProjectModal(project);
 
   // 4. ผูก Event กรองสถานะ
   initFilterBar(project);
@@ -49,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 5. เรนเดอร์กล่องกิจกรรมที่ถูกบันทึกเข้ามาแล้ว
   renderActivitiesList(project);
 
-  // 5. จัดการปุ่ม [เพิ่มกิจกรรม] (ด้านบน)
+  // 6. จัดการปุ่ม [เพิ่มกิจกรรม] (ด้านบน)
   const addActivityBtn = $('#addActivityBtn');
   if (addActivityBtn) {
     addEvent(addActivityBtn, 'click', () => {
@@ -89,18 +90,39 @@ function renderProjectHeader(project) {
   const titleEl = $('#projectHeaderTitle');
   const codeEl = $('#projectHeaderCode');
   const yearEl = $('#projectHeaderYear');
+  const deptEl = $('#projectHeaderDept');
+  const subtitleEl = $('#projectHeaderActivitySubtitle');
   const gradeEl = $('#projectHeaderGrade');
   const personEl = $('#projectHeaderPerson');
+  const budgetEl = $('#projectHeaderBudget');
+  const dateRangeEl = $('#projectHeaderDateRange');
+  const locationEl = $('#projectHeaderLocation');
   const cardEl = $('#projectHeaderCard');
+  const btnEditProject = $('#btnEditProject');
 
   if (iconEl) iconEl.textContent = project.icon || '📁';
   if (titleEl) titleEl.textContent = project.title;
   if (codeEl) codeEl.textContent = project.code;
-  if (yearEl) yearEl.textContent = `ปีงบประมาณ ${project.fiscalYear}`;
-  if (gradeEl) gradeEl.textContent = project.gradeLevel;
-  if (personEl) personEl.textContent = `อาจารย์ผู้รับผิดชอบ: ${project.responsiblePerson}`;
+  if (yearEl) yearEl.textContent = `ปีงบประมาณ ${project.fiscalYear || '2569'}`;
+  if (deptEl) deptEl.textContent = project.department || 'โรงเรียนสาธิต มช.';
+  if (subtitleEl) {
+    subtitleEl.textContent = project.activityName || '';
+    subtitleEl.style.display = project.activityName ? 'block' : 'none';
+  }
+  if (gradeEl) gradeEl.textContent = project.gradeLevel || 'ทุกระดับชั้น';
+  if (personEl) personEl.textContent = project.responsiblePerson || 'ไม่ระบุ';
+  if (budgetEl) budgetEl.textContent = `${(Number(project.budget) || 0).toLocaleString()} บาท`;
+  if (dateRangeEl) dateRangeEl.textContent = project.dateRange || 'ตลอดปีการศึกษา';
+  if (locationEl) locationEl.textContent = project.location || 'โรงเรียนสาธิต มช.';
+
   if (cardEl && project.themeColor) {
     cardEl.style.setProperty('--project-theme', project.themeColor);
+  }
+
+  // ผู้มีสิทธิ์กำหนดสถานะ (Admin) สามารถกดแก้ไขข้อมูลโครงการได้
+  if (btnEditProject) {
+    const canEdit = AuthService.isAdmin();
+    btnEditProject.style.display = canEdit ? 'inline-flex' : 'none';
   }
 }
 
@@ -336,83 +358,136 @@ function renderActivitiesList(project) {
 }
 
 /**
- * แสดงแถบข้อมูลสิทธิ์การใช้งาน (Admin / Teacher Mode) และปุ่มสลับบทบาทด่วนเพื่อทดสอบ
+ * เริ่มต้นระบบ Modal แก้ไขข้อมูลโครงการ (สำหรับผู้มีสิทธิ์กำหนดสถานะ)
  */
-function renderRolePermissionBanner(project) {
-  const banner = $('#rolePermissionBanner');
-  if (!banner) return;
+function initEditProjectModal(projectRef) {
+  const modalEl = $('#editProjectModal');
+  if (!modalEl) return;
 
-  const currentUser = AuthService.getCurrentUser();
-  const isAdmin = AuthService.isAdmin();
+  const editModal = initModal(modalEl, { staticBackdrop: true });
+  const btnEditProject = $('#btnEditProject');
+  const btnSaveProject = $('#btnSaveProject');
 
-  if (isAdmin) {
-    banner.innerHTML = `
-      <div class="role-banner-admin">
-        <div class="banner-left">
-          <span class="banner-avatar">👑</span>
-          <div>
-            <div class="banner-title">
-              <span>โหมดผู้ดูแลระบบ (Admin Access Mode)</span>
-              <span class="badge badge-purple" style="font-size: 11px;">สิทธิ์เต็ม</span>
-            </div>
-            <div class="banner-desc">
-              ผู้ใช้งาน: <strong>${escapeHTML(currentUser.name || 'ผู้ดูแลระบบ')}</strong> • คุณมีสิทธิ์กำหนดและเปลี่ยนสถานะกิจกรรมได้ทุกสถานะ (รอตรวจ / ดำเนินการ / แก้ไข / เสร็จสิ้น / ยกเลิก)
-            </div>
-          </div>
-        </div>
-        <div class="banner-actions">
-          <button type="button" class="btn-role-switch" id="btnSwitchRole" title="คลิกเพื่อสลับเป็นมุมมองอาจารย์ (สถานะจะถูกล็อค)">
-            <span>👨‍🏫 สลับเป็นสิทธิ์อาจารย์ (ทดสอบการล็อคสถานะ)</span>
-          </button>
-        </div>
-      </div>
-    `;
-  } else {
-    banner.innerHTML = `
-      <div class="role-banner-teacher">
-        <div class="banner-left">
-          <span class="banner-avatar">🔒</span>
-          <div>
-            <div class="banner-title">
-              <span>โหมดอาจารย์ผู้รับผิดชอบ (Teacher Mode)</span>
-              <span class="badge badge-blue" style="font-size: 11px;">ดูสถานะเท่านั้น</span>
-            </div>
-            <div class="banner-desc">
-              ผู้ใช้งาน: <strong>${escapeHTML(currentUser.name || 'อาจารย์ผู้รับผิดชอบ')}</strong> • <strong>สถานะกิจกรรมถูกล็อค</strong> (เฉพาะแอดมินเท่านั้นที่สามารถพิจารณากำหนดสถานะกิจกรรมได้)
-            </div>
-          </div>
-        </div>
-        <div class="banner-actions">
-          <button type="button" class="btn-role-switch btn-switch-admin" id="btnSwitchRole" title="คลิกเพื่อสลับเป็นผู้ดูแลระบบ (เพื่อเปิดสิทธิ์แก้ไขสถานะ)">
-            <span>👑 สลับเป็นสิทธิ์แอดมิน (เปิดสิทธิ์เปลี่ยนสถานะ)</span>
-          </button>
-        </div>
-      </div>
-    `;
+  const fillForm = () => {
+    const p = ProjectService.getProjectById(projectRef.id);
+    const titleInp = $('#editProjectTitle');
+    const actInp = $('#editProjectActivityName');
+    const respInp = $('#editProjectResponsiblePerson');
+    const budInp = $('#editProjectBudget');
+    const gradeInp = $('#editProjectGradeLevel');
+    const dateInp = $('#editProjectDateRange');
+    const locInp = $('#editProjectLocation');
+    const deptInp = $('#editProjectDepartment');
+    const yearInp = $('#editProjectFiscalYear');
+
+    if (titleInp) titleInp.value = p.title || '';
+    if (actInp) actInp.value = p.activityName || '';
+    if (respInp) respInp.value = p.responsiblePerson || '';
+    if (budInp) budInp.value = p.budget || 0;
+    if (gradeInp) gradeInp.value = p.gradeLevel || '';
+    if (dateInp) dateInp.value = p.dateRange || '';
+    if (locInp) locInp.value = p.location || '';
+    if (deptInp) deptInp.value = p.department || '';
+    if (yearInp) yearInp.value = p.fiscalYear || '2569';
+  };
+
+  if (btnEditProject) {
+    addEvent(btnEditProject, 'click', (e) => {
+      e.preventDefault();
+      fillForm();
+      editModal.open();
+      const firstInput = $('#editProjectTitle');
+      if (firstInput) setTimeout(() => firstInput.focus(), 100);
+    });
   }
 
-  const switchBtn = $('#btnSwitchRole');
-  if (switchBtn) {
-    switchBtn.addEventListener('click', () => {
-      if (isAdmin) {
-        AuthService.switchRole('teacher');
+  if (btnSaveProject) {
+    addEvent(btnSaveProject, 'click', () => {
+      const title = $('#editProjectTitle')?.value.trim();
+      const activityName = $('#editProjectActivityName')?.value.trim();
+      const responsiblePerson = $('#editProjectResponsiblePerson')?.value.trim();
+      const budget = $('#editProjectBudget')?.value;
+      const gradeLevel = $('#editProjectGradeLevel')?.value.trim();
+      const dateRange = $('#editProjectDateRange')?.value.trim();
+      const location = $('#editProjectLocation')?.value.trim();
+      const department = $('#editProjectDepartment')?.value.trim();
+      const fiscalYear = $('#editProjectFiscalYear')?.value.trim();
+
+      if (!title) {
         showToast({
-          type: 'info',
-          title: 'สลับเป็นสิทธิ์อาจารย์แล้ว 👨‍🏫',
-          message: 'สถานะกิจกรรมในแต่ละกล่องถูกล็อคแล้ว (ดูได้อย่างเดียว)'
+          type: 'warning',
+          title: 'กรุณากรอกชื่อโครงการ',
+          message: 'ชื่อโครงการต้องไม่เป็นค่าว่าง'
         });
-      } else {
-        AuthService.switchRole('admin');
-        showToast({
-          type: 'success',
-          title: 'สลับเป็นสิทธิ์แอดมินแล้ว 👑',
-          message: 'ปลดล็อคแล้ว! คุณสามารถกำหนดสถานะกิจกรรมในแต่ละกล่องได้อิสระ'
-        });
+        $('#editProjectTitle')?.focus();
+        return;
       }
 
-      initNavbar();
-      renderRolePermissionBanner(project);
-      renderActivitiesList(project);
+      if (!responsiblePerson) {
+        showToast({
+          type: 'warning',
+          title: 'กรุณากรอกผู้รับผิดชอบ',
+          message: 'กรุณาระบุชื่ออาจารย์ผู้รับผิดชอบโครงการ'
+        });
+        $('#editProjectResponsiblePerson')?.focus();
+        return;
+      }
+
+      if (budget === '' || isNaN(Number(budget))) {
+        showToast({
+          type: 'warning',
+          title: 'กรุณากรอกงบประมาณ',
+          message: 'กรุณาระบุจำนวนงบประมาณเป็นตัวเลข'
+        });
+        $('#editProjectBudget')?.focus();
+        return;
+      }
+
+      if (!gradeLevel) {
+        showToast({
+          type: 'warning',
+          title: 'กรุณากรอกกลุ่มเป้าหมาย',
+          message: 'กรุณาระบุระดับชั้นหรือกลุ่มเป้าหมายผู้เข้าร่วม'
+        });
+        $('#editProjectGradeLevel')?.focus();
+        return;
+      }
+
+      if (!dateRange) {
+        showToast({
+          type: 'warning',
+          title: 'กรุณากรอกกำหนดการ',
+          message: 'กรุณาระบุช่วงวันและเวลาจัดโครงการ'
+        });
+        $('#editProjectDateRange')?.focus();
+        return;
+      }
+
+      const updated = ProjectService.updateProject(projectRef.id, {
+        title,
+        activityName,
+        responsiblePerson,
+        budget: Number(budget),
+        gradeLevel,
+        dateRange,
+        location,
+        department,
+        fiscalYear: fiscalYear || '2569'
+      });
+
+      if (updated) {
+        Object.assign(projectRef, updated);
+        renderProjectHeader(projectRef);
+        renderActivitiesList(projectRef);
+
+        showToast({
+          type: 'success',
+          title: 'บันทึกโครงการสำเร็จ! ✨',
+          message: `อัปเดตข้อมูลโครงการ "${updated.title}" เรียบร้อยแล้ว`
+        });
+
+        editModal.close();
+      }
     });
   }
 }

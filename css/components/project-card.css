@@ -130,6 +130,41 @@
   border: 1px solid var(--border-subtle);
 }
 
+.btn-card-edit-project {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+  background: var(--bg-surface);
+  border: 1px solid var(--cmu-purple-400);
+  color: var(--cmu-purple-700);
+  font-family: var(--font-family-thai);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.btn-card-edit-project:hover {
+  background: var(--cmu-purple-700);
+  color: #ffffff;
+  border-color: var(--cmu-purple-700);
+  transform: translateY(-1px);
+}
+
+[data-theme="dark"] .btn-card-edit-project {
+  background: rgba(140, 50, 207, 0.2);
+  color: var(--cmu-purple-200);
+  border-color: rgba(167, 84, 227, 0.4);
+}
+
+[data-theme="dark"] .btn-card-edit-project:hover {
+  background: var(--cmu-purple-600);
+  color: #ffffff;
+}
+
 /* Card Title & Info */
 .project-card-title {
   font-family: var(--font-family-thai);
