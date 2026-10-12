@@ -15,13 +15,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
   <!-- Modular CSS Stylesheets -->
-  <script type="module" crossorigin src="./assets/activityForm-BexNDwqi.js"></script>
+  <script type="module" crossorigin src="./assets/activityForm-C8b8iTvy.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/modal-oz8TM4eO.js">
   <link rel="modulepreload" crossorigin href="./assets/navbar-BIx-M677.js">
   <link rel="modulepreload" crossorigin href="./assets/activity-service-78OnpwYJ.js">
   <link rel="stylesheet" crossorigin href="./assets/modal-CRg2M03S.css">
   <link rel="stylesheet" crossorigin href="./assets/navbar-CTplSEAi.css">
-  <link rel="stylesheet" crossorigin href="./assets/activityForm-YTD-o5ZI.css">
+  <link rel="stylesheet" crossorigin href="./assets/activityForm-C9g3ii4A.css">
 </head>
 <body class="activity-form-page">
 
@@ -158,6 +158,9 @@
 
         <!-- Locked Form Alert Banner Container (Injected via JS if locked) -->
         <div id="lockedBannerContainer"></div>
+
+        <!-- Requested Documents Banner Container (Injected via JS) -->
+        <div id="activityDocsBannerContainer"></div>
 
         <!-- Title Block (แถวที่ 1) -->
         <header class="excel-header-block">
@@ -483,6 +486,9 @@
             <span>เลือกแม่แบบเอกสารราชการ (.docx)</span>
           </h4>
           
+          <!-- Notice: หนังสือที่ผู้จัดทำขอออกเอกสาร -->
+          <div id="wordTemplateRequestedDocsNotice" style="margin-bottom: var(--space-3);"></div>
+
           <div class="template-options-grid">
             <label class="template-card is-selected">
               <input type="radio" name="wordTemplate" value="field_trip" checked />

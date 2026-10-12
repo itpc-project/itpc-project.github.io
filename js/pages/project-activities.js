@@ -297,6 +297,69 @@ function renderActivitiesList(project) {
         lockBadgeHtml = `<span class="badge" style="background: rgba(239, 68, 68, 0.1); color: #dc2626; font-size: 0.68rem; font-weight: 700; border: 1px solid rgba(239, 68, 68, 0.25);">🔒 ล็อค</span>`;
       }
 
+      // ข้อมูลหนังสือราชการที่ต้องการ (เพื่อให้ Admin และอาจารย์ทราบทันที)
+      const selectedDocs = Array.isArray(act.selectedDocuments) ? act.selectedDocuments : [];
+      let docsSectionHtml = '';
+
+      if (selectedDocs.length > 0) {
+        const docChips = selectedDocs
+          .map((doc) => {
+            let chipClass = 'activity-doc-chip-other';
+            let icon = '📄';
+            let label = doc;
+
+            if (doc.includes('ขออนุญาติผู้ปกครอง') || doc.includes('ขออนุญาตผู้ปกครอง')) {
+              chipClass = 'activity-doc-chip-parent';
+              icon = '👨‍👩‍👦';
+              label = 'ขออนุญาตผู้ปกครอง';
+            } else if (doc.includes('นำนักเรียนเข้าสถานที่') || doc.includes('เข้าสถานที่')) {
+              chipClass = 'activity-doc-chip-location';
+              icon = '🏛️';
+              label = 'ขอเข้าสถานที่';
+            } else if (doc.includes('เป็นวิทยากร') || doc.includes('วิทยากร')) {
+              chipClass = 'activity-doc-chip-speaker';
+              icon = '🎤';
+              label = 'ขอเชิญวิทยากร';
+            } else if (doc.startsWith('อื่น ๆ:') || doc.startsWith('อื่นๆ:')) {
+              chipClass = 'activity-doc-chip-other';
+              icon = '📝';
+              label = doc.replace(/^(อื่น ๆ:|อื่นๆ:)\s*/, '');
+            }
+
+            return `
+              <span class="activity-doc-chip ${chipClass}" title="${escapeHTML(doc)}">
+                <span>${icon}</span>
+                <span>${escapeHTML(label)}</span>
+              </span>
+            `;
+          })
+          .join('');
+
+        docsSectionHtml = `
+          <div class="activity-docs-section" title="หนังสือราชการที่ขอออกเอกสารในกิจกรรมนี้">
+            <div class="activity-docs-header">
+              <span class="activity-docs-header-title">
+                <span>📋</span>
+                <span>หนังสือราชการที่ต้องการ</span>
+              </span>
+              <span class="badge badge-purple" style="font-size: 0.65rem; padding: 2px 7px; font-weight: 700;">${selectedDocs.length} ฉบับ</span>
+            </div>
+            <div class="activity-docs-badges">
+              ${docChips}
+            </div>
+          </div>
+        `;
+      } else {
+        docsSectionHtml = `
+          <div class="activity-docs-section is-empty" title="ยังไม่มีการระบุหนังสือราชการ">
+            <div class="activity-docs-empty-text">
+              <span>ℹ️</span>
+              <span>ยังไม่ได้ระบุหนังสือราชการที่ต้องการ (แบบร่าง)</span>
+            </div>
+          </div>
+        `;
+      }
+
       return `
       <article class="activity-card" data-id="${act.id}" data-status="${statusCfg.key}">
         <div>
@@ -343,6 +406,10 @@ function renderActivitiesList(project) {
               </span>
             </div>
           </div>
+
+          <!-- ข้อมูลหนังสือราชการที่ต้องการ -->
+          ${docsSectionHtml}
+
           ${act.creatorName ? `
             <div style="margin-top: 8px; font-size: 0.72rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">
               <span>👤 ผู้สร้าง: ${escapeHTML(act.creatorName)}</span>
@@ -354,6 +421,13 @@ function renderActivitiesList(project) {
         <!-- Action Buttons -->
         <div class="activity-card-actions">
           ${actionButtonHtml}
+          <button type="button" class="btn btn-outline btn-sm btn-quick-word" data-id="${act.id}" title="สร้างเอกสาร Word ตามประเภทหนังสือที่ขอ (${selectedDocs.length} ฉบับ)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            <span>สร้าง Word</span>
+          </button>
         </div>
       </article>
     `;
@@ -407,6 +481,15 @@ function renderActivitiesList(project) {
     btn.addEventListener('click', () => {
       const actId = btn.getAttribute('data-id');
       window.location.href = `/activity-form.html?id=${encodeURIComponent(project.id)}&actId=${encodeURIComponent(actId)}`;
+    });
+  });
+
+  // 3. ผูกคลิกเพื่อสร้างเอกสาร Word ทันที
+  grid.querySelectorAll('.btn-quick-word').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const actId = btn.getAttribute('data-id');
+      window.location.href = `/activity-form.html?id=${encodeURIComponent(project.id)}&actId=${encodeURIComponent(actId)}&openWord=1`;
     });
   });
 }

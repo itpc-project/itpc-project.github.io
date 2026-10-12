@@ -301,6 +301,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 12. ระบบตรวจสอบข้อมูลและเลือกประเภทหนังสือราชการ (Verification Modal & Documents Selection Modal)
   initVerificationWorkflow(activeProject.id);
+
+  // 13. แสดง Banner ข้อมูลประเภทหนังสือราชการที่ต้องการ (เพื่อให้ Admin และอาจารย์เห็นชัดเจน)
+  renderRequestedDocsBanner(activeProject.id, currentActId);
+
+  // 14. ตรวจสอบพารามิเตอร์ URL: หากระบุ ?openWord=1 ให้เปิดหน้าต่างสร้างเอกสาร Word ทันที
+  if (urlParams.get('openWord') === '1') {
+    setTimeout(() => {
+      $('#exportWordBtn')?.click();
+    }, 400);
+  }
 });
 
 /**
@@ -992,19 +1002,98 @@ function initWordExportModal(projectId) {
   // ฟังก์ชันเปิด Modal พร้อมโหลดข้อมูลจากฟอร์มปัจจุบัน
   const openModal = () => {
     const currentData = collectCurrentFormData(projectId, currentActId);
+    const existingAct = currentActId ? ActivityService.getActivityById(currentActId) : null;
+    const requestedDocs = Array.isArray(existingAct?.selectedDocuments) ? existingAct.selectedDocuments : [];
 
-    // ตั้งชื่อไฟล์เริ่มต้นตามชื่อกิจกรรม
+    // แสดง Notice สรุปประเภทหนังสือที่ขอในหัว Step 1
+    const noticeEl = $('#wordTemplateRequestedDocsNotice');
+    if (noticeEl) {
+      if (requestedDocs.length > 0) {
+        noticeEl.innerHTML = `
+          <div style="background: rgba(111, 44, 145, 0.08); border: 1.5px solid rgba(111, 44, 145, 0.25); border-radius: var(--radius-lg); padding: 10px 14px; display: flex; align-items: flex-start; gap: 10px;">
+            <span style="font-size: 1.25rem; line-height: 1;">📋</span>
+            <div style="flex: 1;">
+              <div style="font-size: 0.8rem; font-weight: 700; color: var(--cmu-purple-900); margin-bottom: 4px;">
+                รายการหนังสือที่ผู้จัดทำขอออกเอกสาร (${requestedDocs.length} ฉบับ):
+              </div>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                ${requestedDocs.map((d) => `<span class="badge badge-purple" style="font-size: 0.72rem; padding: 2px 8px; font-weight: 600;">✓ ${escapeHTML(d)}</span>`).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        noticeEl.innerHTML = `
+          <div style="background: var(--bg-input); border: 1px dashed var(--border-subtle); border-radius: var(--radius-lg); padding: 8px 12px; font-size: 0.75rem; color: var(--text-muted);">
+            ℹ️ กิจกรรมนี้ยังไม่ได้ระบุหนังสือราชการเฉพาะ สามารถเลือกแม่แบบเอกสารที่ต้องการสร้างได้ตามต้องการ
+          </div>
+        `;
+      }
+    }
+
+    // ไฮไลท์การ์ดแม่แบบที่ตรงกับหนังสือที่ขอ พร้อมป้ายกำกับ ⭐ อาจารย์ขอฉบับนี้
+    let firstMatchedValue = null;
+    $$('.template-card').forEach((card) => {
+      card.classList.remove('is-requested-match');
+      const oldBadge = card.querySelector('.template-match-badge');
+      if (oldBadge) oldBadge.remove();
+
+      const radio = card.querySelector('input[type="radio"]');
+      if (!radio) return;
+      const val = radio.value;
+
+      let isMatch = false;
+      if (val === 'consent_parents' && requestedDocs.some((d) => d.includes('ขออนุญาติผู้ปกครอง') || d.includes('ขออนุญาตผู้ปกครอง'))) {
+        isMatch = true;
+      } else if ((val === 'field_trip' || val === 'site_visit') && requestedDocs.some((d) => d.includes('นำนักเรียนเข้าสถานที่') || d.includes('เข้าสถานที่'))) {
+        isMatch = true;
+      } else if (val === 'invitation_speaker' && requestedDocs.some((d) => d.includes('วิทยากร'))) {
+        isMatch = true;
+      }
+
+      if (isMatch) {
+        card.classList.add('is-requested-match');
+        const header = card.querySelector('.template-card-header');
+        if (header) {
+          const badge = document.createElement('span');
+          badge.className = 'template-match-badge';
+          badge.textContent = '⭐ อาจารย์ขอฉบับนี้';
+          header.appendChild(badge);
+        }
+        if (!firstMatchedValue) {
+          firstMatchedValue = val;
+        }
+      }
+    });
+
+    // เลือกแม่แบบที่ตรงกับที่ขอเป็นค่าเริ่มต้น (ถ้ามี)
+    if (firstMatchedValue) {
+      const targetRadio = $(`input[name="wordTemplate"][value="${firstMatchedValue}"]`);
+      if (targetRadio) {
+        targetRadio.checked = true;
+        $$('.template-card').forEach((card) => card.classList.remove('is-selected'));
+        targetRadio.closest('.template-card')?.classList.add('is-selected');
+      }
+    }
+
+    // ตั้งชื่อไฟล์เริ่มต้นตามชื่อกิจกรรมและแม่แบบที่เลือก
     const actNameSafe = (currentData.activityName || 'กิจกรรม')
       .replace(/[/\\?%*:|"<>]/g, '_')
       .substring(0, 45);
     
     if (outputFilenameInput) {
       const selectedRadio = $('input[name="wordTemplate"]:checked');
-      const tVal = selectedRadio ? selectedRadio.value : 'field_trip';
+      const tVal = selectedRadio ? selectedRadio.value : (firstMatchedValue || 'field_trip');
       if (tVal === 'off_campus') {
         outputFilenameInput.value = `บันทึกข้อความขออนุมัติ_${actNameSafe}.docx`;
+      } else if (tVal === 'consent_parents') {
+        outputFilenameInput.value = `หนังสือขออนุญาตผู้ปกครอง_${actNameSafe}.docx`;
+      } else if (tVal === 'invitation_speaker') {
+        outputFilenameInput.value = `หนังสือเชิญวิทยากร_${actNameSafe}.docx`;
+      } else if (tVal === 'site_visit') {
+        outputFilenameInput.value = `หนังสือขอความอนุเคราะห์_เข้าเยี่ยมชม_${actNameSafe}.docx`;
       } else {
-        outputFilenameInput.value = `หนังสือขอความอนุเคราะห์_${actNameSafe}.docx`;
+        outputFilenameInput.value = `หนังสือขอความอนุเคราะห์_ทัศนศึกษา_${actNameSafe}.docx`;
       }
     }
 
@@ -1536,6 +1625,173 @@ function makeFormReadOnly() {
 }
 
 /**
+ * แสดง Banner รายการประเภทหนังสือราชการที่ต้องการ (Requested Documents) บนหัวแบบฟอร์ม
+ * เพื่อให้ผู้ดูแลระบบ (Admin) และอาจารย์ผู้ตรวจทราบทันทีว่าต้องการหนังสือฉบับใดบ้าง
+ */
+function renderRequestedDocsBanner(projectId, actId) {
+  const container = $('#activityDocsBannerContainer');
+  if (!container) return;
+
+  const targetId = actId || currentActId;
+  const existingAct = targetId ? ActivityService.getActivityById(targetId) : null;
+  const docs = Array.isArray(existingAct?.selectedDocuments) ? existingAct.selectedDocuments : [];
+  const isAdmin = AuthService.isAdmin();
+  const currentUser = AuthService.getCurrentUser();
+  const isLocked = Boolean(existingAct?.isLocked);
+  const isOwner = Boolean(
+    currentUser && existingAct && (
+      existingAct.creatorId === currentUser.id ||
+      existingAct.creatorEmail?.toLowerCase() === currentUser.email?.toLowerCase() ||
+      (currentUser.name && (existingAct.creatorName === currentUser.name || existingAct.responsiblePerson === currentUser.name))
+    )
+  );
+  const isStatusEdit = existingAct?.status === 'edit';
+  const canEdit = isAdmin || (!isLocked && isOwner) || (isLocked && isOwner && isStatusEdit) || !existingAct;
+
+  if (docs.length > 0) {
+    const chipsHtml = docs
+      .map((d) => {
+        let icon = '📄';
+        let label = d;
+        let badgeStyle = 'background: rgba(111, 44, 145, 0.09); color: var(--cmu-purple-800); border: 1px solid rgba(111, 44, 145, 0.3);';
+
+        if (d.includes('ขออนุญาติผู้ปกครอง') || d.includes('ขออนุญาตผู้ปกครอง')) {
+          icon = '👨‍👩‍👦';
+          label = 'หนังสือขออนุญาตผู้ปกครอง';
+          badgeStyle = 'background: rgba(59, 130, 246, 0.09); color: #1d4ed8; border: 1px solid rgba(59, 130, 246, 0.35);';
+        } else if (d.includes('นำนักเรียนเข้าสถานที่') || d.includes('เข้าสถานที่')) {
+          icon = '🏛️';
+          label = 'ขอความอนุเคราะห์นำนักเรียนเข้าสถานที่';
+          badgeStyle = 'background: rgba(16, 185, 129, 0.09); color: #047857; border: 1px solid rgba(16, 185, 129, 0.35);';
+        } else if (d.includes('เป็นวิทยากร') || d.includes('วิทยากร')) {
+          icon = '🎤';
+          label = 'ขอความอนุเคราะห์เป็นวิทยากร';
+          badgeStyle = 'background: rgba(245, 158, 11, 0.1); color: #b45309; border: 1px solid rgba(245, 158, 11, 0.35);';
+        } else if (d.startsWith('อื่น ๆ:') || d.startsWith('อื่นๆ:')) {
+          icon = '📝';
+          label = d;
+        }
+
+        return `
+          <span class="activity-docs-banner-chip" style="${badgeStyle}">
+            <span>${icon}</span>
+            <strong>${escapeHTML(label)}</strong>
+          </span>
+        `;
+      })
+      .join('');
+
+    container.innerHTML = `
+      <div class="activity-docs-banner">
+        <div class="activity-docs-banner-header">
+          <div style="display: flex; align-items: center; gap: var(--space-3);">
+            <div class="activity-docs-banner-icon">📋</div>
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <h4 class="activity-docs-banner-title">หนังสือราชการที่ขอออกเอกสารในกิจกรรมนี้</h4>
+                <span class="badge badge-purple" style="font-size: 0.7rem; font-weight: 700;">${docs.length} ฉบับ</span>
+              </div>
+              <p class="activity-docs-banner-sub">
+                ${isAdmin ? '👑 <strong>สิทธิ์ผู้ดูแลระบบ (Admin):</strong> รายการหนังสือราชการที่ผู้จัดทำกิจกรรมต้องการให้ออกเอกสาร' : 'รายการเอกสารราชการที่จำเป็นต้องใช้สำหรับการจัดกิจกรรมนี้'}
+              </p>
+            </div>
+          </div>
+          <div class="activity-docs-banner-actions">
+            ${canEdit ? `
+              <button type="button" id="btnEditDocsFromBanner" class="btn btn-secondary btn-sm" title="ปรับเปลี่ยนตัวเลือกประเภทหนังสือ">
+                ✏️ ปรับเปลี่ยนประเภทหนังสือ
+              </button>
+            ` : ''}
+            <button type="button" id="btnExportWordFromBanner" class="btn btn-primary btn-sm" style="background: linear-gradient(135deg, var(--cmu-purple-700) 0%, var(--cmu-purple-900) 100%);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              <span>สร้างเอกสาร Word</span>
+            </button>
+          </div>
+        </div>
+        <div class="activity-docs-banner-chips">
+          ${chipsHtml}
+        </div>
+      </div>
+    `;
+
+    $('#btnEditDocsFromBanner')?.addEventListener('click', () => {
+      openDocsModalDirectly(projectId);
+    });
+
+    $('#btnExportWordFromBanner')?.addEventListener('click', () => {
+      $('#exportWordBtn')?.click();
+    });
+  } else {
+    container.innerHTML = `
+      <div class="activity-docs-banner is-empty">
+        <div class="activity-docs-banner-header">
+          <div style="display: flex; align-items: center; gap: var(--space-3);">
+            <div class="activity-docs-banner-icon" style="background: rgba(148, 163, 184, 0.15); color: #64748b;">📋</div>
+            <div>
+              <h4 class="activity-docs-banner-title" style="color: var(--text-muted);">ยังไม่ได้ระบุประเภทหนังสือราชการที่ต้องการ (แบบร่าง)</h4>
+              <p class="activity-docs-banner-sub">
+                ระบบจะให้เลือกประเภทหนังสือเมื่อกดปุ่ม <strong>"ตรวจสอบข้อมูล"</strong> หรือคลิกปุ่มด้านขวาเพื่อกำหนดล่วงหน้า
+              </p>
+            </div>
+          </div>
+          <div class="activity-docs-banner-actions">
+            ${canEdit ? `
+              <button type="button" id="btnChooseDocsFromBanner" class="btn btn-secondary btn-sm">
+                ➕ เลือกประเภทหนังสือ
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+
+    $('#btnChooseDocsFromBanner')?.addEventListener('click', () => {
+      openDocsModalDirectly(projectId);
+    });
+  }
+}
+
+/**
+ * เปิดหน้าต่างเลือกประเภทหนังสือราชการโดยตรง
+ */
+function openDocsModalDirectly(projectId) {
+  const docsModalEl = $('#selectDocsModal');
+  if (!docsModalEl) return;
+  const docsModal = initModal(docsModalEl);
+
+  const existingAct = currentActId ? ActivityService.getActivityById(currentActId) : null;
+  if (existingAct && Array.isArray(existingAct.selectedDocuments)) {
+    const docs = existingAct.selectedDocuments;
+    const chk1 = $('#docReq1');
+    const chk2 = $('#docReq2');
+    const chk3 = $('#docReq3');
+    const chk4 = $('#docReq4');
+    const chk5 = $('#docReq5');
+
+    if (chk1) chk1.checked = docs.some((d) => d.includes('ขออนุญาติผู้ปกครอง') || d.includes('ขออนุญาตผู้ปกครอง'));
+    if (chk2) chk2.checked = docs.some((d) => d.includes('นำนักเรียนเข้าสถานที่') || d.includes('เข้าสถานที่'));
+    if (chk3) chk3.checked = docs.some((d) => d.includes('เป็นวิทยากร') || d.includes('วิทยากร'));
+
+    const others = docs.filter((d) => d.startsWith('อื่น ๆ:') || d.startsWith('อื่นๆ:'));
+    if (others[0] && chk4) {
+      chk4.checked = true;
+      const inp4 = $('#docReqOther1');
+      if (inp4) inp4.value = others[0].replace(/^(อื่น ๆ:|อื่นๆ:)\s*/, '');
+    }
+    if (others[1] && chk5) {
+      chk5.checked = true;
+      const inp5 = $('#docReqOther2');
+      if (inp5) inp5.value = others[1].replace(/^(อื่น ๆ:|อื่นๆ:)\s*/, '');
+    }
+  }
+
+  docsModal.open();
+}
+
+/**
  * ระบบ Workflow ตรวจสอบข้อมูลกิจกรรม และเลือกประเภทหนังสือราชการ
  */
 function initVerificationWorkflow(projectId) {
@@ -1658,6 +1914,8 @@ function initVerificationWorkflow(projectId) {
       status: 'review',
       selectedDocuments: selectedDocs
     });
+
+    renderRequestedDocsBanner(projectId, currentActId);
 
     docsModal.close();
 

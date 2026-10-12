@@ -164,6 +164,9 @@
         <!-- Locked Form Alert Banner Container (Injected via JS if locked) -->
         <div id="lockedBannerContainer"></div>
 
+        <!-- Requested Documents Banner Container (Injected via JS) -->
+        <div id="activityDocsBannerContainer"></div>
+
         <!-- Title Block (แถวที่ 1) -->
         <header class="excel-header-block">
           <div class="excel-school-name">โรงเรียนสาธิตมหาวิทยาลัยเชียงใหม่ ระดับอนุบาลและประถมศึกษา</div>
@@ -488,6 +491,9 @@
             <span>เลือกแม่แบบเอกสารราชการ (.docx)</span>
           </h4>
           
+          <!-- Notice: หนังสือที่ผู้จัดทำขอออกเอกสาร -->
+          <div id="wordTemplateRequestedDocsNotice" style="margin-bottom: var(--space-3);"></div>
+
           <div class="template-options-grid">
             <label class="template-card is-selected">
               <input type="radio" name="wordTemplate" value="field_trip" checked />
