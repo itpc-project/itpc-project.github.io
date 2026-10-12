@@ -18,7 +18,8 @@
   transition: all var(--transition-normal);
 }
 
-.modal-backdrop.is-active {
+.modal-backdrop.is-active,
+.modal-backdrop.is-open {
   opacity: 1;
   visibility: visible;
 }
@@ -47,7 +48,8 @@
   overflow: hidden;
 }
 
-.modal-backdrop.is-active .modal-card {
+.modal-backdrop.is-active .modal-card,
+.modal-backdrop.is-open .modal-card {
   transform: scale(1) translateY(0);
   opacity: 1;
 }

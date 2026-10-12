@@ -97,6 +97,8 @@ const DEFAULT_BUDGET_ITEMS = [];
 
 // รายการข้อมูลวิทยากร (กรณีมีเชิญวิทยากร)
 let speakersData = [];
+let currentActId = null;
+let activeProject = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   initNavbar();
@@ -105,8 +107,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
   const projectIdFromUrl = urlParams.get('id');
   const actIdFromUrl = urlParams.get('actId');
+  const isExplicitNew = urlParams.get('mode') === 'new';
 
-  let activeProject = null;
+  currentActId = actIdFromUrl || null;
+
   if (projectIdFromUrl) {
     activeProject = ProjectService.getProjectById(projectIdFromUrl);
   } else {
@@ -138,11 +142,71 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 4. โหลดข้อมูลแบบฟอร์ม (ช่องว่างเปล่าทั้งหมดเพื่อให้ผู้ใช้ทดสอบกรอกข้อมูลเอง)
-  const isNewMode = urlParams.get('mode') === 'new' || !actIdFromUrl;
-  let formData;
+  // 4. โหลดข้อมูลแบบฟอร์ม
+  // หากไม่มี actId ใน URL และไม่ได้กดเพิ่มใหม่ชัดเจน ให้ลองค้นหากิจกรรมล่าสุดที่เคยบันทึกไว้ของโครงการนี้
+  if (!currentActId && !isExplicitNew) {
+    try {
+      const lastActId = localStorage.getItem(`satit_cmu_last_active_act_${activeProject.id}`);
+      if (lastActId && ActivityService.getActivityById(lastActId)) {
+        currentActId = lastActId;
+      }
+    } catch {}
+  }
 
-  if (isNewMode) {
+  let formData = null;
+
+  if (currentActId) {
+    const existingAct = ActivityService.getActivityById(currentActId);
+    if (existingAct) {
+      const sched = existingAct.schedule || {};
+      const part = existingAct.participants || {};
+
+      formData = {
+        projectId: activeProject.id,
+        formTitle: 'แบบฟอร์มขออนุมัติบรรจุกิจกรรม สำหรับนักเรียน งบประมาณ 2569',
+        projectName: activeProject.title,
+        activityName: existingAct.title || existingAct.activityName || '',
+        responsiblePerson: existingAct.responsiblePerson || '',
+        coordinatorPhone: existingAct.coordinatorPhone || existingAct.responsiblePhone || '',
+        responsiblePhone: existingAct.responsiblePhone || existingAct.coordinatorPhone || '',
+        hasSpeakers: Boolean(existingAct.hasSpeakers || (Array.isArray(existingAct.speakers) && existingAct.speakers.length > 0) || existingAct.speakerName),
+        speakers: Array.isArray(existingAct.speakers) ? existingAct.speakers : [],
+        speakerName: existingAct.speakerName || '',
+        speakerPosition: existingAct.speakerPosition || '',
+        speakerOrganization: existingAct.speakerOrganization || '',
+        speakerTopic: existingAct.speakerTopic || '',
+        objective: existingAct.objective || '',
+        targetOutcome: existingAct.targetOutcome || '',
+        semesterYear: existingAct.semesterYear || '',
+        targetGrade: existingAct.targetGrade || '',
+        participants: {
+          students: part.students !== undefined ? part.students : '',
+          teachers: part.teachers !== undefined ? part.teachers : '',
+          supportStaff: part.supportStaff !== undefined ? part.supportStaff : '',
+          nurse: part.nurse !== undefined ? part.nurse : '',
+          parentsAndExternal: part.parentsAndExternal !== undefined ? part.parentsAndExternal : '',
+          total: part.total || 0
+        },
+        schedule: {
+          dateRange: sched.dateRange || existingAct.dateRange || '',
+          timeRange: sched.timeRange || existingAct.timeRange || '',
+          location: sched.location || existingAct.location || '',
+          travelFormat: sched.travelFormat || existingAct.travelFormat || '',
+          vehicleType: sched.vehicleType || existingAct.vehicleType || '',
+          vehicleCount: sched.vehicleCount !== undefined ? sched.vehicleCount : (existingAct.vehicleCount !== undefined ? existingAct.vehicleCount : ''),
+          timeSlots: Array.isArray(sched.timeSlots) ? sched.timeSlots : (Array.isArray(existingAct.timeSlots) ? existingAct.timeSlots : [])
+        },
+        budgetItems: Array.isArray(existingAct.budgetItems) && existingAct.budgetItems.length > 0
+          ? existingAct.budgetItems
+          : (Array.isArray(existingAct.rawFormData?.budgetItems) ? existingAct.rawFormData.budgetItems : []),
+        budget: existingAct.budget || 0,
+        selectedDocuments: existingAct.selectedDocuments || []
+      };
+    }
+  }
+
+  // หากยังไม่มีข้อมูล (สร้างกิจกรรมใหม่) ให้เริ่มด้วยแบบฟอร์มเปล่า
+  if (!formData) {
     formData = {
       projectId: activeProject.id,
       formTitle: 'แบบฟอร์มขออนุมัติบรรจุกิจกรรม สำหรับนักเรียน งบประมาณ 2569',
@@ -150,6 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
       activityName: '',
       responsiblePerson: '',
       coordinatorPhone: '',
+      responsiblePhone: '',
       hasSpeakers: false,
       speakers: [],
       speakerName: '',
@@ -164,46 +229,6 @@ document.addEventListener('DOMContentLoaded', () => {
       schedule: { dateRange: '', timeRange: '', location: '', travelFormat: '', vehicleType: '', vehicleCount: '', timeSlots: [] },
       budgetItems: []
     };
-  } else {
-    formData = ProjectService.getActivityFormData(activeProject.id);
-    if (!formData.schedule) formData.schedule = {};
-    if (!Array.isArray(formData.schedule.timeSlots)) formData.schedule.timeSlots = [];
-    if (!Array.isArray(formData.budgetItems)) formData.budgetItems = [];
-
-    const existingAct = ActivityService.getActivityById(actIdFromUrl);
-    if (existingAct) {
-      formData.activityName = existingAct.title || '';
-      if (existingAct.dateRange) formData.schedule.dateRange = existingAct.dateRange;
-      if (existingAct.location) formData.schedule.location = existingAct.location;
-      if (existingAct.timeRange) formData.schedule.timeRange = existingAct.timeRange;
-      if (existingAct.responsiblePerson) formData.responsiblePerson = existingAct.responsiblePerson;
-      if (existingAct.coordinatorPhone || existingAct.responsiblePhone) {
-        formData.coordinatorPhone = existingAct.coordinatorPhone || existingAct.responsiblePhone;
-      }
-      if (existingAct.hasSpeakers !== undefined) formData.hasSpeakers = existingAct.hasSpeakers;
-      if (Array.isArray(existingAct.speakers)) formData.speakers = existingAct.speakers;
-      if (existingAct.speakerName) formData.speakerName = existingAct.speakerName;
-      if (existingAct.speakerPosition) formData.speakerPosition = existingAct.speakerPosition;
-      if (existingAct.speakerOrganization) formData.speakerOrganization = existingAct.speakerOrganization;
-      if (existingAct.speakerTopic) formData.speakerTopic = existingAct.speakerTopic;
-      if (existingAct.objective) formData.objective = existingAct.objective;
-      if (existingAct.targetOutcome) formData.targetOutcome = existingAct.targetOutcome;
-      if (existingAct.semesterYear) formData.semesterYear = existingAct.semesterYear;
-      if (existingAct.targetGrade) formData.targetGrade = existingAct.targetGrade;
-      if (existingAct.participants) {
-        formData.participants.students = existingAct.participants.students || '';
-        formData.participants.teachers = existingAct.participants.teachers || '';
-        formData.participants.supportStaff = existingAct.participants.supportStaff || '';
-        formData.participants.nurse = existingAct.participants.nurse || '';
-        formData.participants.parentsAndExternal = existingAct.participants.parentsAndExternal || '';
-      }
-      if (Array.isArray(existingAct.timeSlots)) {
-        formData.schedule.timeSlots = existingAct.timeSlots;
-      }
-      if (Array.isArray(existingAct.budgetItems)) {
-        formData.budgetItems = existingAct.budgetItems;
-      }
-    }
   }
 
   // 5. แสดงผลข้อมูลลงในฟอร์ม
@@ -222,28 +247,29 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 8. Action Buttons Handlers: บันทึกแบบร่าง
-  const saveBtn = $('#saveFormBtn');
-  if (saveBtn) {
-    addEvent(saveBtn, 'click', () => {
-      saveCurrentFormData(activeProject.id, actIdFromUrl);
+  const handleSaveAction = (isManualClick = true) => {
+    const saved = saveCurrentFormData(activeProject.id, currentActId);
+    if (saved && saved.id) {
+      currentActId = saved.id;
+    }
+    if (isManualClick) {
       showToast({
         type: 'success',
-        title: 'บันทึกแบบร่างสำเร็จ',
-        message: 'บันทึกข้อมูลเรียบร้อยแล้ว สามารถกดปุ่ม "สร้างเอกสาร Word" หรือ "ตรวจสอบข้อมูล" เพื่อส่งเอกสาร'
+        title: 'บันทึกข้อมูลเรียบร้อย 💾',
+        message: 'ระบบจำรายละเอียดข้อมูลทั้งหมดแล้ว สามารถตรวจสอบข้อมูลหรือสร้างเอกสาร Word ต่อได้'
       });
-    });
+    }
+    return saved;
+  };
+
+  const saveBtn = $('#saveFormBtn');
+  if (saveBtn) {
+    addEvent(saveBtn, 'click', () => handleSaveAction(true));
   }
 
   const bottomSaveDraft = $('#btnBottomSaveDraft');
   if (bottomSaveDraft) {
-    addEvent(bottomSaveDraft, 'click', () => {
-      saveCurrentFormData(activeProject.id, actIdFromUrl);
-      showToast({
-        type: 'success',
-        title: 'บันทึกแบบร่างสำเร็จ',
-        message: 'บันทึกข้อมูลแบบร่างเรียบร้อยแล้ว'
-      });
-    });
+    addEvent(bottomSaveDraft, 'click', () => handleSaveAction(true));
   }
 
   const printBtn = $('#printFormBtn');
@@ -265,16 +291,16 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 9. กำหนดการทำงานของระบบสร้างเอกสารราชการ Word (.docx)
-  initWordExportModal(activeProject.id, actIdFromUrl);
+  initWordExportModal(activeProject.id);
 
   // 10. ระบบจัดการข้อมูลวิทยากร (กรณีมีเชิญวิทยากร)
   initSpeakerSection();
 
   // 11. ตรวจสอบสิทธิ์และการล็อคแบบฟอร์ม (เฉพาะเจ้าของหรือแอดมิน / ห้ามแก้ไขเมื่อยืนยันแล้วนอกจากแอดมินเปิดสิทธิ์)
-  initFormPermissionsAndLockState(activeProject, actIdFromUrl, isNewMode);
+  initFormPermissionsAndLockState(activeProject, currentActId, isExplicitNew);
 
   // 12. ระบบตรวจสอบข้อมูลและเลือกประเภทหนังสือราชการ (Verification Modal & Documents Selection Modal)
-  initVerificationWorkflow(activeProject.id, actIdFromUrl);
+  initVerificationWorkflow(activeProject.id);
 });
 
 /**
@@ -417,7 +443,7 @@ function renderCategorizedBudgetTable(budgetItems) {
       const defaultSub = {
         category: cat.title,
         subCategory: `${cat.key}.1`,
-        item: `รายการในหมวด ${cat.title.slice(3)}`,
+        item: '',
         qty1: 1,
         unit1: cat.defaultUnit1,
         qty2: 1,
@@ -779,17 +805,40 @@ export function collectCurrentFormData(projectId, actId) {
   const toggleSpk = $('#toggleHasSpeakers');
   const hasSpeakers = toggleSpk ? toggleSpk.checked : false;
 
-  const validSpeakers = hasSpeakers
-    ? speakersData.filter(s => (s.name && s.name.trim()) || (s.position && s.position.trim()) || (s.organization && s.organization.trim()) || (s.topic && s.topic.trim()))
-    : [];
+  let validSpeakers = [];
+  if (hasSpeakers) {
+    // อ่านจาก DOM inputs โดยตรงเพื่อให้ได้ข้อมูลล่าสุดที่กำลังกรอกอยู่เสมอ
+    const cards = $$('.speaker-card', $('#speakersList'));
+    if (cards && cards.length > 0) {
+      cards.forEach((card, idx) => {
+        const name = card.querySelector('.spk-input-name')?.value.trim() || '';
+        const position = card.querySelector('.spk-input-position')?.value.trim() || '';
+        const organization = card.querySelector('.spk-input-org')?.value.trim() || '';
+        const topic = card.querySelector('.spk-input-topic')?.value.trim() || '';
+        if (name || position || organization || topic) {
+          validSpeakers.push({
+            id: speakersData[idx]?.id || `spk-${idx}`,
+            name,
+            position,
+            organization,
+            topic
+          });
+        }
+      });
+    } else if (Array.isArray(speakersData)) {
+      validSpeakers = speakersData.filter(s => (s.name && s.name.trim()) || (s.position && s.position.trim()) || (s.organization && s.organization.trim()) || (s.topic && s.topic.trim()));
+    }
+  }
 
   const speakerName = validSpeakers.map(s => s.name?.trim()).filter(Boolean).join(', ');
   const speakerPosition = validSpeakers.map(s => s.position?.trim()).filter(Boolean).join(', ');
   const speakerOrganization = validSpeakers.map(s => s.organization?.trim()).filter(Boolean).join(', ');
   const speakerTopic = validSpeakers.map(s => s.topic?.trim()).filter(Boolean).join(', ');
 
+  const currentId = actId || currentActId || '';
+
   return {
-    id: actId,
+    id: currentId,
     projectId,
     formTitle: 'แบบฟอร์มขออนุมัติบรรจุกิจกรรม สำหรับนักเรียน งบประมาณ 2569',
     projectName: $('#formProjectName')?.value.trim() || '',
@@ -822,7 +871,7 @@ export function collectCurrentFormData(projectId, actId) {
       location: $('#schedLocation')?.value.trim() || '',
       travelFormat: $('#schedTravelFormat')?.value.trim() || '',
       vehicleType: $('#schedVehicleType')?.value.trim() || '',
-      vehicleCount: $('#schedVehicleCount')?.value ? Number($('#schedVehicleCount').value) : '',
+      vehicleCount: $('#schedVehicleCount')?.value !== undefined && $('#schedVehicleCount')?.value !== '' ? Number($('#schedVehicleCount').value) : '',
       timeSlots
     },
     budgetItems,
@@ -835,13 +884,11 @@ export function collectCurrentFormData(projectId, actId) {
  */
 export function saveCurrentFormData(projectId, actId, options = {}) {
   const currentUser = AuthService.getCurrentUser();
-  const formData = collectCurrentFormData(projectId, actId);
-
-  // บันทึกลงใน ProjectService
-  ProjectService.saveActivityFormData(projectId, formData);
+  const targetId = actId || currentActId || `ACT-${Date.now()}`;
+  const formData = collectCurrentFormData(projectId, targetId);
 
   // ดึงข้อมูลเดิมหากมี
-  const existingAct = actId ? ActivityService.getActivityById(actId) : null;
+  const existingAct = ActivityService.getActivityById(targetId);
   const isLocked = options.isLocked !== undefined ? Boolean(options.isLocked) : (existingAct ? Boolean(existingAct.isLocked) : false);
   const activityStatus = options.status !== undefined ? options.status : (existingAct ? existingAct.status : 'review');
   const selectedDocuments = options.selectedDocuments !== undefined ? options.selectedDocuments : (existingAct?.selectedDocuments || []);
@@ -850,9 +897,9 @@ export function saveCurrentFormData(projectId, actId, options = {}) {
   const creatorEmail = existingAct?.creatorEmail || currentUser?.email || 'user@satit.cmu.ac.th';
   const creatorName = existingAct?.creatorName || currentUser?.name || formData.responsiblePerson || 'อาจารย์';
 
-  // บันทึกลงใน ActivityService ด้วย
+  // บันทึกลงใน ActivityService
   const activityToSave = {
-    id: actId || `ACT-${Date.now()}`,
+    id: targetId,
     projectId,
     title: formData.activityName || 'กิจกรรมใหม่',
     responsiblePerson: formData.responsiblePerson,
@@ -869,7 +916,8 @@ export function saveCurrentFormData(projectId, actId, options = {}) {
     location: formData.schedule?.location || '',
     travelFormat: formData.schedule?.travelFormat || '',
     vehicleType: formData.schedule?.vehicleType || '',
-    vehicleCount: formData.schedule?.vehicleCount || '',
+    vehicleCount: formData.schedule?.vehicleCount !== undefined ? formData.schedule.vehicleCount : '',
+    schedule: formData.schedule,
     objective: formData.objective || '',
     targetOutcome: formData.targetOutcome || '',
     semesterYear: formData.semesterYear || '',
@@ -884,10 +932,38 @@ export function saveCurrentFormData(projectId, actId, options = {}) {
     creatorId,
     creatorEmail,
     creatorName,
-    submittedAt: options.isLocked ? (existingAct?.submittedAt || new Date().toISOString()) : (existingAct?.submittedAt || null)
+    rawFormData: formData,
+    submittedAt: isLocked ? (existingAct?.submittedAt || new Date().toISOString()) : (existingAct?.submittedAt || null)
   };
 
   ActivityService.saveActivity(activityToSave);
+
+  // บันทึกลงใน ProjectService
+  ProjectService.saveActivityFormData(projectId, formData);
+
+  // บันทึก Draft สำรองลง LocalStorage
+  try {
+    localStorage.setItem(`satit_cmu_draft_${targetId}`, JSON.stringify(activityToSave));
+    localStorage.setItem(`satit_cmu_last_active_act_${projectId}`, targetId);
+  } catch {}
+
+  // อัปเดต state ตัวตนของกิจกรรมปัจจุบันในหน้า
+  currentActId = targetId;
+
+  // อัปเดต URL เพื่อให้เมื่อ Reload หน้าเว็บจะยังคงจำรายละเอียดของกิจกรรมนี้
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.set('id', projectId);
+    url.searchParams.set('actId', targetId);
+    url.searchParams.delete('mode');
+    window.history.replaceState({ actId: targetId }, '', url.toString());
+  } catch {}
+
+  // อัปเดตปุ่มย้อนกลับให้กลับไปโครงการที่ถูกต้อง
+  const backBtn = $('#backToActivitiesBtn');
+  if (backBtn) {
+    backBtn.href = `/project-activities.html?id=${encodeURIComponent(projectId)}`;
+  }
 
   return activityToSave;
 }
@@ -896,7 +972,7 @@ export function saveCurrentFormData(projectId, actId, options = {}) {
  * ตัวควบคุมหน้าต่าง Modal สร้างเอกสารราชการ Word (.docx)
  * จัดการการเลือกแม่แบบ, การพรีวิว Tag Mapping, และการดาวน์โหลดไฟล์จริง
  */
-function initWordExportModal(projectId, actId) {
+function initWordExportModal(projectId) {
   const modal = $('#wordExportModal');
   const closeBtn = $('#closeWordModalBtn');
   const cancelBtn = $('#cancelWordModalBtn');
@@ -915,7 +991,7 @@ function initWordExportModal(projectId, actId) {
 
   // ฟังก์ชันเปิด Modal พร้อมโหลดข้อมูลจากฟอร์มปัจจุบัน
   const openModal = () => {
-    const currentData = collectCurrentFormData(projectId, actId);
+    const currentData = collectCurrentFormData(projectId, currentActId);
 
     // ตั้งชื่อไฟล์เริ่มต้นตามชื่อกิจกรรม
     const actNameSafe = (currentData.activityName || 'กิจกรรม')
@@ -1038,7 +1114,7 @@ function initWordExportModal(projectId, actId) {
   // ปุ่มคัดลอก Tags ทั้งหมด สำหรับนำไปวางใน Word
   if (copyTagsBtn) {
     addEvent(copyTagsBtn, 'click', () => {
-      const currentData = collectCurrentFormData(projectId, actId);
+      const currentData = collectCurrentFormData(projectId, currentActId);
       const tagsList = WordDocService.getAvailablePlaceholdersList(currentData);
       const textToCopy = [
         '=== รายการตัวแปร Tag สำหรับวางในแม่แบบเอกสาร Word (.docx) ===\n',
@@ -1087,7 +1163,7 @@ function initWordExportModal(projectId, actId) {
       }
 
       // รวบรวมข้อมูลล่าสุดจากหน้าแบบฟอร์ม
-      const currentData = collectCurrentFormData(projectId, actId);
+      const currentData = collectCurrentFormData(projectId, currentActId);
 
       // จัดการชื่อไฟล์ปลายทาง
       let filename = outputFilenameInput?.value.trim() || 'เอกสารราชการ.docx';
@@ -1462,13 +1538,13 @@ function makeFormReadOnly() {
 /**
  * ระบบ Workflow ตรวจสอบข้อมูลกิจกรรม และเลือกประเภทหนังสือราชการ
  */
-function initVerificationWorkflow(projectId, actId) {
+function initVerificationWorkflow(projectId) {
   const verifyModalEl = $('#verifyActivityModal');
   const docsModalEl = $('#selectDocsModal');
   if (!verifyModalEl || !docsModalEl) return;
 
-  const verifyModal = initModal(verifyModalEl, { staticBackdrop: true });
-  const docsModal = initModal(docsModalEl, { staticBackdrop: true });
+  const verifyModal = initModal(verifyModalEl);
+  const docsModal = initModal(docsModalEl);
 
   const triggerVerification = () => {
     const actName = $('#formActivityName')?.value.trim();
@@ -1482,16 +1558,30 @@ function initVerificationWorkflow(projectId, actId) {
       return;
     }
 
-    const formData = collectCurrentFormData(projectId, actId);
+    // บันทึกแบบร่างปัจจุบันทันทีก่อนเปิดหน้าต่างตรวจสอบ เพื่อไม่ให้ข้อมูลที่เพิ่งพิมพ์สูญหาย
+    const saved = saveCurrentFormData(projectId, currentActId);
+    if (saved && saved.id) {
+      currentActId = saved.id;
+    }
+
+    const formData = collectCurrentFormData(projectId, currentActId);
     renderVerifyModalSummary(formData);
     verifyModal.open();
   };
 
-  // ผูกปุ่มตรวจสอบ
+  // ผูกปุ่มตรวจสอบข้อมูล
   $('#btnVerifyForm')?.addEventListener('click', triggerVerification);
   $('#toolbarVerifyBtn')?.addEventListener('click', triggerVerification);
 
-  // ปุ่มใน Modal 1 (ตรวจสอบ)
+  // ปุ่มปิดหน้าต่าง ✕
+  $('#closeVerifyModalBtn')?.addEventListener('click', () => {
+    verifyModal.close();
+  });
+  $('#closeDocsModalBtn')?.addEventListener('click', () => {
+    docsModal.close();
+  });
+
+  // ปุ่มใน Modal 1 (ตรวจสอบข้อมูล)
   $('#btnVerifyBack')?.addEventListener('click', () => {
     verifyModal.close();
   });
@@ -1513,7 +1603,7 @@ function initVerificationWorkflow(projectId, actId) {
   $('#btnVerifyConfirm')?.addEventListener('click', () => {
     verifyModal.close();
     // เติมข้อมูลหนังสือที่เคยเลือกไว้เดิม (ถ้ามี)
-    const existingAct = actId ? ActivityService.getActivityById(actId) : null;
+    const existingAct = currentActId ? ActivityService.getActivityById(currentActId) : null;
     if (existingAct && Array.isArray(existingAct.selectedDocuments)) {
       const docs = existingAct.selectedDocuments;
       const chk1 = $('#docReq1');
@@ -1541,7 +1631,7 @@ function initVerificationWorkflow(projectId, actId) {
     docsModal.open();
   });
 
-  // ปุ่มใน Modal 2 (เลือกหนังสือ)
+  // ปุ่มใน Modal 2 (เลือกประเภทหนังสือ)
   $('#btnDocsBack')?.addEventListener('click', () => {
     docsModal.close();
     verifyModal.open();
@@ -1563,7 +1653,7 @@ function initVerificationWorkflow(projectId, actId) {
     }
 
     // บันทึกและล็อคกิจกรรม
-    saveCurrentFormData(projectId, actId, {
+    saveCurrentFormData(projectId, currentActId, {
       isLocked: true,
       status: 'review',
       selectedDocuments: selectedDocs
@@ -1598,7 +1688,7 @@ function renderVerifyModalSummary(formData) {
     }
   });
 
-  const timeSlotsCount = formData.schedule?.timeSlots?.length || 0;
+  const timeSlots = formData.schedule?.timeSlots || [];
   const grandTotal = formData.budget || 0;
 
   verifyBody.innerHTML = `
@@ -1628,18 +1718,26 @@ function renderVerifyModalSummary(formData) {
             <div style="font-weight: 600;">📍 ${escapeHTML(formData.schedule?.location || '-')}</div>
           </div>
           <div>
+            <div style="color: var(--text-muted); font-size: var(--font-size-xs);">การเดินทาง / ยานพาหนะ:</div>
+            <div style="font-weight: 600;">🚌 ${escapeHTML(formData.schedule?.travelFormat || '-')} ${formData.schedule?.vehicleType ? `(${escapeHTML(formData.schedule.vehicleType)} ${formData.schedule.vehicleCount ? `${formData.schedule.vehicleCount} คัน` : ''})` : ''}</div>
+          </div>
+          <div>
             <div style="color: var(--text-muted); font-size: var(--font-size-xs);">กลุ่มเป้าหมาย / ผู้เข้าร่วม:</div>
             <div style="font-weight: 600;">👥 นักเรียน ${formData.participants?.students || 0} คน (รวมทั้งหมด ${formData.participants?.total || 0} คน)</div>
           </div>
           <div>
+            <div style="color: var(--text-muted); font-size: var(--font-size-xs);">ภาคเรียน / ระดับชั้น:</div>
+            <div style="font-weight: 600;">🎓 ${escapeHTML(formData.semesterYear || '-')} ${formData.targetGrade ? `(${escapeHTML(formData.targetGrade)})` : ''}</div>
+          </div>
+          <div>
             <div style="color: var(--text-muted); font-size: var(--font-size-xs);">กำหนดการ:</div>
-            <div style="font-weight: 600;">🕒 บรรจุช่วงเวลาทั้งหมด ${timeSlotsCount} ช่วง</div>
+            <div style="font-weight: 600;">🕒 บรรจุช่วงเวลาทั้งหมด ${timeSlots.length} ช่วง</div>
           </div>
         </div>
         ${formData.hasSpeakers && formData.speakerName ? `
           <div style="margin-top: var(--space-3); padding-top: var(--space-2); border-top: 1px dashed var(--border-subtle); font-size: var(--font-size-xs);">
             <span style="color: var(--text-muted);">วิทยากร: </span>
-            <strong>${escapeHTML(formData.speakerName)}</strong> ${formData.speakerOrganization ? `(${escapeHTML(formData.speakerOrganization)})` : ''}
+            <strong>${escapeHTML(formData.speakerName)}</strong> ${formData.speakerPosition ? `(${escapeHTML(formData.speakerPosition)})` : ''} ${formData.speakerOrganization ? `สังกัด ${escapeHTML(formData.speakerOrganization)}` : ''}
           </div>
         ` : ''}
       </div>
@@ -1678,10 +1776,28 @@ function renderVerifyModalSummary(formData) {
         </div>
       </div>
 
+      ${timeSlots.length > 0 ? `
+        <!-- Card 3: กำหนดการโดยย่อ -->
+        <div style="background: var(--bg-surface-elevated, #fff); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: var(--space-3) var(--space-4);">
+          <div style="font-weight: 700; color: var(--cmu-purple-900); font-size: var(--font-size-xs); margin-bottom: 6px;">
+            🕒 รายการช่วงเวลากำหนดการ (${timeSlots.length} รายการ):
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px; max-height: 140px; overflow-y: auto;">
+            ${timeSlots.map(ts => `
+              <div style="display: flex; gap: 8px; font-size: 0.75rem; border-bottom: 1px dashed var(--border-subtle); padding: 3px 0;">
+                <span style="font-weight: 700; color: var(--cmu-purple-800); min-width: 100px;">${escapeHTML(ts.time || '-')}</span>
+                <span style="flex: 1; color: var(--text-main);">${escapeHTML(ts.detail || '-')}</span>
+                ${ts.expenseCategory ? `<span class="badge" style="font-size: 10px;">${escapeHTML(ts.expenseCategory)}</span>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+
       <!-- Action Prompt -->
       <div style="padding: 10px 14px; border-radius: var(--radius-lg); background: rgba(5, 150, 105, 0.08); border: 1px solid rgba(5, 150, 105, 0.3); font-size: var(--font-size-xs); color: #065f46; display: flex; align-items: center; gap: 8px;">
         <span>✅</span>
-        <span>หากข้อมูลถูกต้องครบถ้วนแล้ว ให้กดปุ่ม <strong>"ยืนยัน"</strong> เพื่อเลือกประเภทหนังสือราชการที่ต้องการ</span>
+        <span>หากข้อมูลถูกต้องครบถ้วนแล้ว ให้กดปุ่ม <strong>"ยืนยัน"</strong> เพื่อเลือกประเภทหนังสือราชการ หรือกด <strong>"แก้ไข"</strong> เพื่อปรับปรุงข้อมูล</span>
       </div>
 
     </div>

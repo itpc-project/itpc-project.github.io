@@ -13,15 +13,17 @@ export function initModal(modalBackdrop, options = {}) {
   if (!modalBackdrop) return { open: () => {}, close: () => {} };
 
   const isStatic = options.staticBackdrop ?? modalBackdrop.dataset.backdrop === 'static';
-  const closeBtns = modalBackdrop.querySelectorAll('[data-modal-close]');
+  const closeBtns = modalBackdrop.querySelectorAll('[data-modal-close], .modal-close-btn');
 
   const open = () => {
-    modalBackdrop.classList.add('is-active');
+    modalBackdrop.classList.add('is-active', 'is-open');
+    modalBackdrop.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
   };
 
   const close = () => {
-    modalBackdrop.classList.remove('is-active');
+    modalBackdrop.classList.remove('is-active', 'is-open');
+    modalBackdrop.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
   };
 
@@ -33,7 +35,7 @@ export function initModal(modalBackdrop, options = {}) {
   });
 
   // Protect modal-card from any event bubbling to backdrop
-  const card = modalBackdrop.querySelector('.modal-card');
+  const card = modalBackdrop.querySelector('.modal-card, .word-modal-container');
   if (card) {
     card.addEventListener('mousedown', (e) => e.stopPropagation());
     card.addEventListener('click', (e) => e.stopPropagation());
@@ -52,7 +54,7 @@ export function initModal(modalBackdrop, options = {}) {
 
   // Close on Escape key only when not static
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modalBackdrop.classList.contains('is-active')) {
+    if (e.key === 'Escape' && (modalBackdrop.classList.contains('is-active') || modalBackdrop.classList.contains('is-open'))) {
       if (!isStatic) {
         close();
       }

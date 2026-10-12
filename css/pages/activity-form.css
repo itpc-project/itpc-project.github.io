@@ -104,7 +104,8 @@
   transition: opacity var(--transition-normal), visibility var(--transition-normal);
 }
 
-.modal-backdrop.is-open {
+.modal-backdrop.is-open,
+.modal-backdrop.is-active {
   opacity: 1;
   visibility: visible;
 }
@@ -124,8 +125,15 @@
   overflow: hidden;
 }
 
-.modal-backdrop.is-open .word-modal-container {
+.modal-backdrop.is-open .word-modal-container,
+.modal-backdrop.is-active .word-modal-container {
   transform: translateY(0) scale(1);
+}
+
+.modal-backdrop.is-open .modal-card,
+.modal-backdrop.is-active .modal-card {
+  transform: translateY(0) scale(1);
+  opacity: 1;
 }
 
 /* Modal Header */

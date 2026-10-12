@@ -19,6 +19,7 @@
   <link rel="stylesheet" href="/css/reset.css" />
   <link rel="stylesheet" href="/css/components/button.css" />
   <link rel="stylesheet" href="/css/components/input.css" />
+  <link rel="stylesheet" href="/css/components/modal.css" />
   <link rel="stylesheet" href="/css/components/card.css" />
   <link rel="stylesheet" href="/css/components/badge.css" />
   <link rel="stylesheet" href="/css/components/toast.css" />
@@ -649,7 +650,7 @@
 
   <!-- Modal 1: ตรวจสอบข้อมูลกิจกรรมก่อนยืนยัน -->
   <div id="verifyActivityModal" class="modal-backdrop" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="verifyModalTitle">
-    <div class="modal-card" style="max-width: 720px; width: 95%;">
+    <div class="modal-card" style="max-width: 760px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
       <!-- Header -->
       <div class="modal-header" style="background: linear-gradient(135deg, var(--cmu-purple-900) 0%, var(--cmu-purple-700) 100%); color: #ffffff;">
         <div style="display: flex; align-items: center; gap: var(--space-3);">
@@ -661,11 +662,11 @@
             <p style="font-size: var(--font-size-xs); color: rgba(255,255,255,0.8); margin: 0;">กรุณาตรวจสอบข้อมูลก่อนดำเนินการยืนยันและเลือกประเภทหนังสือราชการ</p>
           </div>
         </div>
-        <button id="closeVerifyModalBtn" type="button" class="modal-close-btn" style="color: #ffffff;" aria-label="ปิด">✕</button>
+        <button id="closeVerifyModalBtn" type="button" class="modal-close-btn" data-modal-close style="color: #ffffff;" aria-label="ปิด">✕</button>
       </div>
 
       <!-- Body -->
-      <div class="modal-body" id="verifyModalBody" style="max-height: 65vh; overflow-y: auto; padding: var(--space-6);">
+      <div class="modal-body" id="verifyModalBody" style="max-height: calc(90vh - 140px); overflow-y: auto; padding: var(--space-6); -webkit-overflow-scrolling: touch;">
         <!-- Summary Injected via JS -->
       </div>
 
@@ -701,7 +702,7 @@
 
   <!-- Modal 2: เลือกประเภทหนังสือราชการที่ต้องการ -->
   <div id="selectDocsModal" class="modal-backdrop" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="docsModalTitle">
-    <div class="modal-card" style="max-width: 620px; width: 95%;">
+    <div class="modal-card" style="max-width: 660px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
       <!-- Header -->
       <div class="modal-header" style="background: linear-gradient(135deg, var(--cmu-purple-800) 0%, var(--cmu-purple-600) 100%); color: #ffffff;">
         <div style="display: flex; align-items: center; gap: var(--space-3);">
@@ -713,11 +714,11 @@
             <p style="font-size: var(--font-size-xs); color: rgba(255,255,255,0.8); margin: 0;">โปรดเลือกประเภทหนังสือราชการที่ต้องการ (สามารถเลือกได้มากกว่า 1 รายการ)</p>
           </div>
         </div>
-        <button id="closeDocsModalBtn" type="button" class="modal-close-btn" style="color: #ffffff;" aria-label="ปิด">✕</button>
+        <button id="closeDocsModalBtn" type="button" class="modal-close-btn" data-modal-close style="color: #ffffff;" aria-label="ปิด">✕</button>
       </div>
 
       <!-- Body -->
-      <div class="modal-body" style="padding: var(--space-6);">
+      <div class="modal-body" style="max-height: calc(90vh - 140px); overflow-y: auto; padding: var(--space-6); -webkit-overflow-scrolling: touch;">
         <p style="font-family: var(--font-family-thai); font-size: var(--font-size-sm); color: var(--text-muted); margin-bottom: var(--space-4);">
           ทำเครื่องหมายเลือกเอกสารที่จำเป็นต้องใช้สำหรับการจัดกิจกรรมนี้:
         </p>
