@@ -15,13 +15,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
   <!-- Modular CSS Stylesheets -->
-  <script type="module" crossorigin src="./assets/activityForm-D4qWMExB.js"></script>
-  <link rel="modulepreload" crossorigin href="./assets/modal-CRjSveqs.js">
-  <link rel="modulepreload" crossorigin href="./assets/navbar-LLI8q1FF.js">
-  <link rel="modulepreload" crossorigin href="./assets/activity-service-9m2hQTaj.js">
-  <link rel="stylesheet" crossorigin href="./assets/modal-BgZLX_Kx.css">
+  <script type="module" crossorigin src="./assets/activityForm-BexNDwqi.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/modal-oz8TM4eO.js">
+  <link rel="modulepreload" crossorigin href="./assets/navbar-BIx-M677.js">
+  <link rel="modulepreload" crossorigin href="./assets/activity-service-78OnpwYJ.js">
+  <link rel="stylesheet" crossorigin href="./assets/modal-CRg2M03S.css">
   <link rel="stylesheet" crossorigin href="./assets/navbar-CTplSEAi.css">
-  <link rel="stylesheet" crossorigin href="./assets/activityForm-BWF__drU.css">
+  <link rel="stylesheet" crossorigin href="./assets/activityForm-YTD-o5ZI.css">
 </head>
 <body class="activity-form-page">
 
@@ -645,7 +645,7 @@
 
   <!-- Modal 1: ตรวจสอบข้อมูลกิจกรรมก่อนยืนยัน -->
   <div id="verifyActivityModal" class="modal-backdrop" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="verifyModalTitle">
-    <div class="modal-card" style="max-width: 720px; width: 95%;">
+    <div class="modal-card" style="max-width: 760px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
       <!-- Header -->
       <div class="modal-header" style="background: linear-gradient(135deg, var(--cmu-purple-900) 0%, var(--cmu-purple-700) 100%); color: #ffffff;">
         <div style="display: flex; align-items: center; gap: var(--space-3);">
@@ -657,11 +657,11 @@
             <p style="font-size: var(--font-size-xs); color: rgba(255,255,255,0.8); margin: 0;">กรุณาตรวจสอบข้อมูลก่อนดำเนินการยืนยันและเลือกประเภทหนังสือราชการ</p>
           </div>
         </div>
-        <button id="closeVerifyModalBtn" type="button" class="modal-close-btn" style="color: #ffffff;" aria-label="ปิด">✕</button>
+        <button id="closeVerifyModalBtn" type="button" class="modal-close-btn" data-modal-close style="color: #ffffff;" aria-label="ปิด">✕</button>
       </div>
 
       <!-- Body -->
-      <div class="modal-body" id="verifyModalBody" style="max-height: 65vh; overflow-y: auto; padding: var(--space-6);">
+      <div class="modal-body" id="verifyModalBody" style="max-height: calc(90vh - 140px); overflow-y: auto; padding: var(--space-6); -webkit-overflow-scrolling: touch;">
         <!-- Summary Injected via JS -->
       </div>
 
@@ -697,7 +697,7 @@
 
   <!-- Modal 2: เลือกประเภทหนังสือราชการที่ต้องการ -->
   <div id="selectDocsModal" class="modal-backdrop" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="docsModalTitle">
-    <div class="modal-card" style="max-width: 620px; width: 95%;">
+    <div class="modal-card" style="max-width: 660px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
       <!-- Header -->
       <div class="modal-header" style="background: linear-gradient(135deg, var(--cmu-purple-800) 0%, var(--cmu-purple-600) 100%); color: #ffffff;">
         <div style="display: flex; align-items: center; gap: var(--space-3);">
@@ -709,11 +709,11 @@
             <p style="font-size: var(--font-size-xs); color: rgba(255,255,255,0.8); margin: 0;">โปรดเลือกประเภทหนังสือราชการที่ต้องการ (สามารถเลือกได้มากกว่า 1 รายการ)</p>
           </div>
         </div>
-        <button id="closeDocsModalBtn" type="button" class="modal-close-btn" style="color: #ffffff;" aria-label="ปิด">✕</button>
+        <button id="closeDocsModalBtn" type="button" class="modal-close-btn" data-modal-close style="color: #ffffff;" aria-label="ปิด">✕</button>
       </div>
 
       <!-- Body -->
-      <div class="modal-body" style="padding: var(--space-6);">
+      <div class="modal-body" style="max-height: calc(90vh - 140px); overflow-y: auto; padding: var(--space-6); -webkit-overflow-scrolling: touch;">
         <p style="font-family: var(--font-family-thai); font-size: var(--font-size-sm); color: var(--text-muted); margin-bottom: var(--space-4);">
           ทำเครื่องหมายเลือกเอกสารที่จำเป็นต้องใช้สำหรับการจัดกิจกรรมนี้:
         </p>
