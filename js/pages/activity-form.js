@@ -1697,11 +1697,6 @@ function renderRequestedDocsBanner(projectId, actId) {
             </div>
           </div>
           <div class="activity-docs-banner-actions">
-            ${canEdit ? `
-              <button type="button" id="btnEditDocsFromBanner" class="btn btn-secondary btn-sm" title="ปรับเปลี่ยนตัวเลือกประเภทหนังสือ">
-                ✏️ ปรับเปลี่ยนประเภทหนังสือ
-              </button>
-            ` : ''}
             <button type="button" id="btnExportWordFromBanner" class="btn btn-primary btn-sm" style="background: linear-gradient(135deg, var(--cmu-purple-700) 0%, var(--cmu-purple-900) 100%);">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -1717,40 +1712,12 @@ function renderRequestedDocsBanner(projectId, actId) {
       </div>
     `;
 
-    $('#btnEditDocsFromBanner')?.addEventListener('click', () => {
-      openDocsModalDirectly(projectId);
-    });
-
     $('#btnExportWordFromBanner')?.addEventListener('click', () => {
       $('#exportWordBtn')?.click();
     });
   } else {
-    container.innerHTML = `
-      <div class="activity-docs-banner is-empty">
-        <div class="activity-docs-banner-header">
-          <div style="display: flex; align-items: center; gap: var(--space-3);">
-            <div class="activity-docs-banner-icon" style="background: rgba(148, 163, 184, 0.15); color: #64748b;">📋</div>
-            <div>
-              <h4 class="activity-docs-banner-title" style="color: var(--text-muted);">ยังไม่ได้ระบุประเภทหนังสือราชการที่ต้องการ (แบบร่าง)</h4>
-              <p class="activity-docs-banner-sub">
-                ระบบจะให้เลือกประเภทหนังสือเมื่อกดปุ่ม <strong>"ตรวจสอบข้อมูล"</strong> หรือคลิกปุ่มด้านขวาเพื่อกำหนดล่วงหน้า
-              </p>
-            </div>
-          </div>
-          <div class="activity-docs-banner-actions">
-            ${canEdit ? `
-              <button type="button" id="btnChooseDocsFromBanner" class="btn btn-secondary btn-sm">
-                ➕ เลือกประเภทหนังสือ
-              </button>
-            ` : ''}
-          </div>
-        </div>
-      </div>
-    `;
-
-    $('#btnChooseDocsFromBanner')?.addEventListener('click', () => {
-      openDocsModalDirectly(projectId);
-    });
+    // หากยังไม่มีการระบุประเภทหนังสือ (ยังเป็นแบบร่างหรือเพิ่งเปิดฟอร์ม) ไม่ต้องแสดง Banner ใดๆ
+    container.innerHTML = '';
   }
 }
 

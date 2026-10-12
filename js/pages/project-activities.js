@@ -350,14 +350,7 @@ function renderActivitiesList(project) {
           </div>
         `;
       } else {
-        docsSectionHtml = `
-          <div class="activity-docs-section is-empty" title="ยังไม่มีการระบุหนังสือราชการ">
-            <div class="activity-docs-empty-text">
-              <span>ℹ️</span>
-              <span>ยังไม่ได้ระบุหนังสือราชการที่ต้องการ (แบบร่าง)</span>
-            </div>
-          </div>
-        `;
+        docsSectionHtml = '';
       }
 
       return `

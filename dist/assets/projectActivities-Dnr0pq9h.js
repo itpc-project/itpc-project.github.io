@@ -82,14 +82,7 @@ import{$ as e,a as S,s as y,b as _,A as N,e as $,i as F}from"./modal-oz8TM4eO.js
               ${H}
             </div>
           </div>
-        `}else E=`
-          <div class="activity-docs-section is-empty" title="ยังไม่มีการระบุหนังสือราชการ">
-            <div class="activity-docs-empty-text">
-              <span>ℹ️</span>
-              <span>ยังไม่ได้ระบุหนังสือราชการที่ต้องการ (แบบร่าง)</span>
-            </div>
-          </div>
-        `;return`
+        `}else E="";return`
       <article class="activity-card" data-id="${t.id}" data-status="${s.key}">
         <div>
           <!-- Header พร้อมตัวเลือกสถานะ (แอดมินเปลี่ยนได้ / อาจารย์ดูได้อย่างเดียว) -->
