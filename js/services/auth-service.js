@@ -66,6 +66,9 @@ export const AuthService = {
         department: 'โรงเรียนสาธิตมหาวิทยาลัยเชียงใหม่',
         avatar: cleanEmail.startsWith('admin') ? '👑' : '👨‍🏫'
       });
+      try {
+        await CloudSyncService.push();
+      } catch {}
     }
 
     if (matchedUser) {

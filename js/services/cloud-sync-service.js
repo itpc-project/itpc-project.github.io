@@ -12,6 +12,7 @@ const STORAGE_KEYS = {
   ACTIVITIES: 'satit_cmu_activities_data',
   FORMS: 'satit_cmu_activity_forms',
   USERS: 'satit_cmu_users_data',
+  DELETED_USERS: 'satit_cmu_deleted_user_ids',
   CONFIG: 'satit_cmu_cloud_config',
   LOCAL_TIMESTAMP: 'satit_cmu_last_local_update'
 };
@@ -90,6 +91,128 @@ class CloudSyncManager {
   }
 
   /**
+   * ผสานรายชื่อผู้ใช้จาก Local และ Remote อย่างปลอดภัย โดยไม่ทำลายข้อมูลเดิม
+   */
+  mergeUserLists(localUsers = [], remoteUsers = [], deletedUserIds = []) {
+    const deletedSet = new Set((deletedUserIds || []).map((x) => String(x).toLowerCase()));
+    const userMap = new Map();
+
+    // 1. ใส่ DEMO_ACCOUNTS เป็นฐานเริ่มต้นเสมอ
+    (DEMO_ACCOUNTS || []).forEach((demo) => {
+      userMap.set(String(demo.id), { ...demo });
+    });
+
+    const mergeOne = (user) => {
+      if (!user || (!user.id && !user.email)) return;
+      const uId = user.id ? String(user.id) : '';
+      const uEmail = user.email ? String(user.email).trim().toLowerCase() : '';
+
+      // หากอยู่ในรายการที่ถูกลบ (Tombstone) ไม่รับเข้า
+      if ((uId && deletedSet.has(uId.toLowerCase())) || (uEmail && deletedSet.has(uEmail))) {
+        return;
+      }
+
+      // ค้นหาบัญชีเดิม
+      let targetKey = null;
+      if (uId && userMap.has(uId)) {
+        targetKey = uId;
+      } else if (uEmail) {
+        for (const [k, v] of userMap.entries()) {
+          if (v.email && String(v.email).trim().toLowerCase() === uEmail) {
+            targetKey = k;
+            break;
+          }
+        }
+      }
+
+      if (!targetKey) {
+        const finalKey = uId || `user-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+        userMap.set(finalKey, { ...user, id: finalKey });
+      } else {
+        const existing = userMap.get(targetKey);
+        const existingTime = Number(existing.updatedAt) || 0;
+        const newTime = Number(user.updatedAt) || 0;
+
+        if (newTime >= existingTime) {
+          userMap.set(targetKey, { ...existing, ...user, id: targetKey });
+        } else {
+          userMap.set(targetKey, { ...user, ...existing, id: targetKey });
+        }
+      }
+    };
+
+    // Process remote users first, then local users
+    (remoteUsers || []).forEach(mergeOne);
+    (localUsers || []).forEach(mergeOne);
+
+    // กู้คืนบัญชีผู้ใช้จากกิจกรรมที่เคยถูกสร้างไว้ (Auto-recovery from Activities)
+    try {
+      const actStored = localStorage.getItem('satit_cmu_activities_data');
+      if (actStored) {
+        const acts = JSON.parse(actStored);
+        if (Array.isArray(acts)) {
+          acts.forEach((act) => {
+            if (act && act.creatorEmail) {
+              const email = act.creatorEmail.trim().toLowerCase();
+              const creatorId = act.creatorId ? String(act.creatorId).toLowerCase() : '';
+              if (!deletedSet.has(email) && !deletedSet.has(creatorId)) {
+                mergeOne({
+                  id: act.creatorId || `user-${Date.now()}`,
+                  name: act.creatorName || email.split('@')[0],
+                  position: 'อาจารย์ผู้สอน',
+                  department: 'โรงเรียนสาธิตมหาวิทยาลัยเชียงใหม่',
+                  phone: act.coordinatorPhone || '0000000000',
+                  email: email,
+                  password: 'password123',
+                  avatar: '👨‍🏫',
+                  roleId: 'teacher',
+                  role: 'อาจารย์ผู้รับผิดชอบ',
+                  roleBadge: 'badge-blue',
+                  canChangeStatus: false,
+                  isActive: true,
+                  updatedAt: Date.now()
+                });
+              }
+            }
+          });
+        }
+      }
+    } catch {}
+
+    // คงผู้ใช้ปัจจุบันใน sessionStorage ไว้เสมอ
+    try {
+      const sessionRaw = sessionStorage.getItem(APP_CONFIG.STORAGE_KEYS.AUTH_USER);
+      if (sessionRaw) {
+        const sUser = JSON.parse(sessionRaw);
+        if (sUser) mergeOne(sUser);
+      }
+    } catch {}
+
+    return Array.from(userMap.values());
+  }
+
+  /**
+   * ผสานรายการกิจกรรมจาก Local และ Remote ป้องกันกิจกรรมหาย
+   */
+  mergeActivities(localActs = [], remoteActs = []) {
+    const actMap = new Map();
+    (remoteActs || []).forEach((act) => {
+      if (act && act.id) actMap.set(act.id, act);
+    });
+    (localActs || []).forEach((act) => {
+      if (act && act.id) {
+        const existing = actMap.get(act.id);
+        if (!existing) {
+          actMap.set(act.id, act);
+        } else {
+          actMap.set(act.id, { ...existing, ...act });
+        }
+      }
+    });
+    return Array.from(actMap.values());
+  }
+
+  /**
    * รวบรวมข้อมูลทั้งหมดในระบบให้เป็นก้อน JSON สมบูรณ์
    */
   exportAllDataAsJSON() {
@@ -97,6 +220,7 @@ class CloudSyncManager {
     let activities = [];
     let forms = {};
     let users = [];
+    let deletedUserIds = [];
 
     try {
       projects = JSON.parse(localStorage.getItem(STORAGE_KEYS.PROJECTS) || '[]');
@@ -110,7 +234,11 @@ class CloudSyncManager {
     try {
       users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
     } catch {}
+    try {
+      deletedUserIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.DELETED_USERS) || '[]');
+    } catch {}
 
+    const safeUsers = this.mergeUserLists(users, [], deletedUserIds);
     const currentUser = this.getCurrentUserName();
 
     return {
@@ -123,7 +251,8 @@ class CloudSyncManager {
       projects,
       activities,
       activityForms: forms,
-      users
+      users: safeUsers,
+      deletedUserIds
     };
   }
 
@@ -149,7 +278,7 @@ class CloudSyncManager {
     if (this.config.enabled) {
       setTimeout(() => {
         this.pull(false);
-      }, 300);
+      }, 50);
     }
 
     // 2. ซิงค์เมื่อสลับกลับมาที่แท็บเบราว์เซอร์
@@ -251,27 +380,49 @@ class CloudSyncManager {
         localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(remoteData.projects));
       }
 
-      // 2. ซิงค์รายชื่อผู้ใช้และสิทธิ์ (Users) จาก Remote เสมอ เพื่อให้สิทธิ์แอดมินที่ได้รับมีผลทันทีข้ามเครื่อง
-      if (Array.isArray(remoteData.users) && remoteData.users.length > 0) {
-        localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(remoteData.users));
-        try {
-          const rawSession = sessionStorage.getItem(APP_CONFIG.STORAGE_KEYS.AUTH_USER);
-          if (rawSession) {
-            const currentAuth = JSON.parse(rawSession);
-            const matched = remoteData.users.find(
-              (u) => (currentAuth.id && u.id === currentAuth.id) || 
-                     (currentAuth.email && u.email && u.email.toLowerCase() === currentAuth.email.toLowerCase())
-            );
-            if (matched) {
-              sessionStorage.setItem(APP_CONFIG.STORAGE_KEYS.AUTH_USER, JSON.stringify(matched));
-            }
-          }
-        } catch {}
-      }
+      // 2. ซิงค์รายชื่อผู้ใช้และสิทธิ์ (Users) ด้วย Smart Merge ป้องกันข้อมูลผู้ใช้ถูกเขียนทับ
+      let localUsers = [];
+      try {
+        localUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+      } catch {}
 
-      // 3. ซิงค์กิจกรรม (Activities) และแบบฟอร์ม (Forms) จาก Firebase เป็นหลัก
-      localStorage.setItem(STORAGE_KEYS.ACTIVITIES, JSON.stringify(remoteActivities));
+      let localDeletedIds = [];
+      try {
+        localDeletedIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.DELETED_USERS) || '[]');
+      } catch {}
+
+      const remoteDeletedIds = Array.isArray(remoteData.deletedUserIds) ? remoteData.deletedUserIds : [];
+      const combinedDeletedIds = Array.from(new Set([...localDeletedIds, ...remoteDeletedIds]));
+      localStorage.setItem(STORAGE_KEYS.DELETED_USERS, JSON.stringify(combinedDeletedIds));
+
+      const remoteUsers = Array.isArray(remoteData.users) ? remoteData.users : [];
+      const mergedUsers = this.mergeUserLists(localUsers, remoteUsers, combinedDeletedIds);
+      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(mergedUsers));
+
+      // ตรวจสอบและอัปเดตเซสชันที่ล็อกอินอยู่
+      try {
+        const rawSession = sessionStorage.getItem(APP_CONFIG.STORAGE_KEYS.AUTH_USER);
+        if (rawSession) {
+          const currentAuth = JSON.parse(rawSession);
+          const matched = mergedUsers.find(
+            (u) => (currentAuth.id && String(u.id) === String(currentAuth.id)) || 
+                   (currentAuth.email && u.email && u.email.toLowerCase() === currentAuth.email.toLowerCase())
+          );
+          if (matched) {
+            sessionStorage.setItem(APP_CONFIG.STORAGE_KEYS.AUTH_USER, JSON.stringify(matched));
+          }
+        }
+      } catch {}
+
+      // 3. ซิงค์กิจกรรม (Activities) และแบบฟอร์ม (Forms) ด้วย Smart Merge
+      const mergedActivities = this.mergeActivities(localActivities, remoteActivities);
+      localStorage.setItem(STORAGE_KEYS.ACTIVITIES, JSON.stringify(mergedActivities));
       localStorage.setItem(STORAGE_KEYS.FORMS, JSON.stringify(remoteForms));
+
+      // หากข้อมูล Local มีผู้ใช้ที่มากกว่า Remote ให้อัปเดตขึ้นคลาวด์อัตโนมัติ
+      if (mergedUsers.length > remoteUsers.length) {
+        this.schedulePush();
+      }
 
       const remoteTimestamp = Number(remoteData.updatedAt) || 0;
       localStorage.setItem(STORAGE_KEYS.LOCAL_TIMESTAMP, String(remoteTimestamp || Date.now()));
@@ -288,7 +439,7 @@ class CloudSyncManager {
   }
 
   /**
-   * ส่งข้อมูลขึ้น Cloud JSON (Push)
+   * ส่งข้อมูลขึ้น Cloud JSON (Push) พร้อม Smart Merge ป้องกันการเขียนทับข้อมูลข้ามเครื่อง
    */
   async push() {
     if (!this.config.enabled) return;
@@ -297,15 +448,63 @@ class CloudSyncManager {
       return;
     }
 
-    const payload = this.exportAllDataAsJSON();
-    const now = Date.now();
-    payload.updatedAt = now;
-    localStorage.setItem(STORAGE_KEYS.LOCAL_TIMESTAMP, String(now));
-
     this.updateStatusBadge('syncing');
 
     try {
       const { url, provider } = this.getTargetUrl();
+
+      // ดึงข้อมูลรีโมทล่าสุดก่อนบันทึกทับ เพื่อผสานข้อมูลป้องกันข้อมูลผู้อื่นหรือผู้ใช้สูญหาย
+      let remoteData = null;
+      try {
+        const getController = new AbortController();
+        const getTimeout = setTimeout(() => getController.abort(), 4000);
+        const getRes = await fetch(url, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          cache: 'no-store',
+          signal: getController.signal
+        });
+        clearTimeout(getTimeout);
+        if (getRes.ok) {
+          const raw = await getRes.json();
+          remoteData = provider === 'rest' ? (raw.data || raw) : raw;
+        }
+      } catch (e) {
+        console.warn('[CloudSync] Pre-push remote fetch fallback:', e.message);
+      }
+
+      // ดึงข้อมูล Local
+      let localUsers = [];
+      try {
+        localUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+      } catch {}
+
+      let localDeletedIds = [];
+      try {
+        localDeletedIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.DELETED_USERS) || '[]');
+      } catch {}
+
+      const remoteDeletedIds = (remoteData && Array.isArray(remoteData.deletedUserIds)) ? remoteData.deletedUserIds : [];
+      const combinedDeletedIds = Array.from(new Set([...localDeletedIds, ...remoteDeletedIds]));
+      localStorage.setItem(STORAGE_KEYS.DELETED_USERS, JSON.stringify(combinedDeletedIds));
+
+      const remoteUsers = (remoteData && Array.isArray(remoteData.users)) ? remoteData.users : [];
+      const finalUsers = this.mergeUserLists(localUsers, remoteUsers, combinedDeletedIds);
+      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(finalUsers));
+
+      const payload = this.exportAllDataAsJSON();
+      payload.users = finalUsers;
+      payload.deletedUserIds = combinedDeletedIds;
+
+      if (remoteData && Array.isArray(remoteData.activities) && remoteData.activities.length > 0) {
+        payload.activities = this.mergeActivities(payload.activities, remoteData.activities);
+        localStorage.setItem(STORAGE_KEYS.ACTIVITIES, JSON.stringify(payload.activities));
+      }
+
+      const now = Date.now();
+      payload.updatedAt = now;
+      localStorage.setItem(STORAGE_KEYS.LOCAL_TIMESTAMP, String(now));
+
       const body = provider === 'rest'
         ? JSON.stringify({ name: 'satit_cmu_master_data_v1', data: payload })
         : JSON.stringify(payload);
